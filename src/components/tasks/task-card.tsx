@@ -33,7 +33,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
 
   const statusColors = {
     pendente: "bg-muted text-muted-foreground",
-    em_andamento: "bg-primary/10 text-primary-foreground border-primary/20",
+    em_andamento: "bg-danger/10 text-danger-foreground border-danger/20",
     realizada: "bg-success/10 text-success-foreground border-success/20",
     cancelada: "bg-muted text-muted-foreground",
     transferida: "bg-accent/10 text-accent-foreground border-accent/20"
