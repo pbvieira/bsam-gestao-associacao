@@ -14,7 +14,9 @@ import {
   ShoppingCart,
   Warehouse,
   BookOpen,
-  LogOut
+  LogOut,
+  CheckSquare,
+  Calendar
 } from "lucide-react";
 
 interface SidebarProps {
@@ -23,6 +25,8 @@ interface SidebarProps {
 
 const navigationItems = [
   { name: "Dashboard", href: "/", icon: Home, module: "dashboard" },
+  { name: "Tarefas", href: "/tarefas", icon: CheckSquare, module: "tasks" },
+  { name: "Calendário", href: "/calendario", icon: Calendar, module: "calendar" },
   { name: "Alunos", href: "/alunos", icon: Users, module: "students" },
   { name: "Usuários", href: "/usuarios", icon: User, module: "users" },
   { name: "Estoque", href: "/estoque", icon: Warehouse, module: "inventory" },

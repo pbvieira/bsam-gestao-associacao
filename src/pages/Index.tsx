@@ -1,33 +1,30 @@
 import { MainLayout } from "@/components/layout/main-layout";
-import { StatsCards } from "@/components/dashboard/stats-cards";
-import { RecentActivities } from "@/components/dashboard/recent-activities";
-import { QuickActions } from "@/components/dashboard/quick-actions";
+import { WorkspaceHeader } from "@/components/dashboard/workspace-header";
+import { TodayTasks } from "@/components/dashboard/today-tasks";
+import { TodayEvents } from "@/components/dashboard/today-events";
+import { ProductivityStats } from "@/components/dashboard/productivity-stats";
+import { WorkspaceActions } from "@/components/dashboard/workspace-actions";
+import { NotificationCenter } from "@/components/dashboard/notification-center";
 
 const Index = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Visão geral do sistema de gestão - O Bom Samaritano
-          </p>
+        {/* Header Personalizado */}
+        <WorkspaceHeader />
+
+        {/* Seção "Meu Trabalho Hoje" */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TodayTasks />
+          <TodayEvents />
         </div>
 
-        {/* Stats Cards */}
-        <StatsCards />
-
-        {/* Content Grid */}
+        {/* Widgets Inteligentes */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Actions */}
+          <ProductivityStats />
+          <NotificationCenter />
           <div className="lg:col-span-1">
-            <QuickActions />
-          </div>
-
-          {/* Recent Activities */}
-          <div className="lg:col-span-2">
-            <RecentActivities />
+            <WorkspaceActions />
           </div>
         </div>
       </div>

@@ -1,0 +1,37 @@
+-- Inserir permissões para os novos módulos de tarefas e calendário
+INSERT INTO permissions (role, module, action, allowed) VALUES
+-- Permissões para módulo 'tasks'
+('diretor', 'tasks', 'read', true),
+('diretor', 'tasks', 'create', true),
+('diretor', 'tasks', 'update', true),
+('diretor', 'tasks', 'delete', true),
+('coordenador', 'tasks', 'read', true),
+('coordenador', 'tasks', 'create', true),
+('coordenador', 'tasks', 'update', true),
+('coordenador', 'tasks', 'delete', true),
+('auxiliar', 'tasks', 'read', true),
+('auxiliar', 'tasks', 'create', true),
+('auxiliar', 'tasks', 'update', true),
+('auxiliar', 'tasks', 'delete', false),
+('aluno', 'tasks', 'read', true),
+('aluno', 'tasks', 'create', false),
+('aluno', 'tasks', 'update', true),
+('aluno', 'tasks', 'delete', false),
+
+-- Permissões para módulo 'calendar'
+('diretor', 'calendar', 'read', true),
+('diretor', 'calendar', 'create', true),
+('diretor', 'calendar', 'update', true),
+('diretor', 'calendar', 'delete', true),
+('coordenador', 'calendar', 'read', true),
+('coordenador', 'calendar', 'create', true),
+('coordenador', 'calendar', 'update', true),
+('coordenador', 'calendar', 'delete', true),
+('auxiliar', 'calendar', 'read', true),
+('auxiliar', 'calendar', 'create', true),
+('auxiliar', 'calendar', 'update', true),
+('auxiliar', 'calendar', 'delete', false),
+('aluno', 'calendar', 'read', true),
+('aluno', 'calendar', 'create', false),
+('aluno', 'calendar', 'update', false),
+('aluno', 'calendar', 'delete', false);
