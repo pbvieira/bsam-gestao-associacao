@@ -19,21 +19,32 @@ export function usePermissions() {
   useEffect(() => {
     if (profile?.role) {
       fetchPermissions(profile.role);
+    } else if (profile === null) {
+      // No profile means no permissions
+      setPermissions([]);
+      setLoading(false);
     }
-  }, [profile?.role]);
+  }, [profile]);
 
   const fetchPermissions = async (role: UserRole) => {
     try {
+      console.log('Fetching permissions for role:', role);
       const { data, error } = await supabase
         .from('permissions')
         .select('*')
         .eq('role', role)
         .eq('allowed', true);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Permission fetch error:', error);
+        throw error;
+      }
+      
+      console.log('Permissions fetched:', data?.length || 0);
       setPermissions(data || []);
     } catch (error) {
       console.error('Error fetching permissions:', error);
+      setPermissions([]);
     } finally {
       setLoading(false);
     }

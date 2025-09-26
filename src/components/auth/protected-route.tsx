@@ -21,28 +21,39 @@ export function ProtectedRoute({
   const { user, loading: authLoading } = useAuth();
   const { hasPermission, loading: permissionsLoading } = usePermissions();
 
-  if (authLoading || permissionsLoading) {
+  console.log('ProtectedRoute:', { user: !!user, authLoading, permissionsLoading, module });
+
+  // Show loading while checking auth status
+  if (authLoading || (user && permissionsLoading)) {
     return (
-      <div className="space-y-4 p-6">
-        <Skeleton className="h-8 w-1/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-32 w-full" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="space-y-4 p-6">
+          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-32 w-full" />
+        </div>
       </div>
     );
   }
 
+  // Redirect to auth if no user
   if (!user) {
+    console.log('No user, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
 
+  // Check module permissions if specified
   if (module && !hasPermission(module, action)) {
+    console.log('No permission for module:', module, action);
     return fallback || (
-      <Alert>
-        <Lock className="h-4 w-4" />
-        <AlertDescription>
-          Você não tem permissão para acessar esta funcionalidade.
-        </AlertDescription>
-      </Alert>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Alert className="max-w-md">
+          <Lock className="h-4 w-4" />
+          <AlertDescription>
+            Você não tem permissão para acessar esta funcionalidade.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 

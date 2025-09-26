@@ -26,14 +26,29 @@ const signUpSchema = z.object({
 });
 
 export default function Auth() {
-  const { user, signIn, signUp } = useAuth();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
 
+  console.log('Auth page - user:', !!user, 'authLoading:', authLoading);
+
   // Redirect if already authenticated
-  if (user) {
+  if (user && !authLoading) {
+    console.log('User authenticated, redirecting to /');
     return <Navigate to="/" replace />;
+  }
+
+  // Show loading if auth is still initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10">
+        <div className="text-center">
+          <Logo className="h-12 w-12 mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
