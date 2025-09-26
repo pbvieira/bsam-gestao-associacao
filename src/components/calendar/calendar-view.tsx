@@ -19,6 +19,7 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showingSpecificDay, setShowingSpecificDay] = useState(false);
 
   // Definir cores e labels dos tipos de evento
   const typeColors = {
@@ -33,6 +34,53 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
     atendimento: "Atendimento",
     evento: "Evento",
     lembrete: "Lembrete"
+  };
+
+  // Função para filtrar eventos baseado no modo de visualização
+  const getFilteredEvents = () => {
+    if (showingSpecificDay) {
+      return events.filter(event => isSameDay(new Date(event.data_inicio), selectedDate));
+    }
+
+    if (viewMode === 'month') {
+      const monthStart = startOfMonth(currentDate);
+      const monthEnd = endOfMonth(currentDate);
+      return events.filter(event => {
+        const eventDate = new Date(event.data_inicio);
+        return eventDate >= monthStart && eventDate <= monthEnd;
+      });
+    } else if (viewMode === 'week') {
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+      return events.filter(event => {
+        const eventDate = new Date(event.data_inicio);
+        return eventDate >= weekStart && eventDate <= weekEnd;
+      });
+    }
+    
+    return [];
+  };
+
+  // Função para obter o título da lista de eventos
+  const getEventListTitle = () => {
+    if (showingSpecificDay) {
+      if (isSameDay(selectedDate, new Date())) {
+        return 'Eventos de Hoje';
+      }
+      return `Eventos de ${format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}`;
+    }
+
+    if (viewMode === 'month') {
+      const filteredEvents = getFilteredEvents();
+      return `Eventos do Mês - ${format(currentDate, "MMMM yyyy", { locale: ptBR })} (${filteredEvents.length})`;
+    } else if (viewMode === 'week') {
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+      const filteredEvents = getFilteredEvents();
+      return `Eventos da Semana - ${format(weekStart, "dd/MM", { locale: ptBR })} a ${format(weekEnd, "dd/MM", { locale: ptBR })} (${filteredEvents.length})`;
+    }
+
+    return 'Eventos';
   };
 
   const monthStart = startOfMonth(currentDate);
@@ -67,6 +115,7 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
           )}
           onClick={() => {
             setSelectedDate(new Date(day));
+            setShowingSpecificDay(true);
             onDateSelect(new Date(day));
           }}
         >
@@ -161,7 +210,11 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentDate(new Date())}
+                onClick={() => {
+                  setCurrentDate(new Date());
+                  setSelectedDate(new Date());
+                  setShowingSpecificDay(true);
+                }}
               >
                 Hoje
               </Button>
@@ -171,14 +224,20 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
               <Button
                 variant={viewMode === 'month' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setViewMode('month')}
+                onClick={() => {
+                  setViewMode('month');
+                  setShowingSpecificDay(false);
+                }}
               >
                 Mês
               </Button>
               <Button
                 variant={viewMode === 'week' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setViewMode('week')}
+                onClick={() => {
+                  setViewMode('week');
+                  setShowingSpecificDay(false);
+                }}
               >
                 Semana
               </Button>
@@ -206,23 +265,28 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
         </CardContent>
       </Card>
 
-      {/* Lista de eventos do dia selecionado */}
+      {/* Lista de eventos baseada no modo de visualização */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5" />
-            Eventos de {isSameDay(selectedDate, new Date()) ? 'Hoje' : format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+            {getEventListTitle()}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {events.filter(event => isSameDay(new Date(event.data_inicio), selectedDate)).length === 0 ? (
+          {getFilteredEvents().length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
-              Nenhum evento para {isSameDay(selectedDate, new Date()) ? 'hoje' : 'este dia'}
+              {showingSpecificDay 
+                ? `Nenhum evento para ${isSameDay(selectedDate, new Date()) ? 'hoje' : 'este dia'}` 
+                : viewMode === 'month' 
+                  ? 'Nenhum evento neste mês'
+                  : 'Nenhum evento nesta semana'
+              }
             </p>
           ) : (
             <div className="space-y-3">
-              {events
-                .filter(event => isSameDay(new Date(event.data_inicio), selectedDate))
+              {getFilteredEvents()
+                .sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime())
                 .map((event) => (
                   <div
                     key={event.id}
@@ -233,6 +297,9 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
+                          {!showingSpecificDay && (
+                            <span className="mr-2">{format(new Date(event.data_inicio), "dd/MM", { locale: ptBR })}</span>
+                          )}
                           {event.all_day 
                             ? 'Dia todo' 
                             : `${format(new Date(event.data_inicio), "HH:mm")} - ${format(new Date(event.data_fim), "HH:mm")}`
