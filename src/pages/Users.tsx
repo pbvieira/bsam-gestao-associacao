@@ -1,5 +1,6 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { UserList } from "@/components/users/user-list";
 
 export default function Users() {
   return (
@@ -13,9 +14,7 @@ export default function Users() {
             </p>
           </div>
           
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
-          </div>
+          <UserList />
         </div>
       </MainLayout>
     </ProtectedRoute>

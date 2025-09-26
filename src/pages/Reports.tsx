@@ -1,5 +1,6 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { ReportDashboard } from "@/components/reports/report-dashboard";
 
 export default function Reports() {
   return (
@@ -13,9 +14,7 @@ export default function Reports() {
             </p>
           </div>
           
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Módulo em desenvolvimento...</p>
-          </div>
+          <ReportDashboard />
         </div>
       </MainLayout>
     </ProtectedRoute>
