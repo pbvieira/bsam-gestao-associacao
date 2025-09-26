@@ -154,8 +154,8 @@ export function StudentChildrenTab({ studentId }: StudentChildrenTabProps) {
         const { error } = await supabase
           .from('student_children_list')
           .insert({ 
-            nome_completo: data.nome_completo || '',
-            data_nascimento: data.data_nascimento || '',
+            nome_completo: data.nome_completo,
+            data_nascimento: data.data_nascimento,
             student_children_id: childrenRecordId 
           });
 
