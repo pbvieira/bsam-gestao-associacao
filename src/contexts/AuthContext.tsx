@@ -56,14 +56,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
+        // Only synchronous state updates in the callback
         setSession(session);
         setUser(session?.user ?? null);
         
+        // Defer async operations to avoid deadlock
         if (session?.user) {
-          await fetchUserProfile(session.user.id);
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
           setPermissions([]);
