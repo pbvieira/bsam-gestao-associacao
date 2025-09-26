@@ -71,6 +71,544 @@ export type Database = {
         }
         Relationships: []
       }
+      student_annotations: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          created_by: string
+          data_agendamento: string | null
+          data_evento: string
+          descricao: string
+          id: string
+          observacoes: string | null
+          student_id: string
+          tipo: string
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          created_by: string
+          data_agendamento?: string | null
+          data_evento?: string
+          descricao: string
+          id?: string
+          observacoes?: string | null
+          student_id: string
+          tipo: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          created_by?: string
+          data_agendamento?: string | null
+          data_evento?: string
+          descricao?: string
+          id?: string
+          observacoes?: string | null
+          student_id?: string
+          tipo?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_annotations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_basic_data: {
+        Row: {
+          bairro: string | null
+          batizado: boolean | null
+          cartao_sus: string | null
+          cep: string | null
+          cidade: string | null
+          cidade_nascimento: string | null
+          comarca_juridica: string | null
+          created_at: string
+          data_nascimento_conjuge: string | null
+          data_nascimento_mae: string | null
+          data_nascimento_pai: string | null
+          endereco: string | null
+          escolaridade: string | null
+          estado: string | null
+          estado_civil: string | null
+          estado_conjuge: string | null
+          estado_mae: string | null
+          estado_nascimento: string | null
+          estado_pai: string | null
+          id: string
+          nome_conjuge: string | null
+          nome_mae: string | null
+          nome_pai: string | null
+          numero: string | null
+          observacoes_juridicas: string | null
+          pis_nis: string | null
+          religiao: string | null
+          situacao_moradia: string | null
+          student_id: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          batizado?: boolean | null
+          cartao_sus?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cidade_nascimento?: string | null
+          comarca_juridica?: string | null
+          created_at?: string
+          data_nascimento_conjuge?: string | null
+          data_nascimento_mae?: string | null
+          data_nascimento_pai?: string | null
+          endereco?: string | null
+          escolaridade?: string | null
+          estado?: string | null
+          estado_civil?: string | null
+          estado_conjuge?: string | null
+          estado_mae?: string | null
+          estado_nascimento?: string | null
+          estado_pai?: string | null
+          id?: string
+          nome_conjuge?: string | null
+          nome_mae?: string | null
+          nome_pai?: string | null
+          numero?: string | null
+          observacoes_juridicas?: string | null
+          pis_nis?: string | null
+          religiao?: string | null
+          situacao_moradia?: string | null
+          student_id: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          batizado?: boolean | null
+          cartao_sus?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cidade_nascimento?: string | null
+          comarca_juridica?: string | null
+          created_at?: string
+          data_nascimento_conjuge?: string | null
+          data_nascimento_mae?: string | null
+          data_nascimento_pai?: string | null
+          endereco?: string | null
+          escolaridade?: string | null
+          estado?: string | null
+          estado_civil?: string | null
+          estado_conjuge?: string | null
+          estado_mae?: string | null
+          estado_nascimento?: string | null
+          estado_pai?: string | null
+          id?: string
+          nome_conjuge?: string | null
+          nome_mae?: string | null
+          nome_pai?: string | null
+          numero?: string | null
+          observacoes_juridicas?: string | null
+          pis_nis?: string | null
+          religiao?: string | null
+          situacao_moradia?: string | null
+          student_id?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_basic_data_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_children: {
+        Row: {
+          convive_filhos: boolean | null
+          created_at: string
+          id: string
+          quantidade_filhos: number | null
+          student_id: string
+          tem_filhos: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          convive_filhos?: boolean | null
+          created_at?: string
+          id?: string
+          quantidade_filhos?: number | null
+          student_id: string
+          tem_filhos?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          convive_filhos?: boolean | null
+          created_at?: string
+          id?: string
+          quantidade_filhos?: number | null
+          student_id?: string
+          tem_filhos?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_children_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_children_list: {
+        Row: {
+          created_at: string
+          data_nascimento: string
+          id: string
+          nome_completo: string
+          student_children_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_nascimento: string
+          id?: string
+          nome_completo: string
+          student_children_id: string
+        }
+        Update: {
+          created_at?: string
+          data_nascimento?: string
+          id?: string
+          nome_completo?: string
+          student_children_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_children_list_student_children_id_fkey"
+            columns: ["student_children_id"]
+            isOneToOne: false
+            referencedRelation: "student_children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_documents: {
+        Row: {
+          caminho_arquivo: string
+          created_at: string
+          id: string
+          mime_type: string | null
+          nome_arquivo: string
+          student_id: string
+          tamanho_arquivo: number | null
+          tipo_documento: string
+          uploaded_by: string
+        }
+        Insert: {
+          caminho_arquivo: string
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          nome_arquivo: string
+          student_id: string
+          tamanho_arquivo?: number | null
+          tipo_documento: string
+          uploaded_by: string
+        }
+        Update: {
+          caminho_arquivo?: string
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          nome_arquivo?: string
+          student_id?: string
+          tamanho_arquivo?: number | null
+          tipo_documento?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_documents_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_emergency_contacts: {
+        Row: {
+          avisar_contato: boolean | null
+          created_at: string
+          endereco: string | null
+          id: string
+          nome: string
+          parentesco: string | null
+          student_id: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          avisar_contato?: boolean | null
+          created_at?: string
+          endereco?: string | null
+          id?: string
+          nome: string
+          parentesco?: string | null
+          student_id: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          avisar_contato?: boolean | null
+          created_at?: string
+          endereco?: string | null
+          id?: string
+          nome?: string
+          parentesco?: string | null
+          student_id?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_emergency_contacts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_health_data: {
+        Row: {
+          acompanhamento_psicologico: boolean | null
+          alucinacoes: boolean | null
+          created_at: string
+          data_teste_covid: string | null
+          data_teste_ist: string | null
+          dependencia_quimica_familia: boolean | null
+          descricao_medicamentos: string | null
+          detalhes_acompanhamento: string | null
+          detalhes_dependencia_familia: string | null
+          historico_internacoes: string | null
+          historico_surtos: boolean | null
+          id: string
+          modo_uso_medicamentos: string | null
+          observacoes_gerais: string | null
+          observacoes_odontologicas: string | null
+          resultado_covid: string | null
+          resultado_ist: string | null
+          student_id: string
+          tem_deficiencia: boolean | null
+          tempo_uso_medicamentos: string | null
+          tentativa_suicidio: boolean | null
+          teste_covid: string | null
+          teste_ist: string | null
+          tipo_deficiencia: string | null
+          tratamento_odontologico: boolean | null
+          updated_at: string
+          uso_medicamentos: boolean | null
+          vacinacao_atualizada: boolean | null
+        }
+        Insert: {
+          acompanhamento_psicologico?: boolean | null
+          alucinacoes?: boolean | null
+          created_at?: string
+          data_teste_covid?: string | null
+          data_teste_ist?: string | null
+          dependencia_quimica_familia?: boolean | null
+          descricao_medicamentos?: string | null
+          detalhes_acompanhamento?: string | null
+          detalhes_dependencia_familia?: string | null
+          historico_internacoes?: string | null
+          historico_surtos?: boolean | null
+          id?: string
+          modo_uso_medicamentos?: string | null
+          observacoes_gerais?: string | null
+          observacoes_odontologicas?: string | null
+          resultado_covid?: string | null
+          resultado_ist?: string | null
+          student_id: string
+          tem_deficiencia?: boolean | null
+          tempo_uso_medicamentos?: string | null
+          tentativa_suicidio?: boolean | null
+          teste_covid?: string | null
+          teste_ist?: string | null
+          tipo_deficiencia?: string | null
+          tratamento_odontologico?: boolean | null
+          updated_at?: string
+          uso_medicamentos?: boolean | null
+          vacinacao_atualizada?: boolean | null
+        }
+        Update: {
+          acompanhamento_psicologico?: boolean | null
+          alucinacoes?: boolean | null
+          created_at?: string
+          data_teste_covid?: string | null
+          data_teste_ist?: string | null
+          dependencia_quimica_familia?: boolean | null
+          descricao_medicamentos?: string | null
+          detalhes_acompanhamento?: string | null
+          detalhes_dependencia_familia?: string | null
+          historico_internacoes?: string | null
+          historico_surtos?: boolean | null
+          id?: string
+          modo_uso_medicamentos?: string | null
+          observacoes_gerais?: string | null
+          observacoes_odontologicas?: string | null
+          resultado_covid?: string | null
+          resultado_ist?: string | null
+          student_id?: string
+          tem_deficiencia?: boolean | null
+          tempo_uso_medicamentos?: string | null
+          tentativa_suicidio?: boolean | null
+          teste_covid?: string | null
+          teste_ist?: string | null
+          tipo_deficiencia?: string | null
+          tratamento_odontologico?: boolean | null
+          updated_at?: string
+          uso_medicamentos?: boolean | null
+          vacinacao_atualizada?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_health_data_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_work_situation: {
+        Row: {
+          contato_empresa: string | null
+          created_at: string
+          data_admissao: string | null
+          empresa: string | null
+          funcao: string | null
+          id: string
+          profissao: string | null
+          renda_per_capita: number | null
+          situacao_trabalhista: string | null
+          student_id: string
+          tipo_renda: string | null
+          updated_at: string
+          valor_renda: number | null
+        }
+        Insert: {
+          contato_empresa?: string | null
+          created_at?: string
+          data_admissao?: string | null
+          empresa?: string | null
+          funcao?: string | null
+          id?: string
+          profissao?: string | null
+          renda_per_capita?: number | null
+          situacao_trabalhista?: string | null
+          student_id: string
+          tipo_renda?: string | null
+          updated_at?: string
+          valor_renda?: number | null
+        }
+        Update: {
+          contato_empresa?: string | null
+          created_at?: string
+          data_admissao?: string | null
+          empresa?: string | null
+          funcao?: string | null
+          id?: string
+          profissao?: string | null
+          renda_per_capita?: number | null
+          situacao_trabalhista?: string | null
+          student_id?: string
+          tipo_renda?: string | null
+          updated_at?: string
+          valor_renda?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_work_situation_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          ativo: boolean
+          codigo_cadastro: string
+          cpf: string | null
+          created_at: string
+          data_abertura: string
+          data_nascimento: string
+          data_saida: string | null
+          hora_entrada: string | null
+          hora_saida: string | null
+          id: string
+          nome_completo: string
+          nome_responsavel: string | null
+          numero_interno: string | null
+          parentesco_responsavel: string | null
+          rg: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo_cadastro?: string
+          cpf?: string | null
+          created_at?: string
+          data_abertura?: string
+          data_nascimento: string
+          data_saida?: string | null
+          hora_entrada?: string | null
+          hora_saida?: string | null
+          id?: string
+          nome_completo: string
+          nome_responsavel?: string | null
+          numero_interno?: string | null
+          parentesco_responsavel?: string | null
+          rg?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo_cadastro?: string
+          cpf?: string | null
+          created_at?: string
+          data_abertura?: string
+          data_nascimento?: string
+          data_saida?: string | null
+          hora_entrada?: string | null
+          hora_saida?: string | null
+          id?: string
+          nome_completo?: string
+          nome_responsavel?: string | null
+          numero_interno?: string | null
+          parentesco_responsavel?: string | null
+          rg?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
