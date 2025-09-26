@@ -6,7 +6,7 @@ import { InventoryForm } from "@/components/inventory/inventory-form";
 import { InventoryMovements } from "@/components/inventory/inventory-movements";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Truck, ShoppingCart } from "lucide-react";
 
 type ViewMode = 'list' | 'create' | 'edit' | 'movements';
 
@@ -79,6 +79,14 @@ export default function Inventory() {
               <TabsList>
                 <TabsTrigger value="items">Itens do Estoque</TabsTrigger>
                 <TabsTrigger value="movements">Movimentações Recentes</TabsTrigger>
+                <TabsTrigger value="suppliers">
+                  <Truck className="h-4 w-4 mr-2" />
+                  Fornecedores
+                </TabsTrigger>
+                <TabsTrigger value="purchases">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Pedidos de Compra
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="items" className="space-y-4">
@@ -91,6 +99,44 @@ export default function Inventory() {
               
               <TabsContent value="movements" className="space-y-4">
                 <InventoryMovements />
+              </TabsContent>
+              
+              <TabsContent value="suppliers" className="space-y-4">
+                <div className="text-center py-8">
+                  <Truck className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Módulo de Fornecedores
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Gerencie seus fornecedores em uma página dedicada
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/fornecedores'}
+                    className="gap-2"
+                  >
+                    <Truck className="h-4 w-4" />
+                    Ir para Fornecedores
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="purchases" className="space-y-4">
+                <div className="text-center py-8">
+                  <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Módulo de Pedidos de Compra
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Gerencie seus pedidos de compra em uma página dedicada
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/pedidos'}
+                    className="gap-2"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Ir para Pedidos
+                  </Button>
+                </div>
               </TabsContent>
             </Tabs>
           )}

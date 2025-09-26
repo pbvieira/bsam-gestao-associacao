@@ -10,6 +10,8 @@ import Auth from "./pages/Auth";
 import Students from "./pages/Students";
 import Users from "./pages/Users";
 import Inventory from "./pages/Inventory";
+import Suppliers from "./pages/Suppliers";
+import Purchases from "./pages/Purchases";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
@@ -69,6 +71,22 @@ const App = () => (
             element={
               <ProtectedRoute module="inventory">
                 <Inventory />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/fornecedores" 
+            element={
+              <ProtectedRoute module="inventory">
+                <Suppliers />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/pedidos" 
+            element={
+              <ProtectedRoute module="inventory">
+                <Purchases />
               </ProtectedRoute>
             } 
           />
