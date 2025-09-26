@@ -98,7 +98,7 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="header">Cabeçalho</TabsTrigger>
           <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
           <TabsTrigger value="children">Filhos</TabsTrigger>
@@ -106,6 +106,7 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
           <TabsTrigger value="contacts">Contatos</TabsTrigger>
           <TabsTrigger value="health">Saúde</TabsTrigger>
           <TabsTrigger value="annotations">Anotações</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="header" className="space-y-4">
@@ -271,6 +272,10 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
 
         <TabsContent value="annotations">
           <StudentAnnotationsTab studentId={student?.id} />
+        </TabsContent>
+
+        <TabsContent value="documents">
+          <StudentDocumentsTab studentId={student?.id} />
         </TabsContent>
       </Tabs>
     </div>
