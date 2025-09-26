@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Sidebar } from "@/components/navigation/sidebar";
+import { AppSidebar } from "@/components/navigation/sidebar";
 import { Header } from "@/components/navigation/header";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
@@ -8,38 +9,28 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className="flex h-screen bg-background">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex">
-        <Sidebar />
-      </div>
-
-      {/* Mobile Sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div 
-            className="absolute inset-0 bg-black/50" 
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="absolute left-0 top-0 h-full">
-            <Sidebar />
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar />
         
-        <main className="flex-1 overflow-auto">
-          <div className="p-6">
-            {children}
-          </div>
-        </main>
+        <SidebarInset className="flex-1">
+          {/* Header with Sidebar Trigger */}
+          <header className="bg-card border-b border-border px-6 py-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:flex" />
+              <div className="flex-1" />
+            </div>
+          </header>
+          
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto">
+            <div className="p-6">
+              {children}
+            </div>
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

@@ -54,22 +54,19 @@ Todas as cores devem ser HSL para consistência com o sistema de design
 
     --radius: 0.5rem;
 
-    /* Sidebar com fundo azul pastel distinto */
-    --sidebar-background: 210 25% 95%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar com gradiente azul vibrante */
+    --sidebar-background: 217 91% 35%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 213 94% 68%;
+    --sidebar-primary-foreground: 217 91% 35%;
+    --sidebar-accent: 213 94% 68%;
+    --sidebar-accent-foreground: 217 91% 35%;
+    --sidebar-border: 213 94% 68%;
+    --sidebar-ring: 213 94% 68%;
+    
+    /* Gradientes para o sidebar */
+    --sidebar-gradient: linear-gradient(135deg, hsl(217, 91%, 35%), hsl(213, 94%, 68%));
+    --sidebar-gradient-dark: linear-gradient(135deg, hsl(217, 91%, 25%), hsl(213, 94%, 58%));
   }
 
   .dark {
@@ -115,15 +112,19 @@ Todas as cores devem ser HSL para consistência com o sistema de design
     --input: 210 18% 22%;
     --ring: 200 85% 55%;
     
-    /* Sidebar escura com tom azulado */
-    --sidebar-background: 210 20% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar escura com gradiente azul */
+    --sidebar-background: 217 91% 25%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 213 94% 68%;
+    --sidebar-primary-foreground: 217 91% 25%;
+    --sidebar-accent: 213 94% 68%;
+    --sidebar-accent-foreground: 217 91% 25%;
+    --sidebar-border: 213 94% 68%;
+    --sidebar-ring: 213 94% 68%;
+    
+    /* Gradientes para o sidebar (modo escuro) */
+    --sidebar-gradient: linear-gradient(135deg, hsl(217, 91%, 25%), hsl(213, 94%, 58%));
+    --sidebar-gradient-dark: linear-gradient(135deg, hsl(217, 91%, 15%), hsl(213, 94%, 48%));
   }
 }
 
