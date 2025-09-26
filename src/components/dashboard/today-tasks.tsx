@@ -109,7 +109,7 @@ export function TodayTasks() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
-            Meu Trabalho Hoje
+            Minhas Tarefas
           </CardTitle>
           <Button size="sm" variant="outline" onClick={createQuickTask}>
             <Plus className="h-4 w-4 mr-1" />

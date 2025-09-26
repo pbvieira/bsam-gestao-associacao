@@ -23,11 +23,11 @@ const Index = () => {
         </div>
 
         {/* Minha Agenda */}
-        <div className="h-[40vh]">
+        <div className="h-[50vh]">
           <TodayEvents />
         </div>
 
-        {/* Meu Trabalho Hoje */}
+        {/* Minhas Tarefas */}
         <div className="h-[50vh]">
           <TodayTasks />
         </div>

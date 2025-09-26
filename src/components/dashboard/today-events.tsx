@@ -94,42 +94,46 @@ export function TodayEvents() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Eventos de Hoje */}
-        {todayEvents.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-foreground">
-              Hoje ({todayEvents.length})
-            </h4>
-            <div className="space-y-2 max-h-[250px] overflow-y-auto">
-              {todayEvents.map(event => (
-                <EventItem key={event.id} event={event} />
-              ))}
-            </div>
-          </div>
-        )}
+      <CardContent className="flex flex-col h-full overflow-hidden">
+        <ScrollArea className="flex-1">
+          <div className="space-y-4 pr-4">
+            {/* Eventos de Hoje */}
+            {todayEvents.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-foreground">
+                  Hoje ({todayEvents.length})
+                </h4>
+                <div className="space-y-2">
+                  {todayEvents.map(event => (
+                    <EventItem key={event.id} event={event} />
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {/* Próximos Eventos */}
-        {upcomingEvents.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Próximos
-            </h4>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {upcomingEvents.map(event => (
-                <EventItem key={event.id} event={event} showDate />
-              ))}
-            </div>
-          </div>
-        )}
+            {/* Próximos Eventos */}
+            {upcomingEvents.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Próximos
+                </h4>
+                <div className="space-y-2">
+                  {upcomingEvents.map(event => (
+                    <EventItem key={event.id} event={event} showDate />
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {todayEvents.length === 0 && upcomingEvents.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <Calendar className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
-            <p>Nenhum compromisso hoje</p>
-            <p className="text-sm">Sua agenda está livre!</p>
+            {todayEvents.length === 0 && upcomingEvents.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
+                <p>Nenhum compromisso hoje</p>
+                <p className="text-sm">Sua agenda está livre!</p>
+              </div>
+            )}
           </div>
-        )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );
