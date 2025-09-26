@@ -148,6 +148,7 @@ export function useCalendar() {
         description: "Evento criado com sucesso",
       });
 
+      // Força re-fetch para garantir que os dados estejam atualizados
       await fetchEvents();
       return data;
     } catch (err) {
@@ -177,6 +178,7 @@ export function useCalendar() {
         description: "Evento atualizado com sucesso",
       });
 
+      // Força re-fetch para garantir que os dados estejam atualizados
       await fetchEvents();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar evento';

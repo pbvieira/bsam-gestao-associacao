@@ -18,11 +18,15 @@ interface CalendarViewProps {
 export function CalendarView({ events, loading, onEditEvent, onDateSelect }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+  const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+  
+  const startDate = viewMode === 'week' ? weekStart : startOfWeek(monthStart, { weekStartsOn: 0 });
+  const endDate = viewMode === 'week' ? weekEnd : endOfWeek(monthEnd, { weekStartsOn: 0 });
 
   const dateFormat = "d";
   const rows = [];
@@ -31,7 +35,8 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
 
   // Gerar dias do calendário
   while (day <= endDate) {
-    for (let i = 0; i < 7; i++) {
+    const daysInRow = viewMode === 'week' ? 7 : 7;
+    for (let i = 0; i < daysInRow; i++) {
       const dayEvents = events.filter(event => 
         isSameDay(new Date(event.data_inicio), day)
       );
@@ -41,10 +46,14 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
           key={day.toString()}
           className={cn(
             "min-h-[120px] p-2 border border-border cursor-pointer hover:bg-muted/50 transition-colors",
-            !isSameMonth(day, monthStart) && "text-muted-foreground bg-muted/20",
-            isToday(day) && "bg-primary/10 border-primary"
+            viewMode === 'month' && !isSameMonth(day, monthStart) && "text-muted-foreground bg-muted/20",
+            isToday(day) && "bg-primary/10 border-primary",
+            isSameDay(day, selectedDate) && "ring-2 ring-primary"
           )}
-          onClick={() => onDateSelect(new Date(day))}
+          onClick={() => {
+            setSelectedDate(new Date(day));
+            onDateSelect(new Date(day));
+          }}
         >
           <div className="flex items-center justify-between mb-2">
             <span className={cn(
@@ -59,7 +68,10 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
             {dayEvents.slice(0, 3).map((event) => (
               <div
                 key={event.id}
-                className="text-xs p-1 rounded bg-primary/10 text-primary-foreground cursor-pointer hover:bg-primary/20 transition-colors"
+                className={cn(
+                  "text-xs p-1 rounded cursor-pointer transition-colors border",
+                  typeColors[event.tipo]
+                )}
                 onClick={(e) => {
                   e.stopPropagation();
                   onEditEvent(event.id);
@@ -89,13 +101,16 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
       </div>
     );
     days = [];
+    
+    // Para visualização semanal, mostrar apenas uma linha
+    if (viewMode === 'week') break;
   }
 
   const typeColors = {
-    reuniao: "bg-primary/10 text-primary-foreground border-primary/20",
-    atendimento: "bg-success/10 text-success-foreground border-success/20",
-    evento: "bg-warning/10 text-warning-foreground border-warning/20",
-    lembrete: "bg-accent/10 text-accent-foreground border-accent/20"
+    reuniao: "bg-blue-100 text-blue-900 border-blue-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-800",
+    atendimento: "bg-green-100 text-green-900 border-green-200 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800", 
+    evento: "bg-purple-100 text-purple-900 border-purple-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-100 dark:border-purple-800",
+    lembrete: "bg-orange-100 text-orange-900 border-orange-200 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-100 dark:border-orange-800"
   };
 
   const typeLabels = {
@@ -195,18 +210,18 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5" />
-            Eventos de Hoje
+            Eventos de {isSameDay(selectedDate, new Date()) ? 'Hoje' : format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {events.filter(event => isSameDay(new Date(event.data_inicio), new Date())).length === 0 ? (
+          {events.filter(event => isSameDay(new Date(event.data_inicio), selectedDate)).length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
-              Nenhum evento para hoje
+              Nenhum evento para {isSameDay(selectedDate, new Date()) ? 'hoje' : 'este dia'}
             </p>
           ) : (
             <div className="space-y-3">
               {events
-                .filter(event => isSameDay(new Date(event.data_inicio), new Date()))
+                .filter(event => isSameDay(new Date(event.data_inicio), selectedDate))
                 .map((event) => (
                   <div
                     key={event.id}
@@ -232,7 +247,7 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
                           <div className="text-sm text-muted-foreground">{event.location}</div>
                         )}
                       </div>
-                      <Badge className={typeColors[event.tipo]}>
+                      <Badge className={cn("border", typeColors[event.tipo])}>
                         {typeLabels[event.tipo]}
                       </Badge>
                     </div>
