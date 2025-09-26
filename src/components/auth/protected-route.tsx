@@ -3,6 +3,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -31,14 +32,7 @@ export function ProtectedRoute({
   }
 
   if (!user) {
-    return fallback || (
-      <Alert>
-        <Lock className="h-4 w-4" />
-        <AlertDescription>
-          Você precisa estar logado para acessar esta página.
-        </AlertDescription>
-      </Alert>
-    );
+    return <Navigate to="/auth" replace />;
   }
 
   if (module && !hasPermission(module, action)) {
