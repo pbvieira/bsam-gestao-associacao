@@ -77,15 +77,15 @@ const App = () => (
           <Route 
             path="/fornecedores" 
             element={
-              <ProtectedRoute module="inventory">
+              <ProtectedRoute module="suppliers">
                 <Suppliers />
               </ProtectedRoute>
             } 
           />
           <Route 
-            path="/pedidos" 
+            path="/compras" 
             element={
-              <ProtectedRoute module="inventory">
+              <ProtectedRoute module="purchases">
                 <Purchases />
               </ProtectedRoute>
             } 

@@ -42,7 +42,11 @@ export function usePermissions() {
           { id: 'temp-6', role, module: 'users', action: 'write', allowed: true, created_at: new Date().toISOString() },
           { id: 'temp-7', role, module: 'inventory', action: 'read', allowed: true, created_at: new Date().toISOString() },
           { id: 'temp-8', role, module: 'inventory', action: 'write', allowed: true, created_at: new Date().toISOString() },
-          { id: 'temp-9', role, module: 'reports', action: 'read', allowed: true, created_at: new Date().toISOString() }
+          { id: 'temp-9', role, module: 'suppliers', action: 'read', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-10', role, module: 'suppliers', action: 'write', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-11', role, module: 'purchases', action: 'read', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-12', role, module: 'purchases', action: 'write', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-13', role, module: 'reports', action: 'read', allowed: true, created_at: new Date().toISOString() }
         ];
         setPermissions(directorPermissions);
         return;
