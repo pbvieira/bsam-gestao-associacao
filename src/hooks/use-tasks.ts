@@ -215,11 +215,15 @@ export function useTasks() {
 
       if (error) throw error;
 
+      // Remove imediatamente da lista local
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+
       toast({
         title: "Sucesso",
         description: "Tarefa excluída com sucesso",
       });
 
+      // Também busca novamente para garantir sincronização
       await fetchTasks();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir tarefa';
