@@ -4,63 +4,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  AlertTriangle, 
-  Package, 
-  TrendingUp,
-  History
-} from 'lucide-react';
-
+import { Search, Plus, Edit, AlertTriangle, Package, TrendingUp, History } from 'lucide-react';
 interface InventoryListProps {
   onCreateItem: () => void;
   onEditItem: (item: any) => void;
   onViewMovements: (item: any) => void;
 }
-
-export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: InventoryListProps) {
-  const { items, loading, getLowStockItems, getTotalValue } = useInventory();
+export function InventoryList({
+  onCreateItem,
+  onEditItem,
+  onViewMovements
+}: InventoryListProps) {
+  const {
+    items,
+    loading,
+    getLowStockItems,
+    getTotalValue
+  } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredItems = items.filter(item =>
-    item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.categoria?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  const filteredItems = items.filter(item => item.nome.toLowerCase().includes(searchTerm.toLowerCase()) || item.categoria?.toLowerCase().includes(searchTerm.toLowerCase()) || item.descricao?.toLowerCase().includes(searchTerm.toLowerCase()));
   const lowStockItems = getLowStockItems();
   const totalValue = getTotalValue();
-
   if (loading) {
-    return (
-      <div className="space-y-4">
+    return <div className="space-y-4">
         <div className="h-8 bg-muted animate-pulse rounded" />
         <div className="h-32 bg-muted animate-pulse rounded" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1 max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, categoria..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+            <Input placeholder="Buscar por nome, categoria..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
           </div>
         </div>
-        <Button onClick={onCreateItem} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Item
-        </Button>
+        
       </div>
 
       {/* Statistics */}
@@ -97,9 +77,9 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
                 <p className="text-sm font-medium">Valor Total</p>
                 <p className="text-2xl font-bold">
                   {new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  }).format(totalValue)}
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(totalValue)}
                 </p>
               </div>
             </div>
@@ -120,8 +100,7 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
       </div>
 
       {/* Low Stock Alert */}
-      {lowStockItems.length > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
+      {lowStockItems.length > 0 && <Card className="border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-700">
               <AlertTriangle className="h-5 w-5" />
@@ -133,20 +112,16 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
               {lowStockItems.length} {lowStockItems.length === 1 ? 'item está' : 'itens estão'} com estoque abaixo do mínimo:
             </p>
             <div className="flex flex-wrap gap-2">
-              {lowStockItems.map((item) => (
-                <Badge key={item.id} variant="outline" className="border-orange-300">
+              {lowStockItems.map(item => <Badge key={item.id} variant="outline" className="border-orange-300">
                   {item.nome} ({item.estoque_atual}/{item.estoque_minimo})
-                </Badge>
-              ))}
+                </Badge>)}
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Items List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredItems.map((item) => (
-          <Card key={item.id} className="hover:shadow-md transition-shadow">
+        {filteredItems.map(item => <Card key={item.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
@@ -157,21 +132,17 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
                   <Badge variant={item.origem === 'compra' ? 'default' : 'secondary'}>
                     {item.origem === 'compra' ? 'Compra' : 'Doação'}
                   </Badge>
-                  {item.estoque_atual <= item.estoque_minimo && item.estoque_minimo > 0 && (
-                    <Badge variant="destructive" className="ml-1">
+                  {item.estoque_atual <= item.estoque_minimo && item.estoque_minimo > 0 && <Badge variant="destructive" className="ml-1">
                       <AlertTriangle className="h-3 w-3" />
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
               </div>
             </CardHeader>
             
             <CardContent className="space-y-3">
-              {item.descricao && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
+              {item.descricao && <p className="text-sm text-muted-foreground line-clamp-2">
                   {item.descricao}
-                </p>
-              )}
+                </p>}
 
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
@@ -187,61 +158,43 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
                 </div>
               </div>
 
-              {item.valor_unitario && (
-                <div className="text-sm">
+              {item.valor_unitario && <div className="text-sm">
                   <p className="text-muted-foreground">Valor Unitário</p>
                   <p className="font-medium">
                     {new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    }).format(item.valor_unitario)}
+                style: 'currency',
+                currency: 'BRL'
+              }).format(item.valor_unitario)}
                   </p>
-                </div>
-              )}
+                </div>}
 
               <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEditItem(item)}
-                  className="flex-1 gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => onEditItem(item)} className="flex-1 gap-2">
                   <Edit className="h-3 w-3" />
                   Editar
                 </Button>
                 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onViewMovements(item)}
-                  className="gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => onViewMovements(item)} className="gap-2">
                   <History className="h-3 w-3" />
                   Histórico
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        ))}
+          </Card>)}
       </div>
 
-      {filteredItems.length === 0 && (
-        <Card>
+      {filteredItems.length === 0 && <Card>
           <CardContent className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">Nenhum item encontrado</h3>
             <p className="text-muted-foreground mb-4">
               {searchTerm ? 'Tente ajustar os filtros de busca.' : 'Comece cadastrando o primeiro item do estoque.'}
             </p>
-            {!searchTerm && (
-              <Button onClick={onCreateItem} className="gap-2">
+            {!searchTerm && <Button onClick={onCreateItem} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Cadastrar Primeiro Item
-              </Button>
-            )}
+              </Button>}
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 }
