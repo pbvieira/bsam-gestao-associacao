@@ -46,6 +46,58 @@ export function useTasks() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Real-time subscription
+  useEffect(() => {
+    console.log('Setting up realtime subscription for tasks...');
+    
+    const channel = supabase
+      .channel('tasks-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'tasks' 
+        }, 
+        (payload) => {
+          console.log('Task realtime update:', payload);
+          
+          // Refresh tasks when any change occurs
+          fetchTasks();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up realtime subscription for tasks...');
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Função para buscar uma tarefa específica
+  const fetchTaskById = async (id: string): Promise<Task | null> => {
+    try {
+      console.log('Fetching fresh task data for ID:', id);
+      
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          created_by_profile:profiles!tasks_created_by_fkey(full_name),
+          assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      
+      console.log('Fresh task data fetched:', data);
+      return data as Task;
+    } catch (err) {
+      console.error('Error fetching task by ID:', err);
+      return null;
+    }
+  };
+
   const fetchTasks = async () => {
     try {
       setLoading(true);
@@ -123,6 +175,8 @@ export function useTasks() {
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
     try {
+      console.log('Updating task:', id, 'with data:', updates);
+      
       const { error } = await supabase
         .from('tasks')
         .update(updates)
@@ -130,13 +184,17 @@ export function useTasks() {
 
       if (error) throw error;
 
+      console.log('Task updated successfully in database');
+
       toast({
         title: "Sucesso",
         description: "Tarefa atualizada com sucesso",
       });
 
-      await fetchTasks();
+      // Return success indicator
+      return true;
     } catch (err) {
+      console.error('Error updating task:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar tarefa';
       setError(errorMessage);
       toast({
@@ -242,5 +300,6 @@ export function useTasks() {
     getTaskComments,
     addComment,
     refetch: fetchTasks,
+    fetchTaskById,
   };
 }

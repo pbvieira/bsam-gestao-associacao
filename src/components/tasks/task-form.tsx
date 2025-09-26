@@ -26,11 +26,13 @@ interface UserProfile {
 }
 
 export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
-  const { createTask, updateTask, tasks } = useTasks();
+  const { createTask, updateTask, fetchTaskById } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [currentTask, setCurrentTask] = useState<Task | null>(null);
+  const [loadingTask, setLoadingTask] = useState(false);
   
   const [formData, setFormData] = useState({
     titulo: '',
@@ -44,7 +46,6 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
   });
 
   const isEdit = !!taskId;
-  const currentTask = isEdit ? tasks.find(t => t.id === taskId) : null;
 
   // Carregar usuários
   useEffect(() => {
@@ -68,19 +69,44 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
 
   // Carregar dados da tarefa para edição
   useEffect(() => {
-    if (currentTask) {
-      setFormData({
-        titulo: currentTask.titulo,
-        descricao: currentTask.descricao || '',
-        prioridade: currentTask.prioridade,
-        status: currentTask.status,
-        categoria: currentTask.categoria || '',
-        data_vencimento: currentTask.data_vencimento ? new Date(currentTask.data_vencimento) : null,
-        assigned_to: currentTask.assigned_to,
-        estimated_hours: currentTask.estimated_hours?.toString() || '',
-      });
-    }
-  }, [currentTask]);
+    const loadTaskData = async () => {
+      if (taskId) {
+        console.log('Loading task data for editing, ID:', taskId);
+        setLoadingTask(true);
+        
+        try {
+          const task = await fetchTaskById(taskId);
+          if (task) {
+            console.log('Task data loaded for editing:', task);
+            setCurrentTask(task);
+            setFormData({
+              titulo: task.titulo,
+              descricao: task.descricao || '',
+              prioridade: task.prioridade,
+              status: task.status,
+              categoria: task.categoria || '',
+              data_vencimento: task.data_vencimento ? new Date(task.data_vencimento) : null,
+              assigned_to: task.assigned_to,
+              estimated_hours: task.estimated_hours?.toString() || '',
+            });
+          } else {
+            console.error('Task not found for ID:', taskId);
+            toast({
+              title: "Erro",
+              description: "Tarefa não encontrada",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error('Error loading task data:', error);
+        } finally {
+          setLoadingTask(false);
+        }
+      }
+    };
+
+    loadTaskData();
+  }, [taskId, fetchTaskById, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,12 +153,20 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
       console.log('Task data to submit:', taskData);
 
       if (isEdit && taskId) {
+        console.log('Updating existing task...');
         await updateTask(taskId, taskData);
+        console.log('Task update completed, calling onSuccess...');
       } else {
+        console.log('Creating new task...');
         await createTask(taskData);
+        console.log('Task creation completed, calling onSuccess...');
       }
 
-      onSuccess();
+      // Wait a bit to ensure the realtime update has processed
+      setTimeout(() => {
+        console.log('Calling onSuccess callback');
+        onSuccess();
+      }, 100);
     } catch (error) {
       console.error('Erro ao salvar tarefa:', error);
       // Error já tratado no hook
