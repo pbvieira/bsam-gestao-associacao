@@ -7,6 +7,8 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ErrorBoundary } from "@/components/error-boundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Tasks from "./pages/Tasks";
+import Calendar from "./pages/Calendar";
 import Students from "./pages/Students";
 import Users from "./pages/Users";
 import Inventory from "./pages/Inventory";
@@ -47,6 +49,22 @@ const App = () => (
             element={
               <ProtectedRoute module="dashboard">
                 <Index />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tarefas" 
+            element={
+              <ProtectedRoute module="tasks">
+                <Tasks />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/calendario" 
+            element={
+              <ProtectedRoute module="calendar">
+                <Calendar />
               </ProtectedRoute>
             } 
           />

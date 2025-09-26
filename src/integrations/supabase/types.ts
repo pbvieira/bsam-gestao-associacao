@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          all_day: boolean | null
+          created_at: string
+          created_by: string
+          data_fim: string
+          data_inicio: string
+          descricao: string | null
+          id: string
+          location: string | null
+          recurrence_end: string | null
+          recurrence_type: Database["public"]["Enums"]["recurrence_type"] | null
+          task_id: string | null
+          tipo: Database["public"]["Enums"]["event_type"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          all_day?: boolean | null
+          created_at?: string
+          created_by: string
+          data_fim: string
+          data_inicio: string
+          descricao?: string | null
+          id?: string
+          location?: string | null
+          recurrence_end?: string | null
+          recurrence_type?:
+            | Database["public"]["Enums"]["recurrence_type"]
+            | null
+          task_id?: string | null
+          tipo?: Database["public"]["Enums"]["event_type"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          all_day?: boolean | null
+          created_at?: string
+          created_by?: string
+          data_fim?: string
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          location?: string | null
+          recurrence_end?: string | null
+          recurrence_type?:
+            | Database["public"]["Enums"]["recurrence_type"]
+            | null
+          task_id?: string | null
+          tipo?: Database["public"]["Enums"]["event_type"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_participants: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          is_organizer: boolean | null
+          status: Database["public"]["Enums"]["participant_status"] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          is_organizer?: boolean | null
+          status?: Database["public"]["Enums"]["participant_status"] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          is_organizer?: boolean | null
+          status?: Database["public"]["Enums"]["participant_status"] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           ativo: boolean
@@ -111,6 +209,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          reference_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          reference_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          reference_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
       }
       permissions: {
         Row: {
@@ -883,6 +1014,138 @@ export type Database = {
         }
         Relationships: []
       }
+      task_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          task_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          task_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          task_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          actual_hours: number | null
+          assigned_to: string
+          categoria: string | null
+          created_at: string
+          created_by: string
+          data_conclusao: string | null
+          data_vencimento: string | null
+          descricao: string | null
+          estimated_hours: number | null
+          id: string
+          parent_task_id: string | null
+          prioridade: Database["public"]["Enums"]["task_priority"]
+          status: Database["public"]["Enums"]["task_status"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          actual_hours?: number | null
+          assigned_to: string
+          categoria?: string | null
+          created_at?: string
+          created_by: string
+          data_conclusao?: string | null
+          data_vencimento?: string | null
+          descricao?: string | null
+          estimated_hours?: number | null
+          id?: string
+          parent_task_id?: string | null
+          prioridade?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          actual_hours?: number | null
+          assigned_to?: string
+          categoria?: string | null
+          created_at?: string
+          created_by?: string
+          data_conclusao?: string | null
+          data_vencimento?: string | null
+          descricao?: string | null
+          estimated_hours?: number | null
+          id?: string
+          parent_task_id?: string | null
+          prioridade?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -894,6 +1157,17 @@ export type Database = {
       }
     }
     Enums: {
+      event_type: "reuniao" | "atendimento" | "evento" | "lembrete"
+      notification_type: "task" | "event" | "reminder" | "mention"
+      participant_status: "pendente" | "aceito" | "recusado"
+      recurrence_type: "none" | "daily" | "weekly" | "monthly"
+      task_priority: "baixa" | "media" | "alta" | "urgente"
+      task_status:
+        | "pendente"
+        | "em_andamento"
+        | "realizada"
+        | "cancelada"
+        | "transferida"
       user_role: "aluno" | "auxiliar" | "coordenador" | "diretor"
     }
     CompositeTypes: {
@@ -1022,6 +1296,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_type: ["reuniao", "atendimento", "evento", "lembrete"],
+      notification_type: ["task", "event", "reminder", "mention"],
+      participant_status: ["pendente", "aceito", "recusado"],
+      recurrence_type: ["none", "daily", "weekly", "monthly"],
+      task_priority: ["baixa", "media", "alta", "urgente"],
+      task_status: [
+        "pendente",
+        "em_andamento",
+        "realizada",
+        "cancelada",
+        "transferida",
+      ],
       user_role: ["aluno", "auxiliar", "coordenador", "diretor"],
     },
   },
