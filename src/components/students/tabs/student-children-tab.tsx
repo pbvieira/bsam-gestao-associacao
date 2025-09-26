@@ -151,6 +151,16 @@ export function StudentChildrenTab({ studentId }: StudentChildrenTabProps) {
 
         if (error) throw error;
       } else {
+        // Validate required fields before insertion
+        if (!data.nome_completo || !data.data_nascimento) {
+          toast({
+            title: 'Erro',
+            description: 'Nome completo e data de nascimento são obrigatórios.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
         const { error } = await supabase
           .from('student_children_list')
           .insert({ 
