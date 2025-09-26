@@ -13,23 +13,23 @@ const Index = () => {
         {/* Header Personalizado */}
         <WorkspaceHeader />
 
-        {/* Seção "Meu Trabalho Hoje" - Prioridade Total */}
-        <div className="space-y-6">
-          <div className="h-[60vh]">
-            <TodayTasks />
-          </div>
-          <div className="h-[35vh]">
-            <TodayEvents />
-          </div>
-        </div>
-
-        {/* Widgets Inteligentes */}
+        {/* Widgets Inteligentes - Prioridade Total */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <ProductivityStats />
           <NotificationCenter />
           <div className="lg:col-span-1">
             <WorkspaceActions />
           </div>
+        </div>
+
+        {/* Minha Agenda */}
+        <div className="h-[40vh]">
+          <TodayEvents />
+        </div>
+
+        {/* Meu Trabalho Hoje */}
+        <div className="h-[50vh]">
+          <TodayTasks />
         </div>
       </div>
     </MainLayout>
