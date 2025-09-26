@@ -17,39 +17,33 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
     },
   },
 });
 
-function App() {
-  return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute module="dashboard">
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/alunos" element={<Students />} />
-            <Route path="/usuarios" element={<Users />} />
-            <Route path="/estoque" element={<Inventory />} />
-            <Route path="/relatorios" element={<Reports />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </React.StrictMode>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <Toaster />
+      <Sonner />
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute module="dashboard">
+              <Index />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="/alunos" element={<Students />} />
+        <Route path="/usuarios" element={<Users />} />
+        <Route path="/estoque" element={<Inventory />} />
+        <Route path="/relatorios" element={<Reports />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  </QueryClientProvider>
+);
 
 export default App;
