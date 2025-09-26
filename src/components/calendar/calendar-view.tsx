@@ -20,6 +20,21 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // Definir cores e labels dos tipos de evento
+  const typeColors = {
+    reuniao: "bg-blue-100 text-blue-900 border-blue-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-800",
+    atendimento: "bg-green-100 text-green-900 border-green-200 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800", 
+    evento: "bg-purple-100 text-purple-900 border-purple-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-100 dark:border-purple-800",
+    lembrete: "bg-orange-100 text-orange-900 border-orange-200 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-100 dark:border-orange-800"
+  };
+
+  const typeLabels = {
+    reuniao: "Reunião",
+    atendimento: "Atendimento",
+    evento: "Evento",
+    lembrete: "Lembrete"
+  };
+
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -105,20 +120,6 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
     // Para visualização semanal, mostrar apenas uma linha
     if (viewMode === 'week') break;
   }
-
-  const typeColors = {
-    reuniao: "bg-blue-100 text-blue-900 border-blue-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-800",
-    atendimento: "bg-green-100 text-green-900 border-green-200 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-800", 
-    evento: "bg-purple-100 text-purple-900 border-purple-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-100 dark:border-purple-800",
-    lembrete: "bg-orange-100 text-orange-900 border-orange-200 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-100 dark:border-orange-800"
-  };
-
-  const typeLabels = {
-    reuniao: "Reunião",
-    atendimento: "Atendimento",
-    evento: "Evento",
-    lembrete: "Lembrete"
-  };
 
   if (loading) {
     return (
