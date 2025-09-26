@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TaskCard } from "./task-card";
 import { Task, TaskStatus } from "@/hooks/use-tasks";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TaskBoardProps {
   tasks: Task[];
@@ -8,6 +9,7 @@ interface TaskBoardProps {
 }
 
 export function TaskBoard({ tasks, onEditTask }: TaskBoardProps) {
+  const isMobile = useIsMobile();
   const statusColumns: Array<{ status: TaskStatus; title: string; count: number }> = [
     { status: 'pendente', title: 'Pendente', count: 0 },
     { status: 'em_andamento', title: 'Em Andamento', count: 0 },
@@ -31,10 +33,14 @@ export function TaskBoard({ tasks, onEditTask }: TaskBoardProps) {
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+    <div className={`grid gap-4 ${
+      isMobile 
+        ? 'grid-cols-1' 
+        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+    }`}>
       {statusColumns.map((column) => (
         <Card key={column.status} className="h-fit">
-          <CardHeader className="pb-3">
+          <CardHeader className={`${isMobile ? 'p-4 pb-3' : 'pb-3'}`}>
             <CardTitle className="flex items-center justify-between text-sm font-medium">
               <span>{column.title}</span>
               <span className="bg-muted text-muted-foreground px-2 py-1 rounded-full text-xs">
@@ -42,14 +48,14 @@ export function TaskBoard({ tasks, onEditTask }: TaskBoardProps) {
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={`space-y-3 ${isMobile ? 'p-4 pt-0' : ''}`}>
             {tasksByStatus[column.status]?.map((task) => (
-              <div key={task.id} className="transform scale-95">
-                <TaskCard 
-                  task={task} 
-                  onEdit={() => onEditTask(task.id)}
-                />
-              </div>
+              <TaskCard 
+                key={task.id}
+                task={task} 
+                onEdit={() => onEditTask(task.id)}
+                variant="board"
+              />
             )) || (
               <div className="text-center py-8 text-muted-foreground text-sm">
                 Nenhuma tarefa
