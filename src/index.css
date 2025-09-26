@@ -8,52 +8,54 @@ Todas as cores devem ser HSL para consistência com o sistema de design
 
 @layer base {
   :root {
-    /* Cores principais da marca */
-    --background: 0 0% 100%;
-    --foreground: 210 12% 16%;
+    /* Paleta Pastel "O Bom Samaritano" - Tons suaves e harmoniosos */
+    --background: 210 30% 98%;
+    --foreground: 210 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 12% 16%;
+    --card-foreground: 210 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 12% 16%;
+    --popover-foreground: 210 20% 15%;
 
-    /* Azul principal da marca O Bom Samaritano */
+    /* Azul principal da marca - mais vibrante para contraste */
     --primary: 200 85% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 200 85% 60%;
+    --primary-light: 200 70% 65%;
     --primary-dark: 200 85% 35%;
 
-    /* Tons neutros para interface */
-    --secondary: 210 20% 98%;
-    --secondary-foreground: 210 12% 16%;
+    /* Tons neutros pastéis azulados */
+    --secondary: 210 25% 94%;
+    --secondary-foreground: 210 20% 20%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 210 12% 45%;
+    --muted: 210 30% 92%;
+    --muted-foreground: 210 15% 50%;
 
-    --accent: 140 85% 45%;
-    --accent-foreground: 0 0% 100%;
+    /* Lavanda pastel como accent */
+    --accent: 260 30% 75%;
+    --accent-foreground: 260 30% 25%;
 
-    /* Cores de apoio do sistema */
-    --success: 140 85% 45%;
-    --success-foreground: 0 0% 100%;
+    /* Cores de apoio pastéis */
+    --success: 15 60% 75%;
+    --success-foreground: 15 60% 25%;
     
-    --warning: 35 90% 55%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 35 70% 70%;
+    --warning-foreground: 35 70% 20%;
     
-    --danger: 0 85% 60%;
-    --danger-foreground: 0 0% 100%;
+    --danger: 0 60% 75%;
+    --danger-foreground: 0 60% 25%;
 
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 60% 75%;
+    --destructive-foreground: 0 60% 25%;
 
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
+    --border: 210 25% 88%;
+    --input: 210 25% 88%;
     --ring: 200 85% 45%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar com fundo azul pastel distinto */
+    --sidebar-background: 210 25% 95%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
 
@@ -71,45 +73,50 @@ Todas as cores devem ser HSL para consistência com o sistema de design
   }
 
   .dark {
-    --background: 210 12% 8%;
-    --foreground: 210 20% 95%;
+    /* Modo escuro harmonioso com a paleta pastel */
+    --background: 210 20% 8%;
+    --foreground: 210 15% 92%;
 
-    --card: 210 12% 10%;
-    --card-foreground: 210 20% 95%;
+    --card: 210 18% 12%;
+    --card-foreground: 210 15% 92%;
 
-    --popover: 210 12% 10%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 210 18% 12%;
+    --popover-foreground: 210 15% 92%;
 
     --primary: 200 85% 55%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 200 85% 70%;
+    --primary-light: 200 70% 70%;
     --primary-dark: 200 85% 40%;
 
-    --secondary: 210 12% 15%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 210 18% 16%;
+    --secondary-foreground: 210 15% 92%;
 
-    --muted: 210 12% 15%;
-    --muted-foreground: 210 20% 65%;
+    --muted: 210 18% 18%;
+    --muted-foreground: 210 10% 65%;
 
-    --accent: 140 85% 50%;
-    --accent-foreground: 0 0% 100%;
+    /* Lavanda escura para accent */
+    --accent: 260 25% 35%;
+    --accent-foreground: 260 25% 85%;
 
-    --success: 140 85% 50%;
-    --success-foreground: 0 0% 100%;
+    /* Cores de apoio em modo escuro */
+    --success: 15 45% 45%;
+    --success-foreground: 15 45% 95%;
     
-    --warning: 35 90% 60%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 35 60% 50%;
+    --warning-foreground: 35 60% 95%;
     
-    --danger: 0 85% 65%;
-    --danger-foreground: 0 0% 100%;
+    --danger: 0 50% 55%;
+    --danger-foreground: 0 50% 95%;
 
-    --destructive: 0 85% 65%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 50% 55%;
+    --destructive-foreground: 0 50% 95%;
 
-    --border: 210 12% 20%;
-    --input: 210 12% 20%;
+    --border: 210 18% 22%;
+    --input: 210 18% 22%;
     --ring: 200 85% 55%;
-    --sidebar-background: 240 5.9% 10%;
+    
+    /* Sidebar escura com tom azulado */
+    --sidebar-background: 210 20% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
