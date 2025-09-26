@@ -1,9 +1,25 @@
 import { useState } from 'react';
 import { useStudents } from '@/hooks/use-students';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Search, 
   Plus, 
@@ -11,7 +27,8 @@ import {
   UserCheck, 
   UserX, 
   Calendar,
-  Phone
+  Phone,
+  Filter
 } from 'lucide-react';
 import { format, differenceInYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -24,13 +41,33 @@ interface StudentListProps {
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
   const { students, loading, deactivateStudent } = useStudents();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('nome_completo');
 
-  const filteredStudents = students.filter(student =>
-    student.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.codigo_cadastro.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.cpf?.includes(searchTerm) ||
-    student.numero_interno?.includes(searchTerm)
-  );
+  const filteredStudents = students
+    .filter(student => {
+      // Search filter
+      const searchMatch = searchTerm === '' || 
+        student.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.codigo_cadastro.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.cpf?.includes(searchTerm) ||
+        student.numero_interno?.includes(searchTerm);
+      
+      // Status filter
+      const statusMatch = statusFilter === 'all' || 
+        (statusFilter === 'active' && student.ativo) ||
+        (statusFilter === 'inactive' && !student.ativo);
+      
+      return searchMatch && statusMatch;
+    })
+    .sort((a, b) => {
+      const aValue = a[sortBy as keyof typeof a];
+      const bValue = b[sortBy as keyof typeof b];
+      
+      if (aValue < bValue) return -1;
+      if (aValue > bValue) return 1;
+      return 0;
+    });
 
   const calculateAge = (birthDate: string) => {
     return differenceInYears(new Date(), new Date(birthDate));
@@ -56,34 +93,30 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="h-8 bg-muted animate-pulse rounded" />
-        <div className="h-32 bg-muted animate-pulse rounded" />
-      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, código, CPF..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
-        <Button onClick={onCreateStudent} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Aluno
-        </Button>
-      </div>
-
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -139,101 +172,177 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
         </Card>
       </div>
 
-      {/* Student Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredStudents.map((student) => (
-          <Card key={student.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{student.nome_completo}</CardTitle>
-                  <p className="text-sm text-muted-foreground font-mono">
-                    {student.codigo_cadastro}
-                  </p>
-                </div>
-                <Badge variant={student.ativo ? "default" : "secondary"}>
-                  {student.ativo ? 'Ativo' : 'Inativo'}
-                </Badge>
-              </div>
-            </CardHeader>
+      {/* Main Table */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Lista de Alunos</CardTitle>
+              <CardDescription>
+                Gestão completa dos assistidos da associação
+              </CardDescription>
+            </div>
+            <Button onClick={onCreateStudent} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Aluno
+            </Button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar por nome, código, CPF..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
             
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Idade</p>
-                  <p className="font-medium">{calculateAge(student.data_nascimento)} anos</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Permanência</p>
-                  <p className="font-medium">
-                    {calculatePermanence(student.data_abertura, student.data_saida)}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="text-sm">
-                <p className="text-muted-foreground">Entrada</p>
-                <p className="font-medium">
-                  {format(new Date(student.data_abertura), 'dd/MM/yyyy', { locale: ptBR })}
-                  {student.hora_entrada && ` às ${student.hora_entrada}`}
-                </p>
-              </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Filtrar por status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="active">Ativos</SelectItem>
+                <SelectItem value="inactive">Inativos</SelectItem>
+              </SelectContent>
+            </Select>
 
-              {student.nome_responsavel && (
-                <div className="text-sm">
-                  <p className="text-muted-foreground">Responsável</p>
-                  <p className="font-medium">
-                    {student.nome_responsavel}
-                    {student.parentesco_responsavel && ` (${student.parentesco_responsavel})`}
-                  </p>
-                </div>
-              )}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nome_completo">Nome</SelectItem>
+                <SelectItem value="codigo_cadastro">Código</SelectItem>
+                <SelectItem value="data_abertura">Data Cadastro</SelectItem>
+                <SelectItem value="data_nascimento">Data Nascimento</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
 
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEditStudent(student)}
-                  className="flex-1 gap-2"
-                >
-                  <Edit className="h-3 w-3" />
-                  Editar
+        <CardContent>
+          {!filteredStudents || filteredStudents.length === 0 ? (
+            <div className="text-center py-8">
+              <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Nenhum aluno encontrado</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm || statusFilter !== 'all' 
+                  ? 'Tente ajustar os filtros de busca.' 
+                  : 'Comece cadastrando o primeiro aluno.'
+                }
+              </p>
+              {!searchTerm && statusFilter === 'all' && (
+                <Button onClick={onCreateStudent} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Cadastrar Primeiro Aluno
                 </Button>
-                
-                {student.ativo && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeactivate(student.id)}
-                    className="gap-2 text-orange-600 hover:text-orange-700"
-                  >
-                    <UserX className="h-3 w-3" />
-                    Desativar
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Código</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Idade</TableHead>
+                    <TableHead>Data Nascimento</TableHead>
+                    <TableHead>Data Entrada</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Responsável</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredStudents.map((student) => (
+                    <TableRow key={student.id} className="hover:bg-muted/50">
+                      <TableCell className="font-mono text-sm">
+                        {student.codigo_cadastro}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {student.nome_completo}
+                      </TableCell>
+                      <TableCell>
+                        {calculateAge(student.data_nascimento)} anos
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(student.data_nascimento), 'dd/MM/yyyy', { locale: ptBR })}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(student.data_abertura), 'dd/MM/yyyy', { locale: ptBR })}
+                        {student.hora_entrada && (
+                          <div className="text-xs text-muted-foreground">
+                            {student.hora_entrada}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={student.ativo ? 'default' : 'secondary'}>
+                          {student.ativo ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {student.nome_responsavel ? (
+                          <div>
+                            <div className="font-medium text-sm">
+                              {student.nome_responsavel}
+                            </div>
+                            {student.parentesco_responsavel && (
+                              <div className="text-xs text-muted-foreground">
+                                {student.parentesco_responsavel}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEditStudent(student)}
+                            className="gap-1"
+                          >
+                            <Edit className="h-3 w-3" />
+                            Editar
+                          </Button>
+                          
+                          {student.ativo && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeactivate(student.id)}
+                              className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                            >
+                              <UserX className="h-3 w-3" />
+                              Desativar
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
-      {filteredStudents.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Nenhum aluno encontrado</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchTerm ? 'Tente ajustar os filtros de busca.' : 'Comece cadastrando o primeiro aluno.'}
-            </p>
-            {!searchTerm && (
-              <Button onClick={onCreateStudent} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Cadastrar Primeiro Aluno
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+          {filteredStudents && filteredStudents.length > 0 && (
+            <div className="flex items-center justify-between pt-4">
+              <p className="text-sm text-muted-foreground">
+                Mostrando {filteredStudents.length} aluno{filteredStudents.length !== 1 ? 's' : ''}
+                {statusFilter !== 'all' && ` (${statusFilter === 'active' ? 'ativos' : 'inativos'})`}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
