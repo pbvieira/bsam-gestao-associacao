@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
-export type NotificationType = 'task' | 'event' | 'reminder' | 'mention';
+export type NotificationType = 'task' | 'event' | 'reminder' | 'mention' | 'calendar_invite' | 'calendar_reminder' | 'calendar_update' | 'calendar_cancellation';
 
 export interface Notification {
   id: string;
@@ -13,6 +13,17 @@ export interface Notification {
   message: string;
   read: boolean;
   created_at: string;
+}
+
+export interface NotificationSettings {
+  id: string;
+  user_id: string;
+  reminder_1h: boolean;
+  reminder_15min: boolean;
+  reminder_at_time: boolean;
+  email_notifications: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export function useNotifications() {
@@ -111,6 +122,75 @@ export function useNotifications() {
     }
   };
 
+  const respondToEventInvite = async (eventId: string, response: 'aceito' | 'recusado') => {
+    try {
+      const { error } = await supabase
+        .from('event_participants')
+        .update({ status: response })
+        .eq('event_id', eventId)
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `Convite ${response === 'aceito' ? 'aceito' : 'recusado'} com sucesso`,
+      });
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Erro ao responder convite",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getNotificationSettings = async (): Promise<NotificationSettings | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('notification_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Erro ao buscar configurações:', err);
+      return null;
+    }
+  };
+
+  const updateNotificationSettings = async (settings: Partial<NotificationSettings>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('notification_settings')
+        .upsert({ 
+          user_id: user.id,
+          ...settings 
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Configurações atualizadas com sucesso",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar configurações",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Configurar listener para notificações em tempo real
   useEffect(() => {
     fetchNotifications();
@@ -160,6 +240,9 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    respondToEventInvite,
+    getNotificationSettings,
+    updateNotificationSettings,
     refetch: fetchNotifications,
   };
 }

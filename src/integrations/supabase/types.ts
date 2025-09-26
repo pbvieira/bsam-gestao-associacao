@@ -126,6 +126,36 @@ export type Database = {
           },
         ]
       }
+      event_reminders: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          processed: boolean
+          reminder_type: string
+          scheduled_for: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          processed?: boolean
+          reminder_type: string
+          scheduled_for: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          processed?: boolean
+          reminder_type?: string
+          scheduled_for?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory_items: {
         Row: {
           ativo: boolean
@@ -223,6 +253,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_settings: {
+        Row: {
+          created_at: string
+          email_notifications: boolean
+          id: string
+          reminder_15min: boolean
+          reminder_1h: boolean
+          reminder_at_time: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          reminder_15min?: boolean
+          reminder_1h?: boolean
+          reminder_at_time?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean
+          id?: string
+          reminder_15min?: boolean
+          reminder_1h?: boolean
+          reminder_at_time?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1195,10 +1258,22 @@ export type Database = {
         Args: { event_uuid: string }
         Returns: boolean
       }
+      process_event_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       event_type: "reuniao" | "atendimento" | "evento" | "lembrete"
-      notification_type: "task" | "event" | "reminder" | "mention"
+      notification_type:
+        | "task"
+        | "event"
+        | "reminder"
+        | "mention"
+        | "calendar_invite"
+        | "calendar_reminder"
+        | "calendar_update"
+        | "calendar_cancellation"
       participant_status: "pendente" | "aceito" | "recusado"
       recurrence_type: "none" | "daily" | "weekly" | "monthly"
       task_priority: "baixa" | "media" | "alta" | "urgente"
@@ -1337,7 +1412,16 @@ export const Constants = {
   public: {
     Enums: {
       event_type: ["reuniao", "atendimento", "evento", "lembrete"],
-      notification_type: ["task", "event", "reminder", "mention"],
+      notification_type: [
+        "task",
+        "event",
+        "reminder",
+        "mention",
+        "calendar_invite",
+        "calendar_reminder",
+        "calendar_update",
+        "calendar_cancellation",
+      ],
       participant_status: ["pendente", "aceito", "recusado"],
       recurrence_type: ["none", "daily", "weekly", "monthly"],
       task_priority: ["baixa", "media", "alta", "urgente"],

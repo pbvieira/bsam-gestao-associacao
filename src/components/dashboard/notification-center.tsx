@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, X, AlertCircle, Calendar, CheckSquare } from "lucide-react";
+import { Bell, Check, X, AlertCircle, Calendar, CheckSquare, CalendarDays, CalendarCheck, CalendarX2, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function NotificationCenter() {
-  const { notifications, markAsRead, loading } = useNotifications();
+  const { notifications, markAsRead, respondToEventInvite, loading } = useNotifications();
 
   const unreadCount = notifications.filter(n => !n.read).length;
   const recentNotifications = notifications.slice(0, 5);
@@ -17,8 +17,20 @@ export function NotificationCenter() {
     switch (type) {
       case 'task':
         return <CheckSquare className="h-4 w-4 text-primary" />;
-      case 'calendar':
+      case 'event':
         return <Calendar className="h-4 w-4 text-accent" />;
+      case 'calendar_invite':
+        return <CalendarDays className="h-4 w-4 text-blue-500" />;
+      case 'calendar_reminder':
+        return <Clock className="h-4 w-4 text-orange-500" />;
+      case 'calendar_update':
+        return <CalendarCheck className="h-4 w-4 text-amber-500" />;
+      case 'calendar_cancellation':
+        return <CalendarX2 className="h-4 w-4 text-red-500" />;
+      case 'reminder':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'mention':
+        return <AlertCircle className="h-4 w-4 text-purple-500" />;
       case 'system':
         return <AlertCircle className="h-4 w-4 text-warning" />;
       default:
@@ -117,6 +129,36 @@ export function NotificationCenter() {
                             locale: ptBR
                           })}
                         </p>
+                        
+                        {/* Ações para convites de calendário */}
+                        {notification.type === 'calendar_invite' && notification.reference_id && (
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                respondToEventInvite(notification.reference_id!, 'aceito');
+                              }}
+                              className="h-6 px-2 text-xs"
+                            >
+                              <Check className="h-3 w-3 mr-1" />
+                              Aceitar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                respondToEventInvite(notification.reference_id!, 'recusado');
+                              }}
+                              className="h-6 px-2 text-xs"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Recusar
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       
                       {!notification.read && (
