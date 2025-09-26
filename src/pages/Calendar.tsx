@@ -6,7 +6,7 @@ import { CalendarView, CalendarViewRef } from "@/components/calendar/calendar-vi
 import { EventForm } from "@/components/calendar/event-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCalendar } from "@/hooks/use-calendar";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/hooks/use-auth";
 
 const Calendar = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -15,7 +15,7 @@ const Calendar = () => {
   const calendarRef = useRef<CalendarViewRef>(null);
 
   const { events, loading } = useCalendar();
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = useAuth();
 
   const canCreateEvents = hasPermission('calendar', 'create');
 

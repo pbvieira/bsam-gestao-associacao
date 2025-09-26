@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
-import { usePermissions } from "@/hooks/use-permissions";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
 import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar } from "lucide-react";
@@ -56,9 +55,7 @@ const navigationItems = [{
 }];
 export function AppSidebar() {
   const {
-    canAccess
-  } = usePermissions();
-  const {
+    canAccess,
     profile,
     signOut
   } = useAuth();

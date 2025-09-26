@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Tasks from "./pages/Tasks";
@@ -39,86 +40,88 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute module="dashboard">
-                <Index />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/tarefas" 
-            element={
-              <ProtectedRoute module="tasks">
-                <Tasks />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/calendario" 
-            element={
-              <ProtectedRoute module="calendar">
-                <Calendar />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/alunos" 
-            element={
-              <ProtectedRoute module="students">
-                <Students />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/usuarios" 
-            element={
-              <ProtectedRoute module="users">
-                <Users />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/estoque" 
-            element={
-              <ProtectedRoute module="inventory">
-                <Inventory />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/fornecedores" 
-            element={
-              <ProtectedRoute module="suppliers">
-                <Suppliers />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/compras" 
-            element={
-              <ProtectedRoute module="purchases">
-                <Purchases />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/relatorios" 
-            element={
-              <ProtectedRoute module="reports">
-                <Reports />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute module="dashboard">
+                  <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/tarefas" 
+              element={
+                <ProtectedRoute module="tasks">
+                  <Tasks />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/calendario" 
+              element={
+                <ProtectedRoute module="calendar">
+                  <Calendar />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/alunos" 
+              element={
+                <ProtectedRoute module="students">
+                  <Students />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/usuarios" 
+              element={
+                <ProtectedRoute module="users">
+                  <Users />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/estoque" 
+              element={
+                <ProtectedRoute module="inventory">
+                  <Inventory />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/fornecedores" 
+              element={
+                <ProtectedRoute module="suppliers">
+                  <Suppliers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/compras" 
+              element={
+                <ProtectedRoute module="purchases">
+                  <Purchases />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/relatorios" 
+              element={
+                <ProtectedRoute module="reports">
+                  <Reports />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { usePermissions } from '@/hooks/use-permissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lock } from 'lucide-react';
@@ -19,12 +17,10 @@ export function ProtectedRoute({
   action = 'read',
   fallback 
 }: ProtectedRouteProps) {
-  const { user, loading: authLoading } = useAuth();
-  const { hasPermission, loading: permissionsLoading, isInitialized } = usePermissions();
+  const { user, loading, isInitialized, hasPermission } = useAuth();
 
-  // Show loading while authentication or permissions are loading
-  // Only proceed once permissions are initialized to prevent flash
-  if (authLoading || permissionsLoading || !isInitialized) {
+  // Show loading while auth is initializing
+  if (loading || !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="space-y-4 p-6">

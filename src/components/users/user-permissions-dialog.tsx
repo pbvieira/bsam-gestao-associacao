@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/hooks/use-auth';
-import { Permission } from '@/hooks/use-permissions';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import {
   Dialog,
@@ -16,6 +15,15 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+
+interface Permission {
+  id: string;
+  role: string;
+  module: string;
+  action: string;
+  allowed: boolean;
+  created_at: string;
+}
 
 interface UserPermissionsDialogProps {
   user: UserProfile;
@@ -219,7 +227,7 @@ export function UserPermissionsDialog({ user, onClose }: UserPermissionsDialogPr
           <DialogTitle>Permissões do Usuário</DialogTitle>
           <DialogDescription>
             Gerencie as permissões de <strong>{user.full_name}</strong> - {' '}
-            <Badge variant={getRoleBadgeVariant(user.role)}>
+            <Badge variant={getRoleBadgeVariant(user.role) as any}>
               {getRoleLabel(user.role)}
             </Badge>
           </DialogDescription>

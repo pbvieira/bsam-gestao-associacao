@@ -8,7 +8,6 @@ import { ptBR } from "date-fns/locale";
 import { useState } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/use-auth";
-import { usePermissions } from "@/hooks/use-permissions";
 
 interface TaskCardProps {
   task: Task;
@@ -18,8 +17,7 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onEdit, variant = 'list' }: TaskCardProps) {
   const { updateTask, deleteTask } = useTasks();
-  const { user } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { user, hasPermission } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const canEditTask = task.created_by === user?.id || task.assigned_to === user?.id || hasPermission('tasks', 'update');

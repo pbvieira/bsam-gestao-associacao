@@ -8,7 +8,7 @@ import { TaskList } from "@/components/tasks/task-list";
 import { TaskForm } from "@/components/tasks/task-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTasks, TaskPriority, TaskStatus } from "@/hooks/use-tasks";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/hooks/use-auth";
 
 const Tasks = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,7 +18,7 @@ const Tasks = () => {
   const [editingTask, setEditingTask] = useState<string | null>(null);
 
   const { tasks, loading } = useTasks();
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = useAuth();
 
   const canCreateTasks = hasPermission('tasks', 'create');
 
