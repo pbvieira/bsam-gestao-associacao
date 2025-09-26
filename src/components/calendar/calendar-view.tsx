@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +15,30 @@ interface CalendarViewProps {
   onDateSelect: (date: Date) => void;
 }
 
-export function CalendarView({ events, loading, onEditEvent, onDateSelect }: CalendarViewProps) {
+export interface CalendarViewRef {
+  resetViewState: () => void;
+}
+
+export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({ 
+  events, 
+  loading, 
+  onEditEvent, 
+  onDateSelect 
+}, ref) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showingSpecificDay, setShowingSpecificDay] = useState(false);
+
+  const resetViewState = () => {
+    setShowingSpecificDay(false);
+    setSelectedDate(new Date());
+    setCurrentDate(new Date());
+  };
+
+  useImperativeHandle(ref, () => ({
+    resetViewState
+  }));
 
   // Definir cores e labels dos tipos de evento
   const typeColors = {
@@ -327,4 +346,4 @@ export function CalendarView({ events, loading, onEditEvent, onDateSelect }: Cal
       </Card>
     </div>
   );
-}
+});

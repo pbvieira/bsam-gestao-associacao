@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { CalendarView } from "@/components/calendar/calendar-view";
+import { CalendarView, CalendarViewRef } from "@/components/calendar/calendar-view";
 import { EventForm } from "@/components/calendar/event-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCalendar } from "@/hooks/use-calendar";
@@ -12,6 +12,7 @@ const Calendar = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const calendarRef = useRef<CalendarViewRef>(null);
 
   const { events, loading } = useCalendar();
   const { hasPermission } = usePermissions();
@@ -22,6 +23,7 @@ const Calendar = () => {
     setIsFormOpen(false);
     setEditingEvent(null);
     setSelectedDate(null);
+    calendarRef.current?.resetViewState();
   };
 
   const handleEditEvent = (eventId: string) => {
@@ -74,12 +76,13 @@ const Calendar = () => {
         </div>
 
         {/* Calendário */}
-        <CalendarView 
-          events={events}
-          loading={loading}
-          onEditEvent={handleEditEvent}
-          onDateSelect={handleDateSelect}
-        />
+          <CalendarView
+            ref={calendarRef}
+            events={events}
+            loading={loading}
+            onEditEvent={handleEditEvent}
+            onDateSelect={handleDateSelect}
+          />
       </div>
     </MainLayout>
   );

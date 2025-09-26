@@ -37,8 +37,8 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
     titulo: '',
     descricao: '',
     tipo: 'evento' as EventType,
-    data_inicio: selectedDate || new Date(),
-    data_fim: selectedDate || new Date(),
+    data_inicio: new Date(),
+    data_fim: new Date(),
     hora_inicio: '09:00',
     hora_fim: '10:00',
     all_day: false,
@@ -46,6 +46,22 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
     recurrence_end: null as Date | null,
     location: '',
   });
+
+  // Initialize form data based on selectedDate or existing event
+  useEffect(() => {
+    if (selectedDate) {
+      // Create a new date object to avoid mutation
+      const localDate = new Date(selectedDate.getTime());
+      
+      setFormData(prev => ({
+        ...prev,
+        data_inicio: localDate,
+        data_fim: localDate,
+        hora_inicio: '09:00',
+        hora_fim: '10:00'
+      }));
+    }
+  }, [selectedDate]);
 
   const isEdit = !!eventId;
   const currentEvent = isEdit ? events.find(e => e.id === eventId) : null;
