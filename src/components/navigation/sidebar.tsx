@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Users, 
-  Settings, 
   FileText, 
   Package, 
   BarChart3, 
@@ -30,7 +29,6 @@ const navigationItems = [
   { name: "Fornecedores", href: "/fornecedores", icon: Package, module: "suppliers" },
   { name: "Compras", href: "/compras", icon: ShoppingCart, module: "purchases" },
   { name: "Relatórios", href: "/relatorios", icon: BarChart3, module: "reports" },
-  { name: "Configurações", href: "/configuracoes", icon: Settings, module: "settings" },
 ];
 
 export function Sidebar({ className }: SidebarProps) {
