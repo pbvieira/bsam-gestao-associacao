@@ -12,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useTasks, Task, TaskPriority, TaskStatus } from "@/hooks/use-tasks";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TaskFormProps {
@@ -27,6 +28,7 @@ interface UserProfile {
 export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
   const { createTask, updateTask, tasks } = useTasks();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
   
@@ -82,10 +84,34 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    // Validação no frontend
+    if (!formData.titulo.trim()) {
+      toast({
+        title: "Erro",
+        description: "Título é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.assigned_to) {
+      toast({
+        title: "Erro", 
+        description: "Responsável é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
+      console.log('Submitting task form with user:', user.id);
+      
       const taskData = {
         titulo: formData.titulo.trim(),
         descricao: formData.descricao.trim() || null,
@@ -98,6 +124,8 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
         created_by: user.id,
       };
 
+      console.log('Task data to submit:', taskData);
+
       if (isEdit && taskId) {
         await updateTask(taskId, taskData);
       } else {
@@ -107,6 +135,7 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
       onSuccess();
     } catch (error) {
       console.error('Erro ao salvar tarefa:', error);
+      // Error já tratado no hook
     } finally {
       setLoading(false);
     }

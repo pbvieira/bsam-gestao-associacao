@@ -75,14 +75,32 @@ export function useTasks() {
 
   const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'created_by_profile' | 'assigned_to_profile'>) => {
     try {
+      console.log('Creating task with data:', taskData);
+      
+      // Validar dados obrigatórios
+      if (!taskData.titulo?.trim()) {
+        throw new Error('Título é obrigatório');
+      }
+      if (!taskData.assigned_to) {
+        throw new Error('Responsável é obrigatório');
+      }
+      if (!taskData.created_by) {
+        throw new Error('Criador é obrigatório');
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .insert([taskData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error creating task:', error);
+        throw error;
+      }
 
+      console.log('Task created successfully:', data);
+      
       toast({
         title: "Sucesso",
         description: "Tarefa criada com sucesso",
@@ -91,6 +109,7 @@ export function useTasks() {
       await fetchTasks();
       return data;
     } catch (err) {
+      console.error('Error creating task:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erro ao criar tarefa';
       setError(errorMessage);
       toast({

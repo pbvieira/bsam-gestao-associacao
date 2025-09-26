@@ -89,13 +89,31 @@ export function useCalendar() {
     participantIds: string[] = []
   ) => {
     try {
+      console.log('Creating event with data:', eventData);
+      
+      // Validar dados obrigatórios
+      if (!eventData.titulo?.trim()) {
+        throw new Error('Título é obrigatório');
+      }
+      if (!eventData.created_by) {
+        throw new Error('Criador é obrigatório');
+      }
+      if (!eventData.data_inicio || !eventData.data_fim) {
+        throw new Error('Datas de início e fim são obrigatórias');
+      }
+
       const { data, error } = await supabase
         .from('calendar_events')
         .insert([eventData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error creating event:', error);
+        throw error;
+      }
+
+      console.log('Event created successfully:', data);
 
       // Adicionar organizador como participante
       const participantsToAdd = [
@@ -114,11 +132,15 @@ export function useCalendar() {
       ];
 
       if (participantsToAdd.length > 0) {
+        console.log('Adding participants:', participantsToAdd);
         const { error: participantsError } = await supabase
           .from('event_participants')
           .insert(participantsToAdd);
 
-        if (participantsError) throw participantsError;
+        if (participantsError) {
+          console.error('Error adding participants:', participantsError);
+          throw participantsError;
+        }
       }
 
       toast({
@@ -129,6 +151,7 @@ export function useCalendar() {
       await fetchEvents();
       return data;
     } catch (err) {
+      console.error('Error creating event:', err);
       const errorMessage = err instanceof Error ? err.message : 'Erro ao criar evento';
       setError(errorMessage);
       toast({
