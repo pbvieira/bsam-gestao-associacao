@@ -1,4 +1,5 @@
 import { useCalendar } from "@/hooks/use-calendar";
+import { useQuickActions } from "@/hooks/use-quick-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { ptBR } from "date-fns/locale";
 
 export function TodayEvents() {
   const { events } = useCalendar();
+  const { createQuickEvent } = useQuickActions();
 
   const today = new Date();
   const todayEvents = events.filter(event => {
@@ -86,7 +88,7 @@ export function TodayEvents() {
             <Calendar className="h-5 w-5 text-primary" />
             Minha Agenda
           </CardTitle>
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={createQuickEvent}>
             <Plus className="h-4 w-4 mr-1" />
             Agendar
           </Button>
@@ -99,13 +101,11 @@ export function TodayEvents() {
             <h4 className="text-sm font-medium text-foreground">
               Hoje ({todayEvents.length})
             </h4>
-            <ScrollArea className="max-h-48">
-              <div className="space-y-2">
-                {todayEvents.map(event => (
-                  <EventItem key={event.id} event={event} />
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="space-y-2 max-h-[250px] overflow-y-auto">
+              {todayEvents.map(event => (
+                <EventItem key={event.id} event={event} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -115,13 +115,11 @@ export function TodayEvents() {
             <h4 className="text-sm font-medium text-muted-foreground">
               Próximos
             </h4>
-            <ScrollArea className="max-h-40">
-              <div className="space-y-2">
-                {upcomingEvents.map(event => (
-                  <EventItem key={event.id} event={event} showDate />
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {upcomingEvents.map(event => (
+                <EventItem key={event.id} event={event} showDate />
+              ))}
+            </div>
           </div>
         )}
 

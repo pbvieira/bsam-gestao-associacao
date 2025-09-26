@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CheckSquare, Clock, AlertCircle, Plus } from "lucide-react";
-import { format, isToday, isPast } from "date-fns";
+import { format, isToday, isPast, isFuture } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Task } from "@/hooks/use-tasks";
 
@@ -21,21 +21,38 @@ export function TodayTasks() {
     task.assigned_to === profile?.user_id || task.created_by === profile?.user_id
   );
 
-  const todayTasks = myTasks.filter(task => {
+  const pendingTasks = myTasks.filter(task => task.status === 'pendente');
+
+  const todayTasks = pendingTasks.filter(task => {
     if (!task.data_vencimento) return false;
     const dueDate = new Date(task.data_vencimento);
     return isToday(dueDate);
   });
 
-  const overdueTasks = myTasks.filter(task => {
-    if (!task.data_vencimento || task.status === 'realizada') return false;
+  const overdueTasks = pendingTasks.filter(task => {
+    if (!task.data_vencimento) return false;
     const dueDate = new Date(task.data_vencimento);
     return isPast(dueDate) && !isToday(dueDate);
   });
 
-  const priorityTasks = myTasks.filter(task => 
-    task.prioridade === 'alta' && task.status === 'pendente'
+  const upcomingTasks = pendingTasks.filter(task => {
+    if (!task.data_vencimento) return false;
+    const dueDate = new Date(task.data_vencimento);
+    return isFuture(dueDate) && !isToday(dueDate);
+  }).slice(0, 5);
+
+  const priorityTasks = pendingTasks.filter(task => 
+    task.prioridade === 'alta'
   );
+
+  const otherTasks = pendingTasks.filter(task => {
+    if (task.prioridade === 'alta') return false;
+    if (task.data_vencimento) {
+      const dueDate = new Date(task.data_vencimento);
+      return !isToday(dueDate) && !isPast(dueDate) && !isFuture(dueDate);
+    }
+    return true; // Tasks without due date
+  }).slice(0, 3);
 
   const handleTaskComplete = async (task: Task) => {
     await updateTask(task.id, {
@@ -94,13 +111,17 @@ export function TodayTasks() {
             <CheckSquare className="h-5 w-5 text-primary" />
             Meu Trabalho Hoje
           </CardTitle>
-          <Button size="sm" variant="outline">
+          <Button size="sm" variant="outline" onClick={createQuickTask}>
             <Plus className="h-4 w-4 mr-1" />
             Nova
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="mb-4 text-sm text-muted-foreground">
+          Total: {pendingTasks.length} tarefas pendentes
+        </div>
+
         {/* Tarefas Atrasadas */}
         {overdueTasks.length > 0 && (
           <div className="space-y-2">
@@ -108,13 +129,11 @@ export function TodayTasks() {
               <AlertCircle className="h-4 w-4" />
               Atrasadas ({overdueTasks.length})
             </h4>
-            <ScrollArea className="max-h-32">
-              <div className="space-y-2">
-                {overdueTasks.slice(0, 3).map(task => (
-                  <TaskItem key={task.id} task={task} showOverdue />
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {overdueTasks.map(task => (
+                <TaskItem key={task.id} task={task} showOverdue />
+              ))}
+            </div>
           </div>
         )}
 
@@ -124,13 +143,11 @@ export function TodayTasks() {
             <h4 className="text-sm font-medium text-foreground">
               Hoje ({todayTasks.length})
             </h4>
-            <ScrollArea className="max-h-40">
-              <div className="space-y-2">
-                {todayTasks.map(task => (
-                  <TaskItem key={task.id} task={task} />
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {todayTasks.map(task => (
+                <TaskItem key={task.id} task={task} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -140,20 +157,46 @@ export function TodayTasks() {
             <h4 className="text-sm font-medium text-warning">
               Prioridade Alta ({priorityTasks.length})
             </h4>
-            <ScrollArea className="max-h-40">
-              <div className="space-y-2">
-                {priorityTasks.slice(0, 3).map(task => (
-                  <TaskItem key={task.id} task={task} />
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {priorityTasks.map(task => (
+                <TaskItem key={task.id} task={task} />
+              ))}
+            </div>
           </div>
         )}
 
-        {todayTasks.length === 0 && overdueTasks.length === 0 && priorityTasks.length === 0 && (
+        {/* Próximas Tarefas */}
+        {upcomingTasks.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">
+              Próximas ({upcomingTasks.length})
+            </h4>
+            <div className="space-y-2 max-h-[150px] overflow-y-auto">
+              {upcomingTasks.map(task => (
+                <TaskItem key={task.id} task={task} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Outras Tarefas */}
+        {otherTasks.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">
+              Outras ({otherTasks.length})
+            </h4>
+            <div className="space-y-2 max-h-[150px] overflow-y-auto">
+              {otherTasks.map(task => (
+                <TaskItem key={task.id} task={task} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {pendingTasks.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <CheckSquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
-            <p>Nenhuma tarefa urgente</p>
+            <p>Nenhuma tarefa pendente</p>
             <p className="text-sm">Você está em dia!</p>
           </div>
         )}
