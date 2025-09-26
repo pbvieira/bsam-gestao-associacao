@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      inventory_items: {
+        Row: {
+          ativo: boolean
+          categoria: string | null
+          created_at: string
+          descricao: string | null
+          estoque_atual: number | null
+          estoque_minimo: number | null
+          id: string
+          nome: string
+          origem: string
+          unidade_medida: string | null
+          updated_at: string
+          valor_unitario: number | null
+        }
+        Insert: {
+          ativo?: boolean
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          estoque_atual?: number | null
+          estoque_minimo?: number | null
+          id?: string
+          nome: string
+          origem: string
+          unidade_medida?: string | null
+          updated_at?: string
+          valor_unitario?: number | null
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          estoque_atual?: number | null
+          estoque_minimo?: number | null
+          id?: string
+          nome?: string
+          origem?: string
+          unidade_medida?: string | null
+          updated_at?: string
+          valor_unitario?: number | null
+        }
+        Relationships: []
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_movimento: string
+          id: string
+          inventory_item_id: string
+          observacoes: string | null
+          origem_movimento: string
+          quantidade: number
+          referencia_id: string | null
+          referencia_tipo: string | null
+          tipo_movimento: string
+          valor_unitario: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_movimento?: string
+          id?: string
+          inventory_item_id: string
+          observacoes?: string | null
+          origem_movimento: string
+          quantidade: number
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          tipo_movimento: string
+          valor_unitario?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_movimento?: string
+          id?: string
+          inventory_item_id?: string
+          observacoes?: string | null
+          origem_movimento?: string
+          quantidade?: number
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          tipo_movimento?: string
+          valor_unitario?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permissions: {
         Row: {
           action: string
@@ -70,6 +168,119 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      purchase_order_items: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          inventory_item_id: string | null
+          nome_item: string
+          purchase_order_id: string
+          quantidade: number
+          quantidade_recebida: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          inventory_item_id?: string | null
+          nome_item: string
+          purchase_order_id: string
+          quantidade: number
+          quantidade_recebida?: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          inventory_item_id?: string | null
+          nome_item?: string
+          purchase_order_id?: string
+          quantidade?: number
+          quantidade_recebida?: number | null
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          approved_by: string | null
+          codigo_pedido: string
+          created_at: string
+          created_by: string
+          data_aprovacao: string | null
+          data_pedido: string
+          data_recebimento: string | null
+          id: string
+          observacoes: string | null
+          received_by: string | null
+          status: string
+          supplier_id: string
+          updated_at: string
+          valor_total: number
+        }
+        Insert: {
+          approved_by?: string | null
+          codigo_pedido?: string
+          created_at?: string
+          created_by: string
+          data_aprovacao?: string | null
+          data_pedido?: string
+          data_recebimento?: string | null
+          id?: string
+          observacoes?: string | null
+          received_by?: string | null
+          status?: string
+          supplier_id: string
+          updated_at?: string
+          valor_total?: number
+        }
+        Update: {
+          approved_by?: string | null
+          codigo_pedido?: string
+          created_at?: string
+          created_by?: string
+          data_aprovacao?: string | null
+          data_pedido?: string
+          data_recebimento?: string | null
+          id?: string
+          observacoes?: string | null
+          received_by?: string | null
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_annotations: {
         Row: {
@@ -606,6 +817,69 @@ export type Database = {
           rg?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          ativo: boolean
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          contato_responsavel: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome_fantasia: string | null
+          observacoes: string | null
+          produtos_servicos: string[] | null
+          razao_social: string
+          telefone: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          contato_responsavel?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome_fantasia?: string | null
+          observacoes?: string | null
+          produtos_servicos?: string[] | null
+          razao_social: string
+          telefone?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          contato_responsavel?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome_fantasia?: string | null
+          observacoes?: string | null
+          produtos_servicos?: string[] | null
+          razao_social?: string
+          telefone?: string | null
+          tipo?: string
+          updated_at?: string
         }
         Relationships: []
       }
