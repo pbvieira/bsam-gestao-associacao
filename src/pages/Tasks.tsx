@@ -135,6 +135,8 @@ const Tasks = () => {
           tasks={filteredTasks}
           loading={loading}
           onEditTask={handleEditTask}
+          searchTerm={searchTerm}
+          hasActiveFilters={statusFilter !== "all" || priorityFilter !== "all"}
         />
       </div>
     </MainLayout>

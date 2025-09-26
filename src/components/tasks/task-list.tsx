@@ -1,7 +1,8 @@
 import { TaskCard } from "./task-card";
 import { TaskBoard } from "./task-board";
 import { Button } from "@/components/ui/button";
-import { Grid, List } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Grid, List, CheckSquare, Plus } from "lucide-react";
 import { useState } from "react";
 import { Task } from "@/hooks/use-tasks";
 
@@ -9,9 +10,11 @@ interface TaskListProps {
   tasks: Task[];
   loading: boolean;
   onEditTask: (taskId: string) => void;
+  searchTerm?: string;
+  hasActiveFilters?: boolean;
 }
 
-export function TaskList({ tasks, loading, onEditTask }: TaskListProps) {
+export function TaskList({ tasks, loading, onEditTask, searchTerm, hasActiveFilters }: TaskListProps) {
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list');
 
   if (loading) {
@@ -26,12 +29,15 @@ export function TaskList({ tasks, loading, onEditTask }: TaskListProps) {
 
   if (tasks.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-muted-foreground">
-          <p className="text-lg font-medium">Nenhuma tarefa encontrada</p>
-          <p className="text-sm">Crie uma nova tarefa para começar</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="text-center py-12">
+          <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Nenhuma tarefa encontrada</h3>
+          <p className="text-muted-foreground">
+            {(searchTerm || hasActiveFilters) ? 'Tente ajustar os filtros de busca.' : 'Comece criando sua primeira tarefa.'}
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
