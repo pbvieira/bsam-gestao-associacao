@@ -43,18 +43,23 @@ export function ProtectedRoute({
   }
 
   // Check module permissions if specified
-  if (module && !hasPermission(module, action)) {
-    console.log('No permission for module:', module, action);
-    return fallback || (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Alert className="max-w-md">
-          <Lock className="h-4 w-4" />
-          <AlertDescription>
-            Você não tem permissão para acessar esta funcionalidade.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  if (module) {
+    const hasAccess = hasPermission(module, action);
+    console.log('Permission check:', { module, action, hasAccess, permissionsCount: permissionsLoading ? 'loading' : 'loaded' });
+    
+    if (!hasAccess) {
+      console.log('No permission for module:', module, action);
+      return fallback || (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <Alert className="max-w-md">
+            <Lock className="h-4 w-4" />
+            <AlertDescription>
+              Você não tem permissão para acessar esta funcionalidade.
+            </AlertDescription>
+          </Alert>
+        </div>
+      );
+    }
   }
 
   return <>{children}</>;

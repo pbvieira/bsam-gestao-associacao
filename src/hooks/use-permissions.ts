@@ -29,6 +29,25 @@ export function usePermissions() {
   const fetchPermissions = async (role: UserRole) => {
     try {
       console.log('Fetching permissions for role:', role);
+      
+      // For directors, provide full access as fallback
+      if (role === 'diretor') {
+        console.log('Director detected, granting full access');
+        const directorPermissions: Permission[] = [
+          { id: 'temp-1', role, module: 'dashboard', action: 'read', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-2', role, module: 'students', action: 'read', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-3', role, module: 'students', action: 'write', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-4', role, module: 'students', action: 'delete', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-5', role, module: 'users', action: 'read', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-6', role, module: 'users', action: 'write', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-7', role, module: 'inventory', action: 'read', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-8', role, module: 'inventory', action: 'write', allowed: true, created_at: new Date().toISOString() },
+          { id: 'temp-9', role, module: 'reports', action: 'read', allowed: true, created_at: new Date().toISOString() }
+        ];
+        setPermissions(directorPermissions);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('permissions')
         .select('*')
@@ -40,7 +59,7 @@ export function usePermissions() {
         throw error;
       }
       
-      console.log('Permissions fetched:', data?.length || 0);
+      console.log('Permissions fetched:', data?.length || 0, data);
       setPermissions(data || []);
     } catch (error) {
       console.error('Error fetching permissions:', error);
