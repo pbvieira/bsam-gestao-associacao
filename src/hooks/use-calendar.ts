@@ -70,9 +70,10 @@ export function useCalendar() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setEvents((data as any) || []);
+      setEvents(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar eventos');
+      setEvents([]); // Set empty array on error
       toast({
         title: "Erro",
         description: "Não foi possível carregar os eventos",

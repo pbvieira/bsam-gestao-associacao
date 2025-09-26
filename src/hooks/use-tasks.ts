@@ -59,9 +59,10 @@ export function useTasks() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTasks((data as any) || []);
+      setTasks(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar tarefas');
+      setTasks([]); // Set empty array on error
       toast({
         title: "Erro",
         description: "Não foi possível carregar as tarefas",
