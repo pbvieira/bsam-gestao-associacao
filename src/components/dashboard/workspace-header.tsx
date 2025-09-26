@@ -27,18 +27,18 @@ export function WorkspaceHeader() {
   };
 
   return (
-    <Card className="bg-gradient-primary text-white border-0">
-      <CardContent className="p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <Card className="bg-card border border-border shadow-sm">
+      <CardContent className="p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* Saudação Personalizada */}
-          <div className="space-y-2">
-            <h1 className="text-2xl lg:text-3xl font-bold">
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-foreground">
               {getGreeting()}, {profile?.full_name?.split(' ')[0] || 'Usuário'}!
             </h1>
-            <div className="flex items-center gap-2 text-white/90">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-4 w-4" />
-              <span className="text-sm lg:text-base">
-                {format(today, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              <span className="text-sm">
+                {format(today, "EEEE, dd 'de' MMMM", { locale: ptBR })}
               </span>
               <div className="flex items-center gap-1 ml-2">
                 <Clock className="h-4 w-4" />
@@ -50,14 +50,14 @@ export function WorkspaceHeader() {
           </div>
 
           {/* Status do Trabalho */}
-          <div className="flex flex-wrap gap-3">
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary" className="text-xs">
               <Target className="h-3 w-3 mr-1" />
-              {pendingTasks} tarefas pendentes
+              {pendingTasks} pendentes
             </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+            <Badge variant="outline" className="text-xs">
               <Calendar className="h-3 w-3 mr-1" />
-              {todayEvents} compromissos hoje
+              {todayEvents} hoje
             </Badge>
           </div>
         </div>

@@ -65,16 +65,6 @@ export function WorkspaceActions() {
 
   const quickStats = [
     {
-      title: "Marcar Feita",
-      description: "Finalizar última tarefa",
-      icon: CheckSquare,
-      action: () => {
-        // TODO: Implementar ação rápida
-        console.log("Marcar última tarefa como feita");
-      },
-      color: "text-success"
-    },
-    {
       title: "Ver Agenda",
       description: "Próximos compromissos",
       icon: Clock,
@@ -95,22 +85,22 @@ export function WorkspaceActions() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Ações Principais */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {actions.map((action) => {
             const Icon = action.icon;
             return (
               <Button
                 key={action.title}
                 variant={action.variant}
-                size="lg"
-                className="h-auto p-4 flex flex-col items-center gap-2 text-center"
+                size="sm"
+                className="h-auto p-3 flex flex-col items-center gap-1.5 text-center min-w-0"
                 asChild
               >
                 <Link to={action.href}>
-                  <Icon className={`h-6 w-6 ${action.color}`} />
-                  <div>
-                    <p className="font-medium text-sm">{action.title}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <Icon className={`h-5 w-5 ${action.color} shrink-0`} />
+                  <div className="min-w-0 w-full">
+                    <p className="font-medium text-xs truncate">{action.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {action.description}
                     </p>
                   </div>
@@ -122,47 +112,27 @@ export function WorkspaceActions() {
 
         {/* Ações Contextuais */}
         <div className="border-t border-border pt-3">
-          <p className="text-xs text-muted-foreground mb-2">Ações Contextuais</p>
+          <p className="text-xs text-muted-foreground mb-2">Acesso Rápido</p>
           <div className="flex flex-wrap gap-2">
             {quickStats.map((stat) => {
               const Icon = stat.icon;
-              if (stat.href) {
-                return (
-                  <Button
-                    key={stat.title}
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-2 flex items-center gap-2"
-                    asChild
-                  >
-                    <Link to={stat.href}>
-                      <Icon className={`h-4 w-4 ${stat.color}`} />
-                      <div className="text-left">
-                        <p className="text-xs font-medium">{stat.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {stat.description}
-                        </p>
-                      </div>
-                    </Link>
-                  </Button>
-                );
-              }
-              
               return (
                 <Button
                   key={stat.title}
                   variant="ghost"
                   size="sm"
-                  className="h-auto p-2 flex items-center gap-2"
-                  onClick={stat.action}
+                  className="h-auto p-2 flex items-center gap-2 min-w-0"
+                  asChild
                 >
-                  <Icon className={`h-4 w-4 ${stat.color}`} />
-                  <div className="text-left">
-                    <p className="text-xs font-medium">{stat.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {stat.description}
-                    </p>
-                  </div>
+                  <Link to={stat.href}>
+                    <Icon className={`h-4 w-4 ${stat.color} shrink-0`} />
+                    <div className="text-left min-w-0">
+                      <p className="text-xs font-medium truncate">{stat.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {stat.description}
+                      </p>
+                    </div>
+                  </Link>
                 </Button>
               );
             })}

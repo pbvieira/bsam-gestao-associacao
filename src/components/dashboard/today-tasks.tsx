@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTasks } from "@/hooks/use-tasks";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuickActions } from "@/hooks/use-quick-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,6 +15,7 @@ import { Task } from "@/hooks/use-tasks";
 export function TodayTasks() {
   const { tasks, updateTask } = useTasks();
   const { profile } = useAuth();
+  const { createQuickTask } = useQuickActions();
 
   const myTasks = tasks.filter(task => 
     task.assigned_to === profile?.user_id || task.created_by === profile?.user_id
