@@ -19,21 +19,27 @@ import { StudentContactsTab } from './tabs/student-contacts-tab';
 import { StudentHealthTab } from './tabs/student-health-tab';
 import { StudentAnnotationsTab } from './tabs/student-annotations-tab';
 import { StudentDocumentsTab } from './tabs/student-documents-tab';
-
 interface StudentFormProps {
   student?: any;
   onSuccess: () => void;
   onCancel: () => void;
 }
-
-export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) {
-  const { createStudent, updateStudent } = useStudents();
-  const { toast } = useToast();
+export function StudentForm({
+  student,
+  onSuccess,
+  onCancel
+}: StudentFormProps) {
+  const {
+    createStudent,
+    updateStudent
+  } = useStudents();
+  const {
+    toast
+  } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('header');
   const [savedStudentId, setSavedStudentId] = useState<string | null>(student?.id || null);
   const [isCreationMode, setIsCreationMode] = useState(!student);
-
   const form = useForm<StudentHeaderForm>({
     resolver: zodResolver(studentHeaderSchema),
     defaultValues: {
@@ -44,13 +50,11 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
       cpf: student?.cpf || '',
       rg: student?.rg || '',
       nome_responsavel: student?.nome_responsavel || '',
-      parentesco_responsavel: student?.parentesco_responsavel || '',
-    },
+      parentesco_responsavel: student?.parentesco_responsavel || ''
+    }
   });
-
   const onSubmit = async (data: StudentHeaderForm) => {
     setIsSubmitting(true);
-    
     try {
       let result;
       if (student) {
@@ -68,15 +72,14 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
           cpf: data.cpf,
           rg: data.rg,
           nome_responsavel: data.nome_responsavel,
-          parentesco_responsavel: data.parentesco_responsavel,
+          parentesco_responsavel: data.parentesco_responsavel
         });
       }
-
       if (result.error) {
         toast({
           title: 'Erro',
           description: result.error,
-          variant: 'destructive',
+          variant: 'destructive'
         });
         return;
       }
@@ -86,10 +89,9 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
         setSavedStudentId(result.data.id);
         setIsCreationMode(false);
       }
-
       toast({
         title: 'Sucesso',
-        description: student ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso! Agora você pode preencher as outras abas.',
+        description: student ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso! Agora você pode preencher as outras abas.'
       });
 
       // Only navigate away if this was an update, not creation
@@ -100,40 +102,35 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
       toast({
         title: 'Erro',
         description: 'Ocorreu um erro inesperado. Tente novamente.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleTabChange = (value: string) => {
     // If in creation mode and trying to access tabs that need studentId
     if (isCreationMode && ['basic', 'work', 'contacts', 'health', 'annotations', 'documents'].includes(value)) {
       toast({
         title: 'Atenção',
         description: 'Salve primeiro o cabeçalho do aluno para acessar esta aba.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
     setActiveTab(value);
   };
-
-  return (
-    <div className="space-y-6">
-      {isCreationMode && (
-        <Alert>
+  return <div className="space-y-6">
+      {isCreationMode && <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Preencha primeiro as informações principais do aluno. Após salvar, você poderá acessar as outras abas para completar o cadastro.
           </AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
       
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="header">Cabeçalho</TabsTrigger>
+          <TabsTrigger value="header">Registro</TabsTrigger>
           <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
           <TabsTrigger value="children">Filhos</TabsTrigger>
           <TabsTrigger value="work">Trabalho</TabsTrigger>
@@ -152,119 +149,87 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="numero_interno"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="numero_interno" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Número Interno</FormLabel>
                           <FormControl>
                             <Input placeholder="Número de controle interno" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
-                    <FormField
-                      control={form.control}
-                      name="hora_entrada"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="hora_entrada" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Horário de Entrada</FormLabel>
                           <FormControl>
                             <Input placeholder="Ex: Manhã, Tarde, 14:00" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
                     <div></div> {/* Spacer */}
 
-                    <FormField
-                      control={form.control}
-                      name="nome_completo"
-                      render={({ field }) => (
-                        <FormItem className="md:col-span-2">
+                    <FormField control={form.control} name="nome_completo" render={({
+                    field
+                  }) => <FormItem className="md:col-span-2">
                           <FormLabel>Nome Completo *</FormLabel>
                           <FormControl>
                             <Input placeholder="Nome completo do aluno" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
-                    <FormField
-                      control={form.control}
-                      name="data_nascimento"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="data_nascimento" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Data de Nascimento *</FormLabel>
                           <FormControl>
                             <Input type="date" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
-                    <FormField
-                      control={form.control}
-                      name="cpf"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="cpf" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>CPF</FormLabel>
                           <FormControl>
                             <Input placeholder="000.000.000-00" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
-                    <FormField
-                      control={form.control}
-                      name="rg"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="rg" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>RG</FormLabel>
                           <FormControl>
                             <Input placeholder="00.000.000-0" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
-                    <FormField
-                      control={form.control}
-                      name="nome_responsavel"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="nome_responsavel" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Nome do Responsável</FormLabel>
                           <FormControl>
                             <Input placeholder="Nome da pessoa de referência" {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
 
-                    <FormField
-                      control={form.control}
-                      name="parentesco_responsavel"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="parentesco_responsavel" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel>Parentesco do Responsável</FormLabel>
                           <FormControl>
                             <Input placeholder="Ex: Pai, Mãe, Irmão, etc." {...field} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                   </div>
 
                   <div className="flex justify-end gap-3 pt-6">
@@ -312,6 +277,5 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
           <StudentDocumentsTab studentId={savedStudentId} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 }
