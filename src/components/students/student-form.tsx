@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { studentHeaderSchema, type StudentHeaderForm } from '@/lib/student-schemas';
@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, X } from 'lucide-react';
+import { Loader2, Save, X, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StudentBasicDataTab } from './tabs/student-basic-data-tab';
 import { StudentChildrenTab } from './tabs/student-children-tab';
 import { StudentWorkTab } from './tabs/student-work-tab';
@@ -30,6 +31,8 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('header');
+  const [savedStudentId, setSavedStudentId] = useState<string | null>(student?.id || null);
+  const [isCreationMode, setIsCreationMode] = useState(!student);
 
   const form = useForm<StudentHeaderForm>({
     resolver: zodResolver(studentHeaderSchema),
@@ -78,12 +81,21 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
         return;
       }
 
+      // If this was a creation, save the new student ID and exit creation mode
+      if (!student && result.data) {
+        setSavedStudentId(result.data.id);
+        setIsCreationMode(false);
+      }
+
       toast({
         title: 'Sucesso',
-        description: student ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso!',
+        description: student ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso! Agora você pode preencher as outras abas.',
       });
 
-      onSuccess();
+      // Only navigate away if this was an update, not creation
+      if (student) {
+        onSuccess();
+      }
     } catch (error) {
       toast({
         title: 'Erro',
@@ -95,9 +107,31 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
     }
   };
 
+  const handleTabChange = (value: string) => {
+    // If in creation mode and trying to access tabs that need studentId
+    if (isCreationMode && ['basic', 'work', 'contacts', 'health', 'annotations', 'documents'].includes(value)) {
+      toast({
+        title: 'Atenção',
+        description: 'Salve primeiro o cabeçalho do aluno para acessar esta aba.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setActiveTab(value);
+  };
+
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      {isCreationMode && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Preencha primeiro as informações principais do aluno. Após salvar, você poderá acessar as outras abas para completar o cadastro.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="header">Cabeçalho</TabsTrigger>
           <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
@@ -251,31 +285,31 @@ export function StudentForm({ student, onSuccess, onCancel }: StudentFormProps) 
         </TabsContent>
 
         <TabsContent value="basic">
-          <StudentBasicDataTab studentId={student?.id} />
+          <StudentBasicDataTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="children">
-          <StudentChildrenTab studentId={student?.id} />
+          <StudentChildrenTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="work">
-          <StudentWorkTab studentId={student?.id} />
+          <StudentWorkTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="contacts">
-          <StudentContactsTab studentId={student?.id} />
+          <StudentContactsTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="health">
-          <StudentHealthTab studentId={student?.id} />
+          <StudentHealthTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="annotations">
-          <StudentAnnotationsTab studentId={student?.id} />
+          <StudentAnnotationsTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="documents">
-          <StudentDocumentsTab studentId={student?.id} />
+          <StudentDocumentsTab studentId={savedStudentId} />
         </TabsContent>
       </Tabs>
     </div>

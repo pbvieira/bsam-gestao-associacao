@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { usePermissions } from '@/hooks/use-permissions';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,11 +21,21 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth();
   const { hasPermission, loading: permissionsLoading } = usePermissions();
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  console.log('ProtectedRoute:', { user: !!user, authLoading, permissionsLoading, module });
+  // Prevent flash of permission denied during initial load
+  useEffect(() => {
+    if (!authLoading && !permissionsLoading) {
+      const timer = setTimeout(() => {
+        setIsInitializing(false);
+      }, 100); // Small delay to prevent flash
+      
+      return () => clearTimeout(timer);
+    }
+  }, [authLoading, permissionsLoading]);
 
-  // Show loading while checking auth status
-  if (authLoading || (user && permissionsLoading)) {
+  // Show loading during initialization or permission checks
+  if (authLoading || permissionsLoading || isInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="space-y-4 p-6">
@@ -38,17 +49,14 @@ export function ProtectedRoute({
 
   // Redirect to auth if no user
   if (!user) {
-    console.log('No user, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
 
   // Check module permissions if specified
   if (module) {
     const hasAccess = hasPermission(module, action);
-    console.log('Permission check:', { module, action, hasAccess, permissionsCount: permissionsLoading ? 'loading' : 'loaded' });
     
     if (!hasAccess) {
-      console.log('No permission for module:', module, action);
       return fallback || (
         <div className="min-h-screen flex items-center justify-center p-4">
           <Alert className="max-w-md">
