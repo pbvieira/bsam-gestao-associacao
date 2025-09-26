@@ -12,22 +12,31 @@ export interface Permission {
 }
 
 export function usePermissions() {
-  const { profile } = useAuth();
+  const { profile, loading: authLoading } = useAuth();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    // Wait for auth to be stable before processing permissions
+    if (authLoading) {
+      return;
+    }
+
+    // Auth is stable, now we can process
     if (profile?.role) {
       fetchPermissions(profile.role);
-    } else if (profile === null) {
+    } else {
       // No profile means no permissions
       setPermissions([]);
       setLoading(false);
+      setIsInitialized(true);
     }
-  }, [profile]);
+  }, [profile, authLoading]);
 
   const fetchPermissions = async (role: UserRole) => {
     try {
+      setLoading(true);
       console.log('Fetching permissions for role:', role);
       
 
@@ -49,6 +58,7 @@ export function usePermissions() {
       setPermissions([]);
     } finally {
       setLoading(false);
+      setIsInitialized(true);
     }
   };
 
@@ -71,7 +81,8 @@ export function usePermissions() {
 
   return {
     permissions,
-    loading,
+    loading: authLoading || loading, // Loading if auth is loading OR permissions are loading
+    isInitialized,
     hasPermission,
     canAccess,
   };

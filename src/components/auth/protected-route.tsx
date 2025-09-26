@@ -20,22 +20,11 @@ export function ProtectedRoute({
   fallback 
 }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth();
-  const { hasPermission, loading: permissionsLoading } = usePermissions();
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { hasPermission, loading: permissionsLoading, isInitialized } = usePermissions();
 
-  // Prevent flash of permission denied during initial load
-  useEffect(() => {
-    if (!authLoading && !permissionsLoading) {
-      const timer = setTimeout(() => {
-        setIsInitializing(false);
-      }, 100); // Small delay to prevent flash
-      
-      return () => clearTimeout(timer);
-    }
-  }, [authLoading, permissionsLoading]);
-
-  // Show loading during initialization or permission checks
-  if (authLoading || permissionsLoading || isInitializing) {
+  // Show loading while authentication or permissions are loading
+  // Only proceed once permissions are initialized to prevent flash
+  if (authLoading || permissionsLoading || !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="space-y-4 p-6">
