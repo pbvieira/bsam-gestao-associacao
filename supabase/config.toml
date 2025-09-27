@@ -2,3 +2,9 @@ project_id = "tgfwldsggwmmotafweki"
 
 [functions.process-event-reminders]
 verify_jwt = false
+
+[functions.send-event-invitation]
+verify_jwt = true
+
+[functions.process-invitation-response]
+verify_jwt = false
