@@ -31,28 +31,30 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 
-const userFormSchema = z.object({
+// Schema para novos usuários
+const newUserSchema = z.object({
   full_name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
   role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor', 'administrador'] as const),
   active: z.boolean(),
-  password: z.string().optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
-  // Para novos usuários, senha é obrigatória
-  if (!data.password && !data.confirmPassword) {
-    return true; // Usuário existente, sem senha
-  }
-  if (data.password && data.password.length < 6) {
-    return false;
-  }
-  return data.password === data.confirmPassword;
-}, {
-  message: "Senhas devem ter pelo menos 6 caracteres e coincidir",
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Senhas devem coincidir",
   path: ["confirmPassword"],
 });
 
-type UserFormData = z.infer<typeof userFormSchema>;
+// Schema para edição de usuários existentes
+const editUserSchema = z.object({
+  full_name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  email: z.string().optional(), // Email não é validado na edição
+  role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor', 'administrador'] as const),
+  active: z.boolean(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+});
+
+type UserFormData = z.infer<typeof editUserSchema>;
 
 interface UserFormProps {
   user?: UserProfile | null;
@@ -63,11 +65,14 @@ export function UserForm({ user, onClose }: UserFormProps) {
   const [loading, setLoading] = useState(false);
   const { handleError, handleSuccess } = useErrorHandler();
 
+  // Escolher o schema baseado se é edição ou criação
+  const schema = user ? editUserSchema : newUserSchema;
+
   const form = useForm<UserFormData>({
-    resolver: zodResolver(userFormSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       full_name: user?.full_name || '',
-      email: user?.id ? '' : '', // Email não pode ser editado para usuários existentes
+      email: user ? undefined : '', // Undefined para edição, string vazia para criação
       role: user?.role || 'aluno',
       active: user?.active ?? true,
       password: '',
@@ -202,14 +207,6 @@ export function UserForm({ user, onClose }: UserFormProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Debug: Form validation state */}
-            {Object.keys(form.formState.errors).length > 0 && (
-              <div className="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                <strong>Erros de validação:</strong>
-                <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
-              </div>
-            )}
-            
             <FormField
               control={form.control}
               name="full_name"
