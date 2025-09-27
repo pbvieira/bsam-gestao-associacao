@@ -33,8 +33,23 @@ import { Switch } from '@/components/ui/switch';
 
 const userFormSchema = z.object({
   full_name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  email: z.string().email('Email inválido'),
   role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor'] as const),
   active: z.boolean(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine((data) => {
+  // Para novos usuários, senha é obrigatória
+  if (!data.password && !data.confirmPassword) {
+    return true; // Usuário existente, sem senha
+  }
+  if (data.password && data.password.length < 6) {
+    return false;
+  }
+  return data.password === data.confirmPassword;
+}, {
+  message: "Senhas devem ter pelo menos 6 caracteres e coincidir",
+  path: ["confirmPassword"],
 });
 
 type UserFormData = z.infer<typeof userFormSchema>;
@@ -52,8 +67,11 @@ export function UserForm({ user, onClose }: UserFormProps) {
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       full_name: user?.full_name || '',
+      email: user?.id ? '' : '', // Email não pode ser editado para usuários existentes
       role: user?.role || 'aluno',
       active: user?.active ?? true,
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -75,15 +93,38 @@ export function UserForm({ user, onClose }: UserFormProps) {
         if (error) throw error;
         handleSuccess('Usuário atualizado com sucesso!');
       } else {
-        // For new users, we would need to handle this differently
-        // as we can't directly create auth users from the client
-        handleError('Criação de novos usuários deve ser feita através do processo de registro', 'auth');
-        return;
+        // Create new user
+        if (!data.password || !data.email) {
+          handleError('Email e senha são obrigatórios para novos usuários', 'auth');
+          return;
+        }
+
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              full_name: data.full_name,
+              role: data.role,
+            },
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        });
+
+        if (authError) throw authError;
+
+        // Check if user was created successfully
+        if (authData.user) {
+          handleSuccess('Usuário criado com sucesso! Um email de confirmação foi enviado.');
+        } else {
+          handleError('Erro ao criar usuário', 'auth');
+          return;
+        }
       }
 
       onClose();
     } catch (error) {
-      handleError(error, 'database');
+      handleError(error, 'auth');
     } finally {
       setLoading(false);
     }
@@ -135,6 +176,26 @@ export function UserForm({ user, onClose }: UserFormProps) {
               )}
             />
 
+            {!user && (
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email" 
+                        placeholder="Digite o email" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <FormField
               control={form.control}
               name="role"
@@ -158,6 +219,46 @@ export function UserForm({ user, onClose }: UserFormProps) {
                 </FormItem>
               )}
             />
+
+            {!user && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Senha</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Digite a senha (mínimo 6 caracteres)" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar Senha</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Confirme a senha" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             <FormField
               control={form.control}
