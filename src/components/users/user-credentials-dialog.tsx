@@ -67,29 +67,17 @@ export function UserCredentialsDialog({ user, onClose }: UserCredentialsDialogPr
   const handlePasswordReset = async () => {
     setLoading(true);
     try {
-      // Buscar o email do usuário na tabela auth.users via função
-      const { data: authData, error: authError } = await supabase.rpc('get_user_email', {
-        user_uuid: user.user_id
-      });
+      // Buscar o email do usuário na tabela auth.users via função personalizada
+      const { data: userEmail, error: emailError } = await supabase
+        .rpc('get_user_email' as any, {
+          user_uuid: user.user_id
+        });
 
-      if (authError) {
-        // Se a função não existir, tentar usando uma query direta (fallback)
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .eq('id', user.id)
-          .single();
-
-        if (profileError) throw profileError;
-
-        // Como não podemos acessar auth.users diretamente, vamos assumir que o email está no campo de email do perfil
-        // ou precisaremos de uma função de banco para isso
+      if (emailError || !userEmail) {
         throw new Error('Email do usuário não encontrado. Solicite ao usuário para redefinir sua senha usando "Esqueci minha senha".');
       }
 
-      const userEmail = authData;
-
-      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail as string, {
         redirectTo: `${window.location.origin}/auth`,
       });
 
@@ -210,7 +198,7 @@ export function UserCredentialsDialog({ user, onClose }: UserCredentialsDialogPr
                   placeholder="novo@email.com"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  size="sm"
+                  className="h-8"
                 />
               </div>
               <Button 
@@ -229,7 +217,7 @@ export function UserCredentialsDialog({ user, onClose }: UserCredentialsDialogPr
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="pt-4">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-amber-800 font-medium">Importante:</p>
                   <p className="text-xs text-amber-700">
