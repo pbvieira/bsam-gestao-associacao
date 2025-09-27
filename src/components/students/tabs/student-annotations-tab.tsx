@@ -23,6 +23,14 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
   const handleCreateAnnotation = async (annotationData: any) => {
+    if (!studentId) {
+      toast({
+        title: 'Erro',
+        description: 'Salve o aluno primeiro para adicionar anotações',
+        variant: 'destructive',
+      });
+      return;
+    }
     const result = await createAnnotation(annotationData);
     if (result?.error) {
       throw new Error(result.error);
@@ -73,15 +81,6 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
     .filter(a => a.tipo === 'gasto' && a.valor)
     .reduce((sum, a) => sum + (a.valor || 0), 0);
 
-  if (!studentId) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8 text-muted-foreground">
-          <p>Selecione um aluno para gerenciar anotações e histórico</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (loading) {
     return (

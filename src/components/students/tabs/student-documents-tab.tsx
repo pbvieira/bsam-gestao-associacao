@@ -68,15 +68,6 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  if (!studentId) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8 text-muted-foreground">
-          <p>Selecione um aluno para gerenciar documentos</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
