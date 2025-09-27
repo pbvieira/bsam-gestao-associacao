@@ -34,7 +34,7 @@ import { Switch } from '@/components/ui/switch';
 const userFormSchema = z.object({
   full_name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor'] as const),
+  role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor', 'administrador'] as const),
   active: z.boolean(),
   password: z.string().optional(),
   confirmPassword: z.string().optional(),
@@ -132,6 +132,8 @@ export function UserForm({ user, onClose }: UserFormProps) {
 
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
+      case 'administrador':
+        return 'Administrador';
       case 'diretor':
         return 'Diretor';
       case 'coordenador':
@@ -208,12 +210,13 @@ export function UserForm({ user, onClose }: UserFormProps) {
                         <SelectValue placeholder="Selecione uma função" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="aluno">Aluno</SelectItem>
-                      <SelectItem value="auxiliar">Auxiliar</SelectItem>
-                      <SelectItem value="coordenador">Coordenador</SelectItem>
-                      <SelectItem value="diretor">Diretor</SelectItem>
-                    </SelectContent>
+                        <SelectContent>
+                          <SelectItem value="aluno">Aluno</SelectItem>
+                          <SelectItem value="auxiliar">Auxiliar</SelectItem>
+                          <SelectItem value="coordenador">Coordenador</SelectItem>
+                          <SelectItem value="diretor">Diretor</SelectItem>
+                          <SelectItem value="administrador">Administrador</SelectItem>
+                        </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>

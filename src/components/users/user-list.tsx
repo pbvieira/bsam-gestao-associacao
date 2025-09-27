@@ -22,6 +22,8 @@ import { UserPermissionsDialog } from './user-permissions-dialog';
 
 const getRoleBadgeVariant = (role: string) => {
   switch (role) {
+    case 'administrador':
+      return 'destructive';
     case 'diretor':
       return 'default';
     case 'coordenador':
@@ -35,6 +37,8 @@ const getRoleBadgeVariant = (role: string) => {
 
 const getRoleLabel = (role: string) => {
   switch (role) {
+    case 'administrador':
+      return 'Administrador';
     case 'diretor':
       return 'Diretor';
     case 'coordenador':

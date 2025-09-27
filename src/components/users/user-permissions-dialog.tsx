@@ -176,6 +176,8 @@ export function UserPermissionsDialog({ user, onClose }: UserPermissionsDialogPr
 
   const getRoleLabel = (role: string) => {
     switch (role) {
+      case 'administrador':
+        return 'Administrador';
       case 'diretor':
         return 'Diretor';
       case 'coordenador':
@@ -191,6 +193,8 @@ export function UserPermissionsDialog({ user, onClose }: UserPermissionsDialogPr
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
+      case 'administrador':
+        return 'destructive';
       case 'diretor':
         return 'default';
       case 'coordenador':
