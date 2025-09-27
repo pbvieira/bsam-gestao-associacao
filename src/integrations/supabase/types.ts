@@ -1283,7 +1283,12 @@ export type Database = {
         | "realizada"
         | "cancelada"
         | "transferida"
-      user_role: "aluno" | "auxiliar" | "coordenador" | "diretor"
+      user_role:
+        | "aluno"
+        | "auxiliar"
+        | "coordenador"
+        | "diretor"
+        | "administrador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1432,7 +1437,13 @@ export const Constants = {
         "cancelada",
         "transferida",
       ],
-      user_role: ["aluno", "auxiliar", "coordenador", "diretor"],
+      user_role: [
+        "aluno",
+        "auxiliar",
+        "coordenador",
+        "diretor",
+        "administrador",
+      ],
     },
   },
 } as const
