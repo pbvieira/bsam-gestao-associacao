@@ -67,7 +67,14 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
   }, [workSituation, form]);
 
   const onSubmit = async (data: WorkSituationForm) => {
-    if (!studentId) return;
+    if (!studentId) {
+      toast({
+        title: 'Erro',
+        description: 'Salve o aluno primeiro para adicionar dados de trabalho',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsSaving(true);
     try {
@@ -101,15 +108,6 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
     }
   };
 
-  if (!studentId) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8 text-muted-foreground">
-          <p>Selecione um aluno para gerenciar a situação trabalhista</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (loading) {
     return (

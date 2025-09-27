@@ -118,7 +118,14 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
   }, [healthData, form]);
 
   const onSubmit = async (data: HealthDataForm) => {
-    if (!studentId) return;
+    if (!studentId) {
+      toast({
+        title: 'Erro',
+        description: 'Salve o aluno primeiro para adicionar dados de saúde',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsSaving(true);
     try {
@@ -148,15 +155,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
     }
   };
 
-  if (!studentId) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8 text-muted-foreground">
-          <p>Selecione um aluno para gerenciar dados de saúde</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (loading) {
     return (

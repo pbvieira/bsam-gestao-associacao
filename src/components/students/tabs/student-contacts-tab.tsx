@@ -16,6 +16,14 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
   const { toast } = useToast();
 
   const handleCreateContact = async (contactData: any) => {
+    if (!studentId) {
+      toast({
+        title: 'Erro',
+        description: 'Salve o aluno primeiro para adicionar contatos',
+        variant: 'destructive',
+      });
+      return;
+    }
     const result = await createContact(contactData);
     if (result?.error) {
       throw new Error(result.error);
@@ -45,15 +53,6 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     }
   };
 
-  if (!studentId) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8 text-muted-foreground">
-          <p>Selecione um aluno para gerenciar contatos de emergência</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (loading) {
     return (
