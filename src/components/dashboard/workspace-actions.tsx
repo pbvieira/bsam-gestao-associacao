@@ -116,7 +116,7 @@ export function WorkspaceActions() {
               <Button
                 variant={action.variant}
                 size="sm"
-                className="h-auto p-3 flex flex-col items-center gap-1.5 text-center min-w-0 relative"
+                className="h-auto p-3 flex flex-col items-center gap-1.5 text-center min-w-0 relative hover:bg-transparent hover:text-inherit"
                 onClick={isAction ? action.action : undefined}
               >
                 <Icon className={`h-5 w-5 ${action.color} shrink-0`} />
