@@ -1246,6 +1246,10 @@ export type Database = {
         Args: { creator_uuid: string; event_uuid: string }
         Returns: boolean
       }
+      count_active_admins: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string

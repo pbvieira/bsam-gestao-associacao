@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/hooks/use-auth';
@@ -16,10 +16,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Search, Edit, Trash2, UserPlus, KeyRound } from 'lucide-react';
 import { UserForm } from './user-form';
 import { UserPermissionsDialog } from './user-permissions-dialog';
 import { UserCredentialsDialog } from './user-credentials-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const getRoleBadgeVariant = (role: string) => {
   switch (role) {
@@ -59,7 +61,9 @@ export function UserList() {
   const [showPermissions, setShowPermissions] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [adminCount, setAdminCount] = useState<number>(0);
   const { handleError } = useErrorHandler();
+  const { toast } = useToast();
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users', searchTerm],
@@ -82,6 +86,24 @@ export function UserList() {
     },
   });
 
+  // Buscar contagem de administradores ativos
+  useEffect(() => {
+    const fetchAdminCount = async () => {
+      try {
+        const { data: count, error } = await supabase
+          .rpc('count_active_admins');
+        
+        if (!error && count !== null) {
+          setAdminCount(count);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar contagem de administradores:', error);
+      }
+    };
+
+    fetchAdminCount();
+  }, [users]); // Atualizar quando os dados mudarem
+
   const handleEdit = (user: UserProfile) => {
     setSelectedUser(user);
     setShowUserForm(true);
@@ -98,17 +120,48 @@ export function UserList() {
   };
 
   const handleDelete = async (user: UserProfile) => {
-    if (!confirm(`Tem certeza que deseja excluir o usuário ${user.full_name}?`)) {
-      return;
-    }
-
     try {
+      // Verificar se é administrador e se é o último
+      if (user.role === 'administrador') {
+        const { data: adminCount, error: countError } = await supabase
+          .rpc('count_active_admins');
+
+        if (countError) {
+          console.error('Erro ao contar administradores:', countError);
+          toast({
+            title: "Erro",
+            description: "Não foi possível verificar os administradores do sistema.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (adminCount <= 1) {
+          toast({
+            title: "Ação não permitida",
+            description: "Não é possível desativar o último administrador do sistema. Deve haver pelo menos um administrador ativo.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      if (!confirm(`Tem certeza que deseja desativar o usuário ${user.full_name}?`)) {
+        return;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({ active: false })
         .eq('id', user.id);
 
       if (error) throw error;
+      
+      toast({
+        title: "Usuário desativado",
+        description: "O usuário foi desativado com sucesso.",
+      });
+      
       refetch();
     } catch (error) {
       handleError(error, 'database');
@@ -239,14 +292,26 @@ export function UserList() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(user)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(user)}
+                                disabled={user.role === 'administrador' && adminCount <= 1}
+                                className="text-destructive hover:text-destructive disabled:text-muted-foreground"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          {user.role === 'administrador' && adminCount <= 1 && (
+                            <TooltipContent>
+                              <p>Não é possível excluir o último administrador</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>
