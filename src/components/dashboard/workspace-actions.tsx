@@ -175,9 +175,9 @@ export function WorkspaceActions() {
           <p className="text-xs text-muted-foreground mb-2">Acesso Direto</p>
           <div className="flex flex-wrap gap-1">
             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs hover:bg-transparent" asChild>
-              <Link to="/calendario">
-                <Calendar className="h-3 w-3 mr-1" />
-                Agenda
+              <Link to="/students">
+                <Users className="h-3 w-3 mr-1" />
+                Alunos
               </Link>
             </Button>
             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" asChild>
