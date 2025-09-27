@@ -16,9 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Edit, Trash2, UserPlus } from 'lucide-react';
+import { Search, Edit, Trash2, UserPlus, KeyRound } from 'lucide-react';
 import { UserForm } from './user-form';
 import { UserPermissionsDialog } from './user-permissions-dialog';
+import { UserCredentialsDialog } from './user-credentials-dialog';
 
 const getRoleBadgeVariant = (role: string) => {
   switch (role) {
@@ -56,6 +57,7 @@ export function UserList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserForm, setShowUserForm] = useState(false);
   const [showPermissions, setShowPermissions] = useState(false);
+  const [showCredentials, setShowCredentials] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const { handleError } = useErrorHandler();
 
@@ -90,6 +92,11 @@ export function UserList() {
     setShowPermissions(true);
   };
 
+  const handleCredentials = (user: UserProfile) => {
+    setSelectedUser(user);
+    setShowCredentials(true);
+  };
+
   const handleDelete = async (user: UserProfile) => {
     if (!confirm(`Tem certeza que deseja excluir o usuário ${user.full_name}?`)) {
       return;
@@ -116,6 +123,11 @@ export function UserList() {
 
   const handlePermissionsClose = () => {
     setShowPermissions(false);
+    setSelectedUser(null);
+  };
+
+  const handleCredentialsClose = () => {
+    setShowCredentials(false);
     setSelectedUser(null);
   };
 
@@ -205,13 +217,20 @@ export function UserList() {
                       {new Date(user.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center gap-2 justify-end">
+                      <div className="flex items-center gap-1 justify-end">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handlePermissions(user)}
                         >
                           Permissões
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCredentials(user)}
+                        >
+                          <KeyRound className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -249,6 +268,13 @@ export function UserList() {
         <UserPermissionsDialog
           user={selectedUser}
           onClose={handlePermissionsClose}
+        />
+      )}
+
+      {showCredentials && selectedUser && (
+        <UserCredentialsDialog
+          user={selectedUser}
+          onClose={handleCredentialsClose}
         />
       )}
     </>

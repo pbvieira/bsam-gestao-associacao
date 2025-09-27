@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Logo } from '@/components/ui/logo';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
 const signInSchema = z.object({
@@ -30,6 +31,31 @@ export default function Auth() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
+  const [hasAdmins, setHasAdmins] = useState<boolean | null>(null);
+  const [checkingAdmins, setCheckingAdmins] = useState(true);
+
+  // Verificar se já existe administradores no sistema
+  useEffect(() => {
+    const checkAdmins = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .in('role', ['diretor', 'administrador'])
+          .limit(1);
+        
+        if (error) throw error;
+        setHasAdmins(data && data.length > 0);
+      } catch (error) {
+        console.error('Erro ao verificar administradores:', error);
+        setHasAdmins(false);
+      } finally {
+        setCheckingAdmins(false);
+      }
+    };
+
+    checkAdmins();
+  }, []);
 
   console.log('Auth page - user:', !!user, 'authLoading:', authLoading);
 
@@ -39,8 +65,8 @@ export default function Auth() {
     return <Navigate to="/" replace />;
   }
 
-  // Show loading if auth is still initializing
-  if (authLoading) {
+  // Show loading if auth is still initializing or checking for admins
+  if (authLoading || checkingAdmins) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <div className="text-center">
@@ -144,13 +170,29 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Entrar</TabsTrigger>
-              <TabsTrigger value="signup">Cadastrar</TabsTrigger>
-            </TabsList>
+            {hasAdmins ? (
+              // Se há administradores, mostrar apenas login
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium">Fazer Login</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Entre com suas credenciais para acessar o sistema
+                  </p>
+                </div>
+              </div>
+            ) : (
+              // Se não há administradores, permitir cadastro do primeiro admin
+              <>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Entrar</TabsTrigger>
+                  <TabsTrigger value="signup">Criar Primeiro Admin</TabsTrigger>
+                </TabsList>
+              </>
+            )}
             
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+            {hasAdmins ? (
+              // Apenas formulário de login quando há admins
+              <form onSubmit={handleSignIn} className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <Input
@@ -175,55 +217,94 @@ export default function Auth() {
                   {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
               </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nome Completo</Label>
-                  <Input
-                    id="signup-name"
-                    name="fullName"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Senha</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-confirm">Confirmar Senha</Label>
-                  <Input
-                    id="signup-confirm"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Cadastrando...' : 'Cadastrar'}
-                </Button>
-              </form>
-            </TabsContent>
+            ) : (
+              // Tabs com login e cadastro quando não há admins
+              <>
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email">Email</Label>
+                      <Input
+                        id="signin-email"
+                        name="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password">Senha</Label>
+                      <Input
+                        id="signin-password"
+                        name="password"
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? 'Entrando...' : 'Entrar'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <div className="space-y-4">
+                    <div className="text-center p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                      <p className="text-sm text-primary font-medium">
+                        Criando o primeiro administrador do sistema
+                      </p>
+                    </div>
+                    
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-name">Nome Completo</Label>
+                        <Input
+                          id="signup-name"
+                          name="fullName"
+                          type="text"
+                          placeholder="Seu nome completo"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">Email</Label>
+                        <Input
+                          id="signup-email"
+                          name="email"
+                          type="email"
+                          placeholder="seu@email.com"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">Senha</Label>
+                        <Input
+                          id="signup-password"
+                          name="password"
+                          type="password"
+                          placeholder="••••••••"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-confirm">Confirmar Senha</Label>
+                        <Input
+                          id="signup-confirm"
+                          name="confirmPassword"
+                          type="password"
+                          placeholder="••••••••"
+                          required
+                        />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? 'Criando Administrador...' : 'Criar Administrador'}
+                      </Button>
+                    </form>
+                  </div>
+                </TabsContent>
+              </>
+            )}
           </Tabs>
         </CardContent>
       </Card>
