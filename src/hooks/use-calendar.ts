@@ -86,7 +86,8 @@ export function useCalendar() {
 
   const createEvent = async (
     eventData: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at' | 'created_by_profile' | 'participants'>,
-    participantIds: string[] = []
+    participantIds: string[] = [],
+    externalParticipants: Array<{ email: string; name: string }> = []
   ) => {
     try {
       console.log('Creating event with data:', eventData);
@@ -140,6 +141,38 @@ export function useCalendar() {
         if (participantsError) {
           console.error('Error adding participants:', participantsError);
           throw participantsError;
+        }
+      }
+
+      // Enviar convites se houver participantes internos ou externos
+      if (participantIds.length > 0 || externalParticipants.length > 0) {
+        try {
+          console.log('Sending invitations...');
+          const { error: inviteError } = await supabase.functions.invoke('send-event-invitation', {
+            body: {
+              eventId: data.id,
+              participantIds,
+              externalParticipants
+            }
+          });
+
+          if (inviteError) {
+            console.error('Error sending invitations:', inviteError);
+            toast({
+              title: "Aviso",
+              description: "Evento criado, mas houve erro ao enviar alguns convites",
+              variant: "destructive",
+            });
+          } else {
+            console.log('Invitations sent successfully');
+          }
+        } catch (inviteErr) {
+          console.error('Error calling invitation function:', inviteErr);
+          toast({
+            title: "Aviso", 
+            description: "Evento criado, mas houve erro ao enviar convites",
+            variant: "destructive",
+          });
         }
       }
 

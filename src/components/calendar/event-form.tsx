@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CalendarIcon, Clock, Users, Mail, X, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -26,12 +27,19 @@ interface UserProfile {
   full_name: string;
 }
 
+interface ExternalParticipant {
+  email: string;
+  name: string;
+}
+
 export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) {
   const { createEvent, updateEvent, events } = useCalendar();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [externalParticipants, setExternalParticipants] = useState<ExternalParticipant[]>([]);
+  const [newExternalParticipant, setNewExternalParticipant] = useState({ name: '', email: '' });
   
   const [formData, setFormData] = useState({
     titulo: '',
@@ -117,6 +125,42 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
     }
   }, [currentEvent]);
 
+  // Funções para gerenciar participantes externos
+  const addExternalParticipant = () => {
+    if (newExternalParticipant.name.trim() && newExternalParticipant.email.trim()) {
+      // Validar email básico
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newExternalParticipant.email.trim())) {
+        alert('Por favor, insira um email válido');
+        return;
+      }
+      
+      // Verificar se já existe
+      if (externalParticipants.some(p => p.email.toLowerCase() === newExternalParticipant.email.toLowerCase().trim())) {
+        alert('Este email já foi adicionado');
+        return;
+      }
+
+      setExternalParticipants([...externalParticipants, { 
+        name: newExternalParticipant.name.trim(),
+        email: newExternalParticipant.email.toLowerCase().trim()
+      }]);
+      setNewExternalParticipant({ name: '', email: '' });
+    }
+  };
+
+  const removeExternalParticipant = (index: number) => {
+    setExternalParticipants(externalParticipants.filter((_, i) => i !== index));
+  };
+
+  const toggleParticipant = (userId: string) => {
+    setSelectedParticipants(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -160,12 +204,14 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
       if (isEdit && eventId) {
         await updateEvent(eventId, eventData);
       } else {
-        await createEvent(eventData, selectedParticipants);
+        await createEvent(eventData, selectedParticipants, externalParticipants);
       }
 
       onSuccess();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Erro ao salvar evento: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -238,7 +284,110 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
         />
       </div>
 
-      {/* All Day Toggle */}
+      {/* Seção de Participantes */}
+      <div className="space-y-4 border-t pt-4">
+        <div className="flex items-center gap-2">
+          <Users className="w-5 h-5" />
+          <Label className="text-lg font-semibold">Participantes</Label>
+        </div>
+
+        {/* Usuários Internos */}
+        <div className="space-y-2">
+          <Label>Usuários do Sistema</Label>
+          <div className="border rounded-lg p-3 max-h-48 overflow-y-auto bg-white">
+            {users.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Carregando usuários...</p>
+            ) : (
+              <div className="space-y-2">
+                {users.filter(u => u.user_id !== user?.id).map((userProfile) => (
+                  <div key={userProfile.user_id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`user-${userProfile.user_id}`}
+                      checked={selectedParticipants.includes(userProfile.user_id)}
+                      onCheckedChange={() => toggleParticipant(userProfile.user_id)}
+                    />
+                    <Label 
+                      htmlFor={`user-${userProfile.user_id}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {userProfile.full_name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {selectedParticipants.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {selectedParticipants.map(userId => {
+                const user = users.find(u => u.user_id === userId);
+                return user ? (
+                  <Badge key={userId} variant="secondary" className="text-xs">
+                    {user.full_name}
+                    <X 
+                      className="w-3 h-3 ml-1 cursor-pointer" 
+                      onClick={() => toggleParticipant(userId)}
+                    />
+                  </Badge>
+                ) : null;
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Participantes Externos */}
+        <div className="space-y-2">
+          <Label>Participantes Externos</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <Input
+              placeholder="Nome completo"
+              value={newExternalParticipant.name}
+              onChange={(e) => setNewExternalParticipant(prev => ({ ...prev, name: e.target.value }))}
+            />
+            <Input
+              type="email"
+              placeholder="email@exemplo.com"
+              value={newExternalParticipant.email}
+              onChange={(e) => setNewExternalParticipant(prev => ({ ...prev, email: e.target.value }))}
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={addExternalParticipant}
+              disabled={!newExternalParticipant.name.trim() || !newExternalParticipant.email.trim()}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Adicionar
+            </Button>
+          </div>
+          
+          {externalParticipants.length > 0 && (
+            <div className="space-y-2 mt-3">
+              <p className="text-sm text-muted-foreground">Participantes externos adicionados:</p>
+              <div className="space-y-1">
+                {externalParticipants.map((participant, index) => (
+                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      <span className="text-sm">
+                        <strong>{participant.name}</strong> - {participant.email}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeExternalParticipant(index)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
       <div className="flex items-center space-x-2">
         <Checkbox
           id="all_day"
