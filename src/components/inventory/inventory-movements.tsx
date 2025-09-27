@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useInventory } from '@/hooks/use-inventory';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -131,192 +131,193 @@ export function InventoryMovements({ itemId }: InventoryMovementsProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">
-            {itemId ? 'Movimentações do Item' : 'Movimentações Recentes'}
-          </h2>
-          <p className="text-muted-foreground">
-            Histórico de entradas e saídas do estoque
-          </p>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>
+              {itemId ? 'Movimentações do Item' : 'Movimentações Recentes'}
+            </CardTitle>
+            <CardDescription>
+              Histórico de entradas e saídas do estoque
+            </CardDescription>
+          </div>
+          
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nova Movimentação
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Registrar Movimentação</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  {!itemId && (
+                    <FormField
+                      control={form.control}
+                      name="inventory_item_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Item *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o item" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {items.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="tipo_movimento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Tipo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="entrada">Entrada</SelectItem>
+                              <SelectItem value="saida">Saída</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="quantidade"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantidade *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="1" 
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value) || 1)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="origem_movimento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Origem *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Origem" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="compra">Compra</SelectItem>
+                            <SelectItem value="doacao">Doação</SelectItem>
+                            <SelectItem value="consumo">Consumo</SelectItem>
+                            <SelectItem value="perda">Perda</SelectItem>
+                            <SelectItem value="ajuste">Ajuste</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="data_movimento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data *</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="valor_unitario"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor Unit. (R$)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              placeholder="0.00" 
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value) || undefined)}
+                              value={field.value || ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="observacoes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Observações</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Observações..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={loading}>
+                      Registrar
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
-        
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nova Movimentação
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Registrar Movimentação</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {!itemId && (
-                  <FormField
-                    control={form.control}
-                    name="inventory_item_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Item *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o item" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {items.map((item) => (
-                              <SelectItem key={item.id} value={item.id}>
-                                {item.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
+      </CardHeader>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="tipo_movimento"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Tipo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="entrada">Entrada</SelectItem>
-                            <SelectItem value="saida">Saída</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="quantidade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantidade *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="1" 
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value) || 1)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="origem_movimento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Origem *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Origem" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="compra">Compra</SelectItem>
-                          <SelectItem value="doacao">Doação</SelectItem>
-                          <SelectItem value="consumo">Consumo</SelectItem>
-                          <SelectItem value="perda">Perda</SelectItem>
-                          <SelectItem value="ajuste">Ajuste</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="data_movimento"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data *</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="valor_unitario"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valor Unit. (R$)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.01"
-                            placeholder="0.00" 
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value) || undefined)}
-                            value={field.value || ''}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="observacoes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Observações</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Observações..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={loading}>
-                    Registrar
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Movements List */}
-      <div className="space-y-4">
+      <CardContent className="space-y-4">
         {movements.length > 0 ? (
           movements.map((movement) => {
             const item = items.find(i => i.id === movement.inventory_item_id);
@@ -379,7 +380,7 @@ export function InventoryMovements({ itemId }: InventoryMovementsProps) {
             </CardContent>
           </Card>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
