@@ -156,6 +156,47 @@ export type Database = {
         }
         Relationships: []
       }
+      external_event_participants: {
+        Row: {
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+          invite_token: string | null
+          name: string
+          status: Database["public"]["Enums"]["participant_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event_id: string
+          id?: string
+          invite_token?: string | null
+          name: string
+          status?: Database["public"]["Enums"]["participant_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+          invite_token?: string | null
+          name?: string
+          status?: Database["public"]["Enums"]["participant_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           ativo: boolean
@@ -1269,6 +1310,13 @@ export type Database = {
       process_event_reminders: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      update_external_participant_status: {
+        Args: {
+          p_invite_token: string
+          p_status: Database["public"]["Enums"]["participant_status"]
+        }
+        Returns: boolean
       }
     }
     Enums: {
