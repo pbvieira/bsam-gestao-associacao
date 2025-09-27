@@ -58,8 +58,8 @@ export function WorkspaceActions() {
       description: "Criar rapidamente",
       icon: Plus,
       action: createQuickTask,
-      variant: "secondary" as const,
-      color: "text-primary"
+      variant: "outline" as const,
+      color: "text-accent"
     });
 
     // Ação para verificar estoque baixo
