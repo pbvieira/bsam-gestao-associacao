@@ -109,15 +109,6 @@ export function StudentForm({
     }
   };
   const handleTabChange = (value: string) => {
-    // If in creation mode and trying to access tabs that need studentId
-    if (isCreationMode && ['basic', 'work', 'contacts', 'health', 'annotations', 'documents'].includes(value)) {
-      toast({
-        title: 'Atenção',
-        description: 'Salve primeiro o cabeçalho do aluno para acessar esta aba.',
-        variant: 'destructive'
-      });
-      return;
-    }
     setActiveTab(value);
   };
   return <div className="space-y-6">
