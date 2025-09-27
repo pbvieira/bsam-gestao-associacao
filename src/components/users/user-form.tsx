@@ -76,11 +76,22 @@ export function UserForm({ user, onClose }: UserFormProps) {
   });
 
   const onSubmit = async (data: UserFormData) => {
+    console.log('🔥 UserForm: onSubmit iniciado', { data, user: user?.id });
+    
     setLoading(true);
     try {
       if (user) {
+        console.log('🔥 UserForm: Atualizando usuário existente', { 
+          userId: user.id, 
+          updates: {
+            full_name: data.full_name,
+            role: data.role,
+            active: data.active,
+          }
+        });
+
         // Update existing user
-        const { error } = await supabase
+        const { data: updateResult, error } = await supabase
           .from('profiles')
           .update({
             full_name: data.full_name,
@@ -88,13 +99,30 @@ export function UserForm({ user, onClose }: UserFormProps) {
             active: data.active,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', user.id);
+          .eq('id', user.id)
+          .select('*');
 
-        if (error) throw error;
+        console.log('🔥 UserForm: Resultado da atualização', { updateResult, error });
+
+        if (error) {
+          console.error('🔥 UserForm: Erro na atualização', error);
+          throw error;
+        }
+        
+        if (!updateResult || updateResult.length === 0) {
+          console.error('🔥 UserForm: Nenhuma linha foi atualizada');
+          handleError('Nenhum usuário foi atualizado. Verifique as permissões.', 'database');
+          return;
+        }
+
+        console.log('🔥 UserForm: Sucesso na atualização, chamando handleSuccess');
         handleSuccess('Usuário atualizado com sucesso!');
       } else {
+        console.log('🔥 UserForm: Criando novo usuário');
+        
         // Create new user
         if (!data.password || !data.email) {
+          console.error('🔥 UserForm: Email ou senha faltando');
           handleError('Email e senha são obrigatórios para novos usuários', 'auth');
           return;
         }
@@ -111,21 +139,31 @@ export function UserForm({ user, onClose }: UserFormProps) {
           },
         });
 
-        if (authError) throw authError;
+        console.log('🔥 UserForm: Resultado da criação', { authData, authError });
+
+        if (authError) {
+          console.error('🔥 UserForm: Erro na criação', authError);
+          throw authError;
+        }
 
         // Check if user was created successfully
         if (authData.user) {
+          console.log('🔥 UserForm: Usuário criado com sucesso');
           handleSuccess('Usuário criado com sucesso! Um email de confirmação foi enviado.');
         } else {
+          console.error('🔥 UserForm: Usuário não foi criado');
           handleError('Erro ao criar usuário', 'auth');
           return;
         }
       }
 
+      console.log('🔥 UserForm: Fechando dialog');
       onClose();
     } catch (error) {
+      console.error('🔥 UserForm: Erro capturado no catch', error);
       handleError(error, 'auth');
     } finally {
+      console.log('🔥 UserForm: Finalizando, setLoading(false)');
       setLoading(false);
     }
   };
@@ -164,6 +202,14 @@ export function UserForm({ user, onClose }: UserFormProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Debug: Form validation state */}
+            {Object.keys(form.formState.errors).length > 0 && (
+              <div className="p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                <strong>Erros de validação:</strong>
+                <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
+              </div>
+            )}
+            
             <FormField
               control={form.control}
               name="full_name"

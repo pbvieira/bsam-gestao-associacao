@@ -12,7 +12,7 @@ export function useErrorHandler() {
   const { toast } = useToast();
 
   const handleError = useCallback((error: unknown, context?: string) => {
-    console.error('Error handled:', error, { context });
+    console.error('🔥 useErrorHandler: handleError chamado', { error, context });
 
     let errorMessage = 'Ocorreu um erro inesperado';
     let errorTitle = 'Erro';
@@ -49,6 +49,8 @@ export function useErrorHandler() {
       }
     }
 
+    console.log('🔥 useErrorHandler: Mostrando toast de erro', { errorTitle, errorMessage });
+
     toast({
       variant: 'destructive',
       title: errorTitle,
@@ -57,6 +59,8 @@ export function useErrorHandler() {
   }, [toast]);
 
   const handleSuccess = useCallback((message: string, title = 'Sucesso') => {
+    console.log('🔥 useErrorHandler: handleSuccess chamado', { title, message });
+    
     toast({
       title,
       description: message,
