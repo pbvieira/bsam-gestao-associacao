@@ -45,7 +45,10 @@ export function useStudentHealthData(studentId?: string) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchHealthData = async () => {
-    if (!user || !studentId) return;
+    if (!user || !studentId) {
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data, error } = await supabase

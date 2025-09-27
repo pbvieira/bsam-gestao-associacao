@@ -24,7 +24,10 @@ export function useStudentAnnotations(studentId?: string) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchAnnotations = async () => {
-    if (!user || !studentId) return;
+    if (!user || !studentId) {
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data, error } = await supabase
