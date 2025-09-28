@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useStudents } from '@/hooks/use-students';
+import { usePermissions } from '@/hooks/use-permissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PermissionButton } from '@/components/ui/permission-button';
+import { PermissionLink } from '@/components/ui/permission-link';
 import {
   Table,
   TableBody,
@@ -40,6 +43,7 @@ interface StudentListProps {
 
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
   const { students, loading, deactivateStudent } = useStudents();
+  const { canCreate, canUpdate, canDelete } = usePermissions();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('nome_completo');
@@ -182,10 +186,15 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                 Gestão completa dos assistidos da associação
               </CardDescription>
             </div>
-            <Button onClick={onCreateStudent} className="gap-2">
+            <PermissionButton
+              hasPermission={canCreate('students')}
+              permissionMessage="Você não tem permissão para criar alunos"
+              onClick={onCreateStudent}
+              className="gap-2"
+            >
               <Plus className="h-4 w-4" />
               Novo Aluno
-            </Button>
+            </PermissionButton>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -236,10 +245,15 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                 }
               </p>
               {!searchTerm && statusFilter === 'all' && (
-                <Button onClick={onCreateStudent} className="gap-2">
+                <PermissionButton
+                  hasPermission={canCreate('students')}
+                  permissionMessage="Você não tem permissão para criar alunos"
+                  onClick={onCreateStudent}
+                  className="gap-2"
+                >
                   <Plus className="h-4 w-4" />
                   Cadastrar Primeiro Aluno
-                </Button>
+                </PermissionButton>
               )}
             </div>
           ) : (
@@ -303,26 +317,26 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                          <PermissionLink
+                            hasPermission={canUpdate('students')}
+                            permissionMessage="Você não tem permissão para editar alunos"
                             onClick={() => onEditStudent(student)}
                             className="gap-1"
                           >
                             <Edit className="h-3 w-3" />
                             Editar
-                          </Button>
+                          </PermissionLink>
                           
                           {student.ativo && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                            <PermissionLink
+                              hasPermission={canDelete('students')}
+                              permissionMessage="Você não tem permissão para desativar alunos"
                               onClick={() => handleDeactivate(student.id)}
                               className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                             >
                               <UserX className="h-3 w-3" />
                               Desativar
-                            </Button>
+                            </PermissionLink>
                           )}
                         </div>
                       </TableCell>

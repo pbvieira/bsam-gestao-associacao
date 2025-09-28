@@ -1,10 +1,11 @@
 import { MainLayout } from "@/components/layout/main-layout";
-
+import { UnifiedRoute } from "@/components/auth/unified-route";
 import { UserList } from "@/components/users/user-list";
 
 export default function Users() {
   return (
-    <MainLayout>
+    <UnifiedRoute module="users" action="read">
+      <MainLayout>
         <div className="space-y-6">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
@@ -16,5 +17,6 @@ export default function Users() {
           <UserList />
         </div>
       </MainLayout>
+    </UnifiedRoute>
   );
 }

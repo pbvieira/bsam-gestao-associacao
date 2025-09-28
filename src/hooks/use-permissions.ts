@@ -17,6 +17,27 @@ export function usePermissions() {
     return hasPermission(module, action);
   };
 
+  // Funções granulares para ações específicas
+  const canCreate = (module: string): boolean => {
+    return hasPermission(module, 'create');
+  };
+
+  const canUpdate = (module: string): boolean => {
+    return hasPermission(module, 'update');
+  };
+
+  const canDelete = (module: string): boolean => {
+    return hasPermission(module, 'delete');
+  };
+
+  const canExport = (module: string): boolean => {
+    return hasPermission(module, 'export');
+  };
+
+  const canRead = (module: string): boolean => {
+    return hasPermission(module, 'read');
+  };
+
   // Função para obter todas as permissões de um módulo
   const getModulePermissions = (module: string) => {
     return permissions.filter(p => p.module === module && p.allowed);
@@ -47,6 +68,12 @@ export function usePermissions() {
     getAccessibleModules,
     debugPermissions,
     reloadPermissions,
+    // Funções granulares
+    canCreate,
+    canUpdate,
+    canDelete,
+    canExport,
+    canRead,
     // Re-export das funções originais para compatibilidade
     hasPermission,
     canAccess,

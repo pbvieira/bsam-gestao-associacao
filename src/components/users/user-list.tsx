@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/hooks/use-auth';
+import { usePermissions } from '@/hooks/use-permissions';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import {
   Table,
@@ -16,7 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { PermissionButton } from '@/components/ui/permission-button';
+import { PermissionLink } from '@/components/ui/permission-link';
 import { Search, Edit, Trash2, UserPlus, KeyRound } from 'lucide-react';
 import { UserForm } from './user-form';
 import { UserPermissionsDialog } from './user-permissions-dialog';
@@ -64,6 +66,7 @@ export function UserList() {
   const [adminCount, setAdminCount] = useState<number>(0);
   const { handleError } = useErrorHandler();
   const { toast } = useToast();
+  const { canCreate, canUpdate, canDelete } = usePermissions();
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users', searchTerm],
@@ -213,10 +216,14 @@ export function UserList() {
                 Gerenciar usuários e suas permissões
               </CardDescription>
             </div>
-            <Button onClick={() => setShowUserForm(true)}>
+            <PermissionButton
+              hasPermission={canCreate('users')}
+              permissionMessage="Você não tem permissão para criar usuários"
+              onClick={() => setShowUserForm(true)}
+            >
               <UserPlus className="h-4 w-4 mr-2" />
               Novo Usuário
-            </Button>
+            </PermissionButton>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -271,47 +278,42 @@ export function UserList() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center gap-1 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <PermissionLink
+                          hasPermission={canUpdate('users')}
+                          permissionMessage="Você não tem permissão para gerenciar permissões"
                           onClick={() => handlePermissions(user)}
                         >
                           Permissões
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        </PermissionLink>
+                        
+                        <PermissionLink
+                          hasPermission={canUpdate('users')}
+                          permissionMessage="Você não tem permissão para alterar credenciais"
                           onClick={() => handleCredentials(user)}
                         >
                           <KeyRound className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        </PermissionLink>
+                        
+                        <PermissionLink
+                          hasPermission={canUpdate('users')}
+                          permissionMessage="Você não tem permissão para editar usuários"
                           onClick={() => handleEdit(user)}
                         >
                           <Edit className="h-4 w-4" />
-                        </Button>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(user)}
-                                disabled={user.role === 'administrador' && adminCount <= 1}
-                                className="text-destructive hover:text-destructive disabled:text-muted-foreground"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TooltipTrigger>
-                          {user.role === 'administrador' && adminCount <= 1 && (
-                            <TooltipContent>
-                              <p>Não é possível excluir o último administrador</p>
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
+                        </PermissionLink>
+                        
+                        <PermissionLink
+                          hasPermission={canDelete('users') && !(user.role === 'administrador' && adminCount <= 1)}
+                          permissionMessage={
+                            !canDelete('users') 
+                              ? "Você não tem permissão para excluir usuários"
+                              : "Não é possível excluir o último administrador"
+                          }
+                          onClick={() => handleDelete(user)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </PermissionLink>
                       </div>
                     </TableCell>
                   </TableRow>

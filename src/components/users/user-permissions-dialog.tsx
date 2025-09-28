@@ -78,6 +78,46 @@ const MODULES = [
     ],
   },
   {
+    module: 'calendar',
+    label: 'Calendário',
+    actions: [
+      { action: 'read', label: 'Visualizar' },
+      { action: 'create', label: 'Criar' },
+      { action: 'update', label: 'Editar' },
+      { action: 'delete', label: 'Excluir' },
+    ],
+  },
+  {
+    module: 'tasks',
+    label: 'Tarefas',
+    actions: [
+      { action: 'read', label: 'Visualizar' },
+      { action: 'create', label: 'Criar' },
+      { action: 'update', label: 'Editar' },
+      { action: 'delete', label: 'Excluir' },
+    ],
+  },
+  {
+    module: 'suppliers',
+    label: 'Fornecedores',
+    actions: [
+      { action: 'read', label: 'Visualizar' },
+      { action: 'create', label: 'Criar' },
+      { action: 'update', label: 'Editar' },
+      { action: 'delete', label: 'Excluir' },
+    ],
+  },
+  {
+    module: 'purchases',
+    label: 'Compras',
+    actions: [
+      { action: 'read', label: 'Visualizar' },
+      { action: 'create', label: 'Criar' },
+      { action: 'update', label: 'Editar' },
+      { action: 'delete', label: 'Excluir' },
+    ],
+  },
+  {
     module: 'reports',
     label: 'Relatórios',
     actions: [
