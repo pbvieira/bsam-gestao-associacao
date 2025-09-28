@@ -47,15 +47,30 @@ function CategoryDialog({ category, onSave }: { category?: any; onSave: (data: C
   const form = useForm<CategoryForm>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      nome: category?.nome || '',
-      descricao: category?.descricao || '',
-      cor: category?.cor || '#6366f1',
-      ordem: category?.ordem || 0,
-      ativo: category?.ativo !== false,
+      nome: '',
+      descricao: '',
+      cor: '#6366f1',
+      ordem: 0,
+      ativo: true,
     },
   });
 
+  // Reset form when category changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      console.log('CategoryDialog: Resetting form for category:', category);
+      form.reset({
+        nome: category?.nome || '',
+        descricao: category?.descricao || '',
+        cor: category?.cor || '#6366f1',
+        ordem: category?.ordem || 0,
+        ativo: category?.ativo !== false,
+      });
+    }
+  }, [open, category, form]);
+
   const onSubmit = async (data: CategoryForm) => {
+    console.log('CategoryDialog: Submitting data:', data, 'for category:', category);
     setIsSaving(true);
     try {
       await onSave(data);
@@ -66,6 +81,7 @@ function CategoryDialog({ category, onSave }: { category?: any; onSave: (data: C
       setOpen(false);
       form.reset();
     } catch (error) {
+      console.error('CategoryDialog: Error saving category:', error);
       toast({
         title: 'Erro',
         description: 'Ocorreu um erro ao salvar a categoria.',
@@ -252,7 +268,9 @@ export default function AnnotationCategories() {
   };
 
   const handleUpdateCategory = async (data: CategoryForm, categoryId: string) => {
+    console.log('AnnotationCategories: Updating category:', categoryId, 'with data:', data);
     const result = await updateCategory(categoryId, data);
+    console.log('AnnotationCategories: Update result:', result);
     if (result?.error) {
       throw new Error(result.error);
     }

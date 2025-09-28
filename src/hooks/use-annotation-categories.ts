@@ -80,6 +80,13 @@ export function useAnnotationCategories() {
   };
 
   const updateCategory = async (id: string, categoryData: Partial<AnnotationCategory>) => {
+    if (!user) {
+      console.error('useAnnotationCategories: User not authenticated for update');
+      return { data: null, error: 'User not authenticated' };
+    }
+
+    console.log('useAnnotationCategories: Updating category:', id, 'with data:', categoryData);
+    
     try {
       const { data, error } = await supabase
         .from('annotation_categories')
@@ -88,10 +95,13 @@ export function useAnnotationCategories() {
         .select()
         .single();
 
+      console.log('useAnnotationCategories: Supabase update response:', { data, error });
+
       if (error) throw error;
       await fetchCategories();
       return { data, error: null };
     } catch (err: any) {
+      console.error('useAnnotationCategories: Error updating category:', err);
       return { data: null, error: err.message };
     }
   };
