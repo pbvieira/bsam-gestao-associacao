@@ -70,7 +70,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { open } = useSidebar();
 
-  // Filter navigation items based on user permissions
+  // Filter navigation items based on user role access
   const navigation = navigationItems.filter(item => canAccess(item.module));
   
   // Debug log para diagnóstico

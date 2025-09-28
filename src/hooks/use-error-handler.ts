@@ -36,8 +36,8 @@ export function useErrorHandler() {
         case 'auth':
           errorTitle = 'Erro de Autenticação';
           break;
-        case 'permissions':
-          errorTitle = 'Erro de Permissão';
+        case 'access':
+          errorTitle = 'Erro de Acesso';
           break;
         case 'database':
           errorTitle = 'Erro de Banco de Dados';

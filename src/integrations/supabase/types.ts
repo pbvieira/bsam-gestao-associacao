@@ -361,33 +361,6 @@ export type Database = {
         }
         Relationships: []
       }
-      permissions: {
-        Row: {
-          action: string
-          allowed: boolean
-          created_at: string
-          id: string
-          module: string
-          role: Database["public"]["Enums"]["user_role"]
-        }
-        Insert: {
-          action: string
-          allowed?: boolean
-          created_at?: string
-          id?: string
-          module: string
-          role: Database["public"]["Enums"]["user_role"]
-        }
-        Update: {
-          action?: string
-          allowed?: boolean
-          created_at?: string
-          id?: string
-          module?: string
-          role?: Database["public"]["Enums"]["user_role"]
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           active: boolean
