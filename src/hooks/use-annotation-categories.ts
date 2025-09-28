@@ -88,21 +88,48 @@ export function useAnnotationCategories() {
     console.log('useAnnotationCategories: Updating category:', id, 'with data:', categoryData);
     
     try {
-      const { data, error } = await supabase
+      // First verify we have permission by checking if we can read the category
+      const { data: existingCategory, error: readError } = await supabase
+        .from('annotation_categories')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (readError || !existingCategory) {
+        console.error('useAnnotationCategories: Cannot read category for update:', readError);
+        return { data: null, error: 'Categoria não encontrada ou sem permissão para editar' };
+      }
+
+      // Perform the update without .single() to avoid PGRST116 error
+      const { data, error, count } = await supabase
         .from('annotation_categories')
         .update(categoryData)
         .eq('id', id)
-        .select()
-        .single();
+        .select();
 
-      console.log('useAnnotationCategories: Supabase update response:', { data, error });
+      console.log('useAnnotationCategories: Supabase update response:', { data, error, count });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
+      // Check if any rows were actually updated
+      if (!data || data.length === 0) {
+        console.error('useAnnotationCategories: No rows updated - possible permission issue');
+        return { data: null, error: 'Não foi possível atualizar a categoria. Verifique suas permissões.' };
+      }
+
       await fetchCategories();
-      return { data, error: null };
+      return { data: data[0], error: null };
     } catch (err: any) {
       console.error('useAnnotationCategories: Error updating category:', err);
-      return { data: null, error: err.message };
+      
+      // Provide specific error messages
+      if (err.code === 'PGRST116') {
+        return { data: null, error: 'Erro de permissão: não é possível editar esta categoria' };
+      }
+      
+      return { data: null, error: err.message || 'Erro desconhecido ao atualizar categoria' };
     }
   };
 
