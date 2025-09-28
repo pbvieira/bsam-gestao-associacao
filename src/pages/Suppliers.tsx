@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+
 import { SupplierList } from "@/components/suppliers/supplier-list";
 import { SupplierForm } from "@/components/suppliers/supplier-form";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,7 @@ export default function Suppliers() {
   };
 
   return (
-    <ProtectedRoute module="inventory">
-      <MainLayout>
+    <MainLayout>
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             {viewMode !== 'list' && (
@@ -81,6 +80,5 @@ export default function Suppliers() {
           )}
         </div>
       </MainLayout>
-    </ProtectedRoute>
   );
 }

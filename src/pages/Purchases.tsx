@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+
 import { PurchaseList } from "@/components/purchases/purchase-list";
 import { PurchaseForm } from "@/components/purchases/purchase-form";
 import { PurchaseView } from "@/components/purchases/purchase-view";
@@ -34,8 +34,7 @@ export default function Purchases() {
   };
 
   return (
-    <ProtectedRoute module="inventory">
-      <MainLayout>
+    <MainLayout>
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             {viewMode !== 'list' && (
@@ -97,6 +96,5 @@ export default function Purchases() {
           )}
         </div>
       </MainLayout>
-    </ProtectedRoute>
   );
 }

@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 import { Link, useLocation } from "react-router-dom";
 import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
@@ -55,15 +56,15 @@ const navigationItems = [{
 }];
 export function AppSidebar() {
   const {
-    canAccess,
     profile,
     signOut
   } = useAuth();
+  const { canAccessModule } = usePermissions();
   const location = useLocation();
   const {
     open
   } = useSidebar();
-  const navigation = navigationItems.filter(item => canAccess(item.module));
+  const navigation = navigationItems.filter(item => canAccessModule(item.module));
   const handleSignOut = async () => {
     await signOut();
   };

@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { usePermissions } from '@/hooks/use-permissions';
 
 const routes = [
   { path: '/', module: 'dashboard', name: 'Dashboard' },
@@ -16,16 +17,22 @@ const routes = [
 
 export function useNavigationFallback() {
   const { canAccess } = useAuth();
+  const { getAccessibleModules } = usePermissions();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const getAccessibleRoutes = () => {
-    return routes.filter(route => canAccess(route.module));
+    const accessibleModules = getAccessibleModules();
+    const accessibleRoutes = routes.filter(route => accessibleModules.includes(route.module));
+    console.log('🛣️ Rotas acessíveis:', { accessibleModules, accessibleRoutes });
+    return accessibleRoutes;
   };
 
   const getDefaultRoute = () => {
     const accessibleRoutes = getAccessibleRoutes();
-    return accessibleRoutes.length > 0 ? accessibleRoutes[0].path : '/auth';
+    const defaultPath = accessibleRoutes.length > 0 ? accessibleRoutes[0].path : '/auth';
+    console.log('🏠 Rota padrão:', { defaultPath, totalAccessible: accessibleRoutes.length });
+    return defaultPath;
   };
 
   const navigateToAccessible = (attemptedRoute?: string) => {

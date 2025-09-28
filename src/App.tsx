@@ -3,8 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/components/auth/protected-route";
-import { DynamicRoute } from "@/components/auth/dynamic-route";
+import { UnifiedRoute } from "@/components/auth/unified-route";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
@@ -45,82 +44,59 @@ const App = () => (
         <BrowserRouter>
           <Toaster />
           <Sonner />
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route 
-              path="/" 
-              element={
-                <DynamicRoute preferredModule="dashboard">
-                  <Index />
-                </DynamicRoute>
-              } 
-            />
-            <Route 
-              path="/tarefas" 
-              element={
-                <ProtectedRoute module="tasks">
-                  <Tasks />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/calendario" 
-              element={
-                <ProtectedRoute module="calendar">
-                  <Calendar />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/alunos" 
-              element={
-                <ProtectedRoute module="students">
-                  <Students />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/usuarios" 
-              element={
-                <ProtectedRoute module="users">
-                  <Users />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/estoque" 
-              element={
-                <ProtectedRoute module="inventory">
-                  <Inventory />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/fornecedores" 
-              element={
-                <ProtectedRoute module="suppliers">
-                  <Suppliers />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/compras" 
-              element={
-                <ProtectedRoute module="purchases">
-                  <Purchases />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/relatorios" 
-              element={
-                <ProtectedRoute module="reports">
-                  <Reports />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+        <Routes>
+          <Route path="/auth" element={
+            <UnifiedRoute allowGuests={true}>
+              <Auth />
+            </UnifiedRoute>
+          } />
+          <Route path="/" element={
+            <UnifiedRoute module="dashboard">
+              <Index />
+            </UnifiedRoute>
+          } />
+          <Route path="/tarefas" element={
+            <UnifiedRoute module="tasks">
+              <Tasks />
+            </UnifiedRoute>
+          } />
+          <Route path="/calendario" element={
+            <UnifiedRoute module="calendar">
+              <Calendar />
+            </UnifiedRoute>
+          } />
+          <Route path="/alunos" element={
+            <UnifiedRoute module="students">
+              <Students />
+            </UnifiedRoute>
+          } />
+          <Route path="/usuarios" element={
+            <UnifiedRoute module="users">
+              <Users />
+            </UnifiedRoute>
+          } />
+          <Route path="/estoque" element={
+            <UnifiedRoute module="inventory">
+              <Inventory />
+            </UnifiedRoute>
+          } />
+          <Route path="/fornecedores" element={
+            <UnifiedRoute module="suppliers">
+              <Suppliers />
+            </UnifiedRoute>
+          } />
+          <Route path="/compras" element={
+            <UnifiedRoute module="purchases">
+              <Purchases />
+            </UnifiedRoute>
+          } />
+          <Route path="/relatorios" element={
+            <UnifiedRoute module="reports">
+              <Reports />
+            </UnifiedRoute>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>

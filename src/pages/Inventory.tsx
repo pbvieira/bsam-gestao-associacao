@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { PageLayout } from "@/components/layout/page-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -77,8 +77,7 @@ export default function Inventory() {
   ) : undefined;
 
   return (
-    <ProtectedRoute module="inventory">
-      <MainLayout>
+    <MainLayout>
         <PageLayout
           title={getTitle()}
           subtitle={getDescription()}
@@ -147,6 +146,5 @@ export default function Inventory() {
           )}
         </PageLayout>
       </MainLayout>
-    </ProtectedRoute>
   );
 }

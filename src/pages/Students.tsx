@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+
 import { StudentList } from "@/components/students/student-list";
 import { StudentForm } from "@/components/students/student-form";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,7 @@ export default function Students() {
   };
 
   return (
-    <ProtectedRoute module="students">
-      <MainLayout>
+    <MainLayout>
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             {viewMode !== 'list' && (
@@ -74,6 +73,5 @@ export default function Students() {
           )}
         </div>
       </MainLayout>
-    </ProtectedRoute>
   );
 }

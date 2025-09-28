@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Lock, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNavigationFallback } from "@/hooks/use-navigation-fallback";
+import { usePermissions } from "@/hooks/use-permissions";
 import { MainLayout } from "@/components/layout/main-layout";
 
 export function PermissionDenied() {
   const { getAccessibleRoutes, getDefaultRoute } = useNavigationFallback();
+  const { debugPermissions, reloadPermissions } = usePermissions();
   const accessibleRoutes = getAccessibleRoutes();
 
   return (
@@ -43,11 +45,24 @@ export function PermissionDenied() {
                     </Button>
                   ))}
                 </div>
-                <Button className="w-full" asChild>
-                  <Link to={getDefaultRoute()}>
-                    Ir para página principal
-                  </Link>
-                </Button>
+                <div className="space-y-2">
+                  <Button className="w-full" asChild>
+                    <Link to={getDefaultRoute()}>
+                      Ir para página principal
+                    </Link>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => {
+                      debugPermissions();
+                      reloadPermissions();
+                    }}
+                  >
+                    🔄 Recarregar Permissões
+                  </Button>
+                </div>
               </>
             ) : (
               <div className="text-center">

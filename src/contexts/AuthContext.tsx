@@ -32,6 +32,7 @@ interface AuthContextType {
   isInitialized: boolean;
   hasPermission: (module: string, action?: string) => boolean;
   canAccess: (module: string) => boolean;
+  reloadPermissions: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -174,21 +175,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Função de debug para logs detalhados
+  const debugPermissions = (module: string, action: string = 'read') => {
+    console.log('🔍 Verificando permissão:', { 
+      module, 
+      action, 
+      userRole: profile?.role,
+      totalPermissions: permissions.length,
+      permissionsForModule: permissions.filter(p => p.module === module),
+      specificPermission: permissions.find(p => p.module === module && p.action === action)
+    });
+  };
+
   const hasPermission = (module: string, action: string = 'read'): boolean => {
-    return permissions.some(
+    if (!profile || !permissions.length) {
+      console.log('❌ Sem profile ou permissões:', { profile: !!profile, permissions: permissions.length });
+      return false;
+    }
+
+    // Debug detalhado
+    debugPermissions(module, action);
+
+    const hasAccess = permissions.some(
       (permission) =>
         permission.module === module &&
         permission.action === action &&
         permission.allowed
     );
+
+    console.log('✅ Resultado hasPermission:', { module, action, hasAccess });
+    return hasAccess;
   };
 
   const canAccess = (module: string): boolean => {
-    return permissions.some(
+    if (!profile || !permissions.length) {
+      console.log('❌ Sem profile ou permissões para canAccess:', { profile: !!profile, permissions: permissions.length });
+      return false;
+    }
+
+    // Simplificado: se tem qualquer permissão allowed no módulo, pode acessar
+    const hasAccess = permissions.some(
       (permission) =>
         permission.module === module &&
         permission.allowed
     );
+
+    console.log('✅ Resultado canAccess:', { module, hasAccess, permissionsForModule: permissions.filter(p => p.module === module) });
+    return hasAccess;
+  };
+
+  // Função para forçar reload das permissões (útil para debug)
+  const reloadPermissions = async () => {
+    if (profile?.role) {
+      console.log('🔄 Forçando reload das permissões...');
+      setPermissionsCache({} as Record<UserRole, Permission[]>);
+      await fetchPermissions(profile.role);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
@@ -233,6 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isInitialized,
     hasPermission,
     canAccess,
+    reloadPermissions,
     signIn,
     signUp,
     signOut,
