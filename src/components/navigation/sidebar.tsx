@@ -3,7 +3,7 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield } from "lucide-react";
+import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -31,6 +31,12 @@ const navigationItems = [
     name: "Alunos",
     href: "/alunos",
     icon: Users,
+    module: "students"
+  },
+  {
+    name: "Categorias de Anotações",
+    href: "/categorias-anotacoes",
+    icon: Tag,
     module: "students"
   },
   {

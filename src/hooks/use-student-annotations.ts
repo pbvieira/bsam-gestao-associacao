@@ -5,13 +5,10 @@ import { useAuth } from './use-auth';
 export interface StudentAnnotation {
   id: string;
   student_id: string;
-  tipo: string; // 'anotacao' ou 'gasto'
-  categoria: string | null; // Para anotações: 'atendimento', 'curso', 'entrega_item', 'compra'
+  tipo: string; // apenas 'anotacao'
+  categoria: string | null; // Nome da categoria
   descricao: string;
-  valor: number | null; // Para gastos
   data_evento: string;
-  data_agendamento: string | null;
-  observacoes: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;

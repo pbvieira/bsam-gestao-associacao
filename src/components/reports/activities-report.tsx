@@ -32,7 +32,6 @@ interface ActivityReportData {
   tipo: string;
   categoria: string;
   descricao: string;
-  valor: number | null;
   data_evento: string;
   created_at: string;
   student_name: string;
@@ -105,7 +104,7 @@ export function ActivitiesReport() {
     if (!activities) return;
 
     const csv = [
-      ['Data', 'Aluno', 'Código', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Responsável'].join(','),
+      ['Data', 'Aluno', 'Código', 'Tipo', 'Categoria', 'Descrição', 'Responsável'].join(','),
       ...activities.map(activity => [
         new Date(activity.data_evento).toLocaleDateString('pt-BR'),
         activity.student_name,
@@ -113,7 +112,6 @@ export function ActivitiesReport() {
         activity.tipo,
         activity.categoria || '',
         activity.descricao.replace(/,/g, ';'), // Replace commas to avoid CSV issues
-        activity.valor?.toString() || '',
         activity.created_by_name
       ].join(','))
     ].join('\n');
@@ -271,7 +269,6 @@ export function ActivitiesReport() {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Descrição</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
                   <TableHead>Responsável</TableHead>
                 </TableRow>
               </TableHeader>
@@ -301,12 +298,6 @@ export function ActivitiesReport() {
                       <p className="truncate" title={activity.descricao}>
                         {activity.descricao}
                       </p>
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {activity.valor 
-                        ? `R$ ${activity.valor.toFixed(2)}` 
-                        : '-'
-                      }
                     </TableCell>
                     <TableCell className="text-sm">
                       {activity.created_by_name}

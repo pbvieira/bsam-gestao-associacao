@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      annotation_categories: {
+        Row: {
+          ativo: boolean
+          cor: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           all_day: boolean | null
@@ -536,43 +569,34 @@ export type Database = {
           categoria: string | null
           created_at: string
           created_by: string
-          data_agendamento: string | null
           data_evento: string
           descricao: string
           id: string
-          observacoes: string | null
           student_id: string
           tipo: string
           updated_at: string
-          valor: number | null
         }
         Insert: {
           categoria?: string | null
           created_at?: string
           created_by: string
-          data_agendamento?: string | null
           data_evento?: string
           descricao: string
           id?: string
-          observacoes?: string | null
           student_id: string
           tipo: string
           updated_at?: string
-          valor?: number | null
         }
         Update: {
           categoria?: string | null
           created_at?: string
           created_by?: string
-          data_agendamento?: string | null
           data_evento?: string
           descricao?: string
           id?: string
-          observacoes?: string | null
           student_id?: string
           tipo?: string
           updated_at?: string
-          valor?: number | null
         }
         Relationships: [
           {

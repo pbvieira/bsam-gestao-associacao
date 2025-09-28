@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useStudentAnnotations } from '@/hooks/use-student-annotations';
+import { useAnnotationCategories } from '@/hooks/use-annotation-categories';
 import { useToast } from '@/hooks/use-toast';
 import { AnnotationDialog } from './annotation-dialog';
-import { Loader2, FileText, DollarSign, Edit, Trash2, Plus, Calendar, Filter } from 'lucide-react';
+import { Loader2, FileText, Edit, Trash2, Plus, Calendar, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -18,8 +18,8 @@ interface StudentAnnotationsTabProps {
 
 export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps) {
   const { annotations, loading, createAnnotation, updateAnnotation, deleteAnnotation } = useStudentAnnotations(studentId);
+  const { categories } = useAnnotationCategories();
   const { toast } = useToast();
-  const [filterType, setFilterType] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
   const handleCreateAnnotation = async (annotationData: any) => {
@@ -55,39 +55,28 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Registro removido com sucesso!',
+        description: 'Anotação removida com sucesso!',
       });
     }
   };
 
-  const getCategoryLabel = (categoria: string | null) => {
-    const labels: Record<string, string> = {
-      atendimento: 'Atendimento',
-      curso: 'Curso',
-      entrega_item: 'Entrega de Item',
-      compra: 'Compra',
-      outros: 'Outros',
-    };
-    return categoria ? labels[categoria] || categoria : 'Sem categoria';
+  const getCategoryColor = (categoria: string | null) => {
+    if (!categoria) return '#6b7280';
+    const category = categories.find(c => c.nome === categoria);
+    return category?.cor || '#6b7280';
   };
 
   const filteredAnnotations = annotations.filter(annotation => {
-    if (filterType !== 'all' && annotation.tipo !== filterType) return false;
     if (filterCategory !== 'all' && annotation.categoria !== filterCategory) return false;
     return true;
   });
-
-  const totalGastos = annotations
-    .filter(a => a.tipo === 'gasto' && a.valor)
-    .reduce((sum, a) => sum + (a.valor || 0), 0);
-
 
   if (loading) {
     return (
       <Card>
         <CardContent className="text-center py-8">
           <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-          <p className="text-muted-foreground">Carregando histórico...</p>
+          <p className="text-muted-foreground">Carregando anotações...</p>
         </CardContent>
       </Card>
     );
@@ -97,12 +86,10 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Anotações e Histórico</CardTitle>
-          {totalGastos > 0 && (
-            <div className="text-sm text-muted-foreground mt-1">
-              Total de gastos: <span className="font-semibold text-destructive">R$ {totalGastos.toFixed(2)}</span>
-            </div>
-          )}
+          <CardTitle>Anotações</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Histórico de anotações do aluno
+          </p>
         </div>
         <AnnotationDialog onSave={handleCreateAnnotation} />
       </CardHeader>
@@ -111,45 +98,38 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
         <div className="flex gap-4 mb-6">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="anotacao">Anotações</SelectItem>
-                <SelectItem value="gasto">Gastos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {filterType === 'anotacao' && (
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-48">
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
-                <SelectItem value="atendimento">Atendimento</SelectItem>
-                <SelectItem value="curso">Curso</SelectItem>
-                <SelectItem value="entrega_item">Entrega de Item</SelectItem>
-                <SelectItem value="compra">Compra</SelectItem>
-                <SelectItem value="outros">Outros</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.nome}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: category.cor }}
+                      />
+                      {category.nome}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          )}
+          </div>
         </div>
 
         {filteredAnnotations.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="text-lg font-medium mb-2">
-              {annotations.length === 0 ? 'Nenhum registro encontrado' : 'Nenhum registro com os filtros aplicados'}
+              {annotations.length === 0 ? 'Nenhuma anotação encontrada' : 'Nenhuma anotação com os filtros aplicados'}
             </p>
             <p className="text-sm mb-4">
               {annotations.length === 0 
-                ? 'Adicione anotações e gastos para este aluno' 
-                : 'Ajuste os filtros para ver outros registros'
+                ? 'Adicione anotações para este aluno' 
+                : 'Ajuste os filtros para ver outras anotações'
               }
             </p>
             {annotations.length === 0 && (
@@ -158,7 +138,7 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
                 trigger={
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Primeiro Registro
+                    Adicionar Primeira Anotação
                   </Button>
                 }
               />
@@ -174,25 +154,19 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      {annotation.tipo === 'anotacao' ? (
-                        <FileText className="h-4 w-4 text-primary" />
-                      ) : (
-                        <DollarSign className="h-4 w-4 text-destructive" />
-                      )}
-                      
-                      <Badge variant={annotation.tipo === 'anotacao' ? 'default' : 'destructive'}>
-                        {annotation.tipo === 'anotacao' ? 'Anotação' : 'Gasto'}
-                      </Badge>
+                      <FileText className="h-4 w-4 text-primary" />
                       
                       {annotation.categoria && (
-                        <Badge variant="secondary" className="text-xs">
-                          {getCategoryLabel(annotation.categoria)}
-                        </Badge>
-                      )}
-                      
-                      {annotation.valor && (
-                        <Badge variant="outline" className="text-xs">
-                          R$ {annotation.valor.toFixed(2)}
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs"
+                          style={{ 
+                            backgroundColor: `${getCategoryColor(annotation.categoria)}20`,
+                            borderColor: getCategoryColor(annotation.categoria),
+                            color: getCategoryColor(annotation.categoria)
+                          }}
+                        >
+                          {annotation.categoria}
                         </Badge>
                       )}
                     </div>
@@ -206,22 +180,7 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
                           {format(new Date(annotation.data_evento), 'dd/MM/yyyy', { locale: ptBR })}
                         </span>
                       </div>
-                      
-                      {annotation.data_agendamento && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          <span>
-                            Agendado: {format(new Date(annotation.data_agendamento), 'dd/MM/yyyy', { locale: ptBR })}
-                          </span>
-                        </div>
-                      )}
                     </div>
-                    
-                    {annotation.observacoes && (
-                      <p className="text-sm text-muted-foreground mt-2 italic">
-                        {annotation.observacoes}
-                      </p>
-                    )}
                   </div>
                   
                   <div className="flex gap-2">
@@ -243,9 +202,9 @@ export function StudentAnnotationsTab({ studentId }: StudentAnnotationsTabProps)
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Remover registro</AlertDialogTitle>
+                          <AlertDialogTitle>Remover anotação</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Tem certeza que deseja remover este registro? 
+                            Tem certeza que deseja remover esta anotação? 
                             Esta ação não pode ser desfeita.
                           </AlertDialogDescription>
                         </AlertDialogHeader>

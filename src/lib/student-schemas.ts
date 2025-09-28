@@ -106,13 +106,10 @@ export const studentHealthDataSchema = z.object({
 
 // Annotation schema
 export const studentAnnotationSchema = z.object({
-  tipo: z.enum(['anotacao', 'gasto']),
+  tipo: z.enum(['anotacao']),
   categoria: z.string().optional(),
   descricao: z.string().min(1, 'Descrição é obrigatória'),
-  valor: z.number().optional(),
   data_evento: z.string().min(1, 'Data do evento é obrigatória'),
-  data_agendamento: z.string().optional(),
-  observacoes: z.string().optional(),
 });
 
 export type StudentHeaderForm = z.infer<typeof studentHeaderSchema>;
