@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { canAccessModule } from '@/lib/role-access';
 
 export type UserRole = 'aluno' | 'auxiliar' | 'coordenador' | 'diretor' | 'administrador';
 
@@ -14,25 +15,13 @@ export interface UserProfile {
   updated_at: string;
 }
 
-interface Permission {
-  id: string;
-  role: UserRole;
-  module: string;
-  action: string;
-  allowed: boolean;
-  created_at: string;
-}
-
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: UserProfile | null;
-  permissions: Permission[];
   loading: boolean;
   isInitialized: boolean;
-  hasPermission: (module: string, action?: string) => boolean;
   canAccess: (module: string) => boolean;
-  reloadPermissions: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -40,258 +29,177 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Cache permissions by role to avoid repeated requests
-  const [permissionsCache, setPermissionsCache] = useState<Record<UserRole, Permission[]>>({} as Record<UserRole, Permission[]>);
-
-  useEffect(() => {
-    // Initialize auth state
-    initializeAuth();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        // Only synchronous state updates in the callback
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer async operations to avoid deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
-          setPermissions([]);
-          setLoading(false);
-          setIsInitialized(true);
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
   const initializeAuth = async () => {
     try {
+      console.log('🔄 Initializing auth...');
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.error('Error getting session:', error);
-        return;
+        console.error('❌ Error getting session:', error);
+        throw error;
       }
 
       if (session?.user) {
+        console.log('✅ Session found, fetching profile...');
         setSession(session);
         setUser(session.user);
         await fetchUserProfile(session.user.id);
       } else {
-        setLoading(false);
-        setIsInitialized(true);
+        console.log('ℹ️ No active session found');
       }
     } catch (error) {
-      console.error('Error initializing auth:', error);
+      console.error('❌ Failed to initialize auth:', error);
+    } finally {
       setLoading(false);
       setIsInitialized(true);
+      console.log('✅ Auth initialization complete');
     }
   };
 
   const fetchUserProfile = async (userId: string) => {
+    console.log('🔍 Fetching user profile for:', userId);
     try {
-      const { data: profileData, error: profileError } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
 
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        setProfile(null);
-        setPermissions([]);
-        return;
-      }
-
-      setProfile(profileData);
-      
-      if (profileData?.role) {
-        await fetchPermissions(profileData.role);
-      }
-    } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      setProfile(null);
-      setPermissions([]);
-    } finally {
-      setLoading(false);
-      setIsInitialized(true);
-    }
-  };
-
-  const fetchPermissions = async (role: UserRole) => {
-    console.log('🔍 Fetching permissions for role:', role);
-    try {
-      // Check cache first
-      if (permissionsCache[role]) {
-        console.log('💾 Using cached permissions for role:', role);
-        setPermissions(permissionsCache[role]);
-        return;
-      }
-
-      console.log('📡 Fetching fresh permissions for role:', role);
-      
-      const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .eq('role', role)
-        .eq('allowed', true);
-
       if (error) {
-        console.error('❌ Permission fetch error:', error);
+        console.error('❌ Error fetching profile:', error);
         throw error;
       }
-      
-      const fetchedPermissions = data || [];
-      console.log('✅ Permissions fetched:', fetchedPermissions.length);
-      console.table(fetchedPermissions);
-      console.log('📋 Modules available:', [...new Set(fetchedPermissions.map(p => p.module))]);
-      
-      // Cache the permissions
-      setPermissionsCache(prev => ({
-        ...prev,
-        [role]: fetchedPermissions
-      }));
-      
-      setPermissions(fetchedPermissions);
+
+      console.log('✅ Profile fetched successfully:', data);
+      setProfile(data);
+      return data;
     } catch (error) {
-      console.error('❌ Error fetching permissions:', error);
-      setPermissions([]);
+      console.error('❌ Failed to fetch user profile:', error);
+      setProfile(null);
+      throw error;
     }
   };
 
-  // Função de debug para logs detalhados
-  const debugPermissions = (module: string, action: string = 'read') => {
-    console.log('🔍 Verificando permissão:', { 
-      module, 
-      action, 
-      userRole: profile?.role,
-      totalPermissions: permissions.length,
-      permissionsForModule: permissions.filter(p => p.module === module),
-      specificPermission: permissions.find(p => p.module === module && p.action === action)
-    });
-  };
-
-  const hasPermission = (module: string, action: string = 'read'): boolean => {
-    if (!profile || !permissions.length) {
-      console.log('❌ No profile or permissions:', { profile: !!profile, permissions: permissions.length });
-      return false;
-    }
-
-    const hasAccess = permissions.some(
-      (permission) =>
-        permission.module === module &&
-        permission.action === action &&
-        permission.allowed
-    );
-
-    if (!hasAccess) {
-      console.log(`❌ Permission denied: ${module}.${action}`);
-      console.log('Available permissions:', permissions.map(p => `${p.module}.${p.action}`));
-    } else {
-      console.log(`✅ Permission granted: ${module}.${action}`);
-    }
-    
-    return hasAccess;
-  };
-
+  // Função simplificada para verificar acesso a módulos baseado no role
   const canAccess = (module: string): boolean => {
-    if (!profile || !permissions.length) {
-      console.log('❌ No profile or permissions for canAccess:', { profile: !!profile, permissions: permissions.length });
-      return false;
-    }
-
-    // Check if has read permission for the module
-    const hasAccess = permissions.some(
-      (permission) =>
-        permission.module === module &&
-        permission.action === 'read' &&
-        permission.allowed
-    );
-
-    if (!hasAccess) {
-      console.log(`❌ Module access denied: ${module}`);
-      console.log('Module permissions:', permissions.filter(p => p.module === module));
-    } else {
-      console.log(`✅ Module access granted: ${module}`);
-    }
-    
-    return hasAccess;
-  };
-
-  // Função para forçar reload das permissões (útil para debug)
-  const reloadPermissions = async () => {
-    if (profile?.role) {
-      console.log('🔄 Forcing permissions reload for role:', profile.role);
-      setPermissionsCache({} as Record<UserRole, Permission[]>);
-      setPermissions([]); // Clear current permissions first
-      await fetchPermissions(profile.role);
-    } else {
-      console.log('❌ Cannot reload permissions: no profile or role');
-    }
+    const access = canAccessModule(profile?.role, module);
+    console.log(`🔍 Role-based access check - ${profile?.role} can access ${module}:`, access);
+    return access;
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    console.log('🔑 Attempting sign in for:', email);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('❌ Sign in error:', error);
+        return { error };
+      }
+
+      console.log('✅ Sign in successful');
+      return { error: null };
+    } catch (error) {
+      console.error('❌ Sign in failed:', error);
+      return { error };
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
+    console.log('📝 Attempting sign up for:', email);
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
-    return { error };
+      });
+
+      if (error) {
+        console.error('❌ Sign up error:', error);
+        return { error };
+      }
+
+      console.log('✅ Sign up successful');
+      return { error: null };
+    } catch (error) {
+      console.error('❌ Sign up failed:', error);
+      return { error };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setPermissions([]);
-    setPermissionsCache({} as Record<UserRole, Permission[]>);
+    console.log('👋 Signing out...');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('❌ Sign out error:', error);
+        throw error;
+      }
+      
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      console.log('✅ Sign out successful');
+    } catch (error) {
+      console.error('❌ Sign out failed:', error);
+      throw error;
+    }
   };
+
+  useEffect(() => {
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('🔄 Auth state changed:', event);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          // Defer profile fetching to avoid potential deadlock
+          setTimeout(() => {
+            fetchUserProfile(session.user.id).catch(error => {
+              console.error('❌ Failed to fetch profile after auth change:', error);
+            });
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    return () => {
+      console.log('🧹 Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const value: AuthContextType = {
     user,
     session,
     profile,
-    permissions,
     loading,
     isInitialized,
-    hasPermission,
     canAccess,
-    reloadPermissions,
     signIn,
     signUp,
     signOut,

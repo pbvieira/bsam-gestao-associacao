@@ -15,9 +15,9 @@ const Calendar = () => {
   const calendarRef = useRef<CalendarViewRef>(null);
 
   const { events, loading } = useCalendar();
-  const { hasPermission } = useAuth();
+  const { canAccess } = useAuth();
 
-  const canCreateEvents = hasPermission('calendar', 'create');
+  const canCreateEvents = canAccess('calendar');
 
   const handleEventCreated = () => {
     setIsFormOpen(false);

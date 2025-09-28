@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useStudents } from '@/hooks/use-students';
-import { usePermissions } from '@/hooks/use-permissions';
+import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PermissionButton } from '@/components/ui/permission-button';
-import { PermissionLink } from '@/components/ui/permission-link';
 import {
   Table,
   TableBody,
@@ -43,10 +41,14 @@ interface StudentListProps {
 
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
   const { students, loading, deactivateStudent } = useStudents();
-  const { canCreate, canUpdate, canDelete } = usePermissions();
+  const { canAccess } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('nome_completo');
+
+  const canCreate = canAccess('students');
+  const canUpdate = canAccess('students');
+  const canDelete = canAccess('students');
 
   const filteredStudents = students
     .filter(student => {
@@ -186,15 +188,14 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                 Gestão completa dos assistidos da associação
               </CardDescription>
             </div>
-            <PermissionButton
-              hasPermission={canCreate('students')}
-              permissionMessage="Você não tem permissão para criar alunos"
+            <Button
+              disabled={!canCreate}
               onClick={onCreateStudent}
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
               Novo Aluno
-            </PermissionButton>
+            </Button>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -245,15 +246,14 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                 }
               </p>
               {!searchTerm && statusFilter === 'all' && (
-                <PermissionButton
-                  hasPermission={canCreate('students')}
-                  permissionMessage="Você não tem permissão para criar alunos"
+                <Button
+                  disabled={!canCreate}
                   onClick={onCreateStudent}
                   className="gap-2"
                 >
                   <Plus className="h-4 w-4" />
                   Cadastrar Primeiro Aluno
-                </PermissionButton>
+                </Button>
               )}
             </div>
           ) : (
@@ -317,26 +317,28 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          <PermissionLink
-                            hasPermission={canUpdate('students')}
-                            permissionMessage="Você não tem permissão para editar alunos"
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canUpdate}
                             onClick={() => onEditStudent(student)}
                             className="gap-1"
                           >
                             <Edit className="h-3 w-3" />
                             Editar
-                          </PermissionLink>
+                          </Button>
                           
                           {student.ativo && (
-                            <PermissionLink
-                              hasPermission={canDelete('students')}
-                              permissionMessage="Você não tem permissão para desativar alunos"
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!canDelete}
                               onClick={() => handleDeactivate(student.id)}
                               className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                             >
                               <UserX className="h-3 w-3" />
                               Desativar
-                            </PermissionLink>
+                            </Button>
                           )}
                         </div>
                       </TableCell>

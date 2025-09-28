@@ -15,9 +15,9 @@ const Tasks = () => {
   const [editingTask, setEditingTask] = useState<string | null>(null);
 
   const { tasks, loading } = useTasks();
-  const { hasPermission } = useAuth();
+  const { canAccess } = useAuth();
 
-  const canCreateTasks = hasPermission('tasks', 'create');
+  const canCreateTasks = canAccess('tasks');
 
   const handleTaskCreated = () => {
     setIsFormOpen(false);

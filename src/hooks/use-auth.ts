@@ -1,3 +1,2 @@
-// This hook is now just a re-export of the context hook
-// All auth logic has been moved to AuthContext for global state management
+// Simplified auth hook - re-export from context
 export { useAuth, type UserRole, type UserProfile } from '@/contexts/AuthContext';

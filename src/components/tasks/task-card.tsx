@@ -17,11 +17,11 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onEdit, variant = 'list' }: TaskCardProps) {
   const { updateTask, deleteTask } = useTasks();
-  const { user, hasPermission } = useAuth();
+  const { user, canAccess } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const canEditTask = task.created_by === user?.id || task.assigned_to === user?.id || hasPermission('tasks', 'update');
-  const canDeleteTask = task.created_by === user?.id || hasPermission('tasks', 'delete');
+  const canEditTask = task.created_by === user?.id || task.assigned_to === user?.id || canAccess('tasks');
+  const canDeleteTask = task.created_by === user?.id || canAccess('tasks');
   const isBoard = variant === 'board';
 
   const priorityColors = {

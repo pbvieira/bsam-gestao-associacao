@@ -1,7 +1,6 @@
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Navigate, useLocation } from 'react-router-dom';
-import { PermissionDenied } from './permission-denied';
 import { useEffect, useState } from 'react';
 
 interface UnifiedRouteProps {
@@ -17,11 +16,11 @@ export function UnifiedRoute({
   action = 'read',
   allowGuests = false 
 }: UnifiedRouteProps) {
-  const { user, loading, isInitialized, hasPermission, canAccess, profile, permissions } = useAuth();
+  const { user, loading, isInitialized, canAccess, profile } = useAuth();
   const location = useLocation();
   const [debugInfo, setDebugInfo] = useState<any>(null);
 
-  // Debug detalhado das permissões
+  // Debug simplificado baseado em roles
   useEffect(() => {
     if (isInitialized && user && profile) {
       const debug = {
@@ -29,15 +28,12 @@ export function UnifiedRoute({
         module,
         action,
         userRole: profile.role,
-        totalPermissions: permissions.length,
-        hasPermissionResult: module ? hasPermission(module, action) : true,
         canAccessResult: module ? canAccess(module) : true,
-        relevantPermissions: module ? permissions.filter(p => p.module === module) : []
       };
       setDebugInfo(debug);
       console.log('🔍 UnifiedRoute Debug:', debug);
     }
-  }, [isInitialized, user, profile, permissions, location.pathname, module, action, hasPermission, canAccess]);
+  }, [isInitialized, user, profile, location.pathname, module, action, canAccess]);
 
   // Loading state
   if (loading || !isInitialized) {
@@ -67,12 +63,21 @@ export function UnifiedRoute({
     return <>{children}</>;
   }
 
-  // Verificar permissões do módulo
+  // Verificar acesso ao módulo baseado no role
   const hasModuleAccess = canAccess(module);
   
   if (!hasModuleAccess) {
     console.log('❌ Acesso negado ao módulo:', { module, debugInfo });
-    return <PermissionDenied />;
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Acesso Negado</h2>
+          <p className="text-muted-foreground">
+            Você não tem permissão para acessar esta funcionalidade.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Se chegou até aqui, tem acesso

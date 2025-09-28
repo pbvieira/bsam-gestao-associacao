@@ -4,11 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { PermissionButton } from "@/components/ui/permission-button";
-import { PermissionLink } from "@/components/ui/permission-link";
 import { Package, Search, AlertTriangle, Edit, History, Plus } from "lucide-react";
 import { useInventory } from "@/hooks/use-inventory";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAuth } from "@/hooks/use-auth";
 
 interface InventoryListProps {
   onCreateItem: () => void;
@@ -19,7 +17,10 @@ interface InventoryListProps {
 export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: InventoryListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { items, loading, getLowStockItems } = useInventory();
-  const { canCreate, canUpdate } = usePermissions();
+  const { canAccess } = useAuth();
+
+  const canCreate = canAccess('inventory');
+  const canUpdate = canAccess('inventory');
 
   const filteredItems = items.filter(item =>
     item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,15 +92,14 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
                 {searchTerm ? 'Tente ajustar o termo de busca' : 'Comece adicionando seu primeiro item'}
               </p>
               {!searchTerm && (
-                <PermissionButton
-                  hasPermission={canCreate('inventory')}
-                  permissionMessage="Você não tem permissão para criar itens"
+                <Button
+                  disabled={!canCreate}
                   onClick={onCreateItem}
                   className="gap-2"
                 >
                   <Plus className="h-4 w-4" />
                   Adicionar Item
-                </PermissionButton>
+                </Button>
               )}
             </div>
           ) : (
@@ -130,20 +130,18 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <PermissionLink
-                      hasPermission={canUpdate('inventory')}
-                      permissionMessage="Você não tem permissão para editar itens"
+                    <Button
                       variant="outline"
                       size="sm"
+                      disabled={!canUpdate}
                       onClick={() => onEditItem(item)}
                       className="gap-2"
                     >
                       <Edit className="h-4 w-4" />
                       Editar
-                    </PermissionLink>
+                    </Button>
                     
-                    <PermissionLink
-                      hasPermission={true} // Histórico pode ser visualizado por todos
+                    <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onViewMovements(item)}
@@ -151,7 +149,7 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
                     >
                       <History className="h-4 w-4" />
                       Histórico
-                    </PermissionLink>
+                    </Button>
                   </div>
                 </div>
               ))}

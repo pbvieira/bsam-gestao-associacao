@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/hooks/use-auth';
-import { usePermissions } from '@/hooks/use-permissions';
+import { useAuth } from '@/hooks/use-auth';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import {
   Table,
@@ -17,11 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PermissionButton } from '@/components/ui/permission-button';
-import { PermissionLink } from '@/components/ui/permission-link';
 import { Search, Edit, Trash2, UserPlus, KeyRound } from 'lucide-react';
 import { UserForm } from './user-form';
-import { UserPermissionsDialog } from './user-permissions-dialog';
 import { UserCredentialsDialog } from './user-credentials-dialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -60,13 +57,16 @@ const getRoleLabel = (role: string) => {
 export function UserList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserForm, setShowUserForm] = useState(false);
-  const [showPermissions, setShowPermissions] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [adminCount, setAdminCount] = useState<number>(0);
   const { handleError } = useErrorHandler();
   const { toast } = useToast();
-  const { canCreate, canUpdate, canDelete } = usePermissions();
+  const { canAccess } = useAuth();
+
+  const canCreate = canAccess('users');
+  const canUpdate = canAccess('users');
+  const canDelete = canAccess('users');
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users', searchTerm],
@@ -110,11 +110,6 @@ export function UserList() {
   const handleEdit = (user: UserProfile) => {
     setSelectedUser(user);
     setShowUserForm(true);
-  };
-
-  const handlePermissions = (user: UserProfile) => {
-    setSelectedUser(user);
-    setShowPermissions(true);
   };
 
   const handleCredentials = (user: UserProfile) => {
@@ -177,11 +172,6 @@ export function UserList() {
     refetch();
   };
 
-  const handlePermissionsClose = () => {
-    setShowPermissions(false);
-    setSelectedUser(null);
-  };
-
   const handleCredentialsClose = () => {
     setShowCredentials(false);
     setSelectedUser(null);
@@ -216,14 +206,13 @@ export function UserList() {
                 Gerenciar usuários e suas permissões
               </CardDescription>
             </div>
-            <PermissionButton
-              hasPermission={canCreate('users')}
-              permissionMessage="Você não tem permissão para criar usuários"
+            <Button
+              disabled={!canCreate}
               onClick={() => setShowUserForm(true)}
             >
               <UserPlus className="h-4 w-4 mr-2" />
               Novo Usuário
-            </PermissionButton>
+            </Button>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -278,42 +267,33 @@ export function UserList() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center gap-1 justify-end">
-                        <PermissionLink
-                          hasPermission={canUpdate('users')}
-                          permissionMessage="Você não tem permissão para gerenciar permissões"
-                          onClick={() => handlePermissions(user)}
-                        >
-                          Permissões
-                        </PermissionLink>
-                        
-                        <PermissionLink
-                          hasPermission={canUpdate('users')}
-                          permissionMessage="Você não tem permissão para alterar credenciais"
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!canUpdate}
                           onClick={() => handleCredentials(user)}
                         >
                           <KeyRound className="h-4 w-4" />
-                        </PermissionLink>
+                        </Button>
                         
-                        <PermissionLink
-                          hasPermission={canUpdate('users')}
-                          permissionMessage="Você não tem permissão para editar usuários"
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!canUpdate}
                           onClick={() => handleEdit(user)}
                         >
                           <Edit className="h-4 w-4" />
-                        </PermissionLink>
+                        </Button>
                         
-                        <PermissionLink
-                          hasPermission={canDelete('users') && !(user.role === 'administrador' && adminCount <= 1)}
-                          permissionMessage={
-                            !canDelete('users') 
-                              ? "Você não tem permissão para excluir usuários"
-                              : "Não é possível excluir o último administrador"
-                          }
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1)}
                           onClick={() => handleDelete(user)}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </PermissionLink>
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -328,13 +308,6 @@ export function UserList() {
         <UserForm
           user={selectedUser}
           onClose={handleFormClose}
-        />
-      )}
-
-      {showPermissions && selectedUser && (
-        <UserPermissionsDialog
-          user={selectedUser}
-          onClose={handlePermissionsClose}
         />
       )}
 
