@@ -61,6 +61,12 @@ export function usePermissions() {
     });
   };
 
+  // Função para forçar reload completo das permissões
+  const forceReloadPermissions = () => {
+    console.log('🔄 Forcing complete permissions reload...');
+    reloadPermissions();
+  };
+
   return {
     canAccessModule,
     hasSpecificPermission,
@@ -68,6 +74,7 @@ export function usePermissions() {
     getAccessibleModules,
     debugPermissions,
     reloadPermissions,
+    forceReloadPermissions,
     // Funções granulares
     canCreate,
     canUpdate,

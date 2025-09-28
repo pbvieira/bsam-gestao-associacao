@@ -138,15 +138,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const fetchPermissions = async (role: UserRole) => {
+    console.log('🔍 Fetching permissions for role:', role);
     try {
       // Check cache first
       if (permissionsCache[role]) {
-        console.log('Using cached permissions for role:', role);
+        console.log('💾 Using cached permissions for role:', role);
         setPermissions(permissionsCache[role]);
         return;
       }
 
-      console.log('Fetching permissions for role:', role);
+      console.log('📡 Fetching fresh permissions for role:', role);
       
       const { data, error } = await supabase
         .from('permissions')
@@ -155,12 +156,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('allowed', true);
 
       if (error) {
-        console.error('Permission fetch error:', error);
+        console.error('❌ Permission fetch error:', error);
         throw error;
       }
       
       const fetchedPermissions = data || [];
-      console.log('Permissions fetched:', fetchedPermissions.length, fetchedPermissions);
+      console.log('✅ Permissions fetched:', fetchedPermissions.length);
+      console.table(fetchedPermissions);
+      console.log('📋 Modules available:', [...new Set(fetchedPermissions.map(p => p.module))]);
       
       // Cache the permissions
       setPermissionsCache(prev => ({
@@ -170,7 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setPermissions(fetchedPermissions);
     } catch (error) {
-      console.error('Error fetching permissions:', error);
+      console.error('❌ Error fetching permissions:', error);
       setPermissions([]);
     }
   };
@@ -189,12 +192,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const hasPermission = (module: string, action: string = 'read'): boolean => {
     if (!profile || !permissions.length) {
-      console.log('❌ Sem profile ou permissões:', { profile: !!profile, permissions: permissions.length });
+      console.log('❌ No profile or permissions:', { profile: !!profile, permissions: permissions.length });
       return false;
     }
-
-    // Debug detalhado
-    debugPermissions(module, action);
 
     const hasAccess = permissions.some(
       (permission) =>
@@ -203,33 +203,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         permission.allowed
     );
 
-    console.log('✅ Resultado hasPermission:', { module, action, hasAccess });
+    if (!hasAccess) {
+      console.log(`❌ Permission denied: ${module}.${action}`);
+      console.log('Available permissions:', permissions.map(p => `${p.module}.${p.action}`));
+    } else {
+      console.log(`✅ Permission granted: ${module}.${action}`);
+    }
+    
     return hasAccess;
   };
 
   const canAccess = (module: string): boolean => {
     if (!profile || !permissions.length) {
-      console.log('❌ Sem profile ou permissões para canAccess:', { profile: !!profile, permissions: permissions.length });
+      console.log('❌ No profile or permissions for canAccess:', { profile: !!profile, permissions: permissions.length });
       return false;
     }
 
-    // Simplificado: se tem qualquer permissão allowed no módulo, pode acessar
+    // Check if has read permission for the module
     const hasAccess = permissions.some(
       (permission) =>
         permission.module === module &&
+        permission.action === 'read' &&
         permission.allowed
     );
 
-    console.log('✅ Resultado canAccess:', { module, hasAccess, permissionsForModule: permissions.filter(p => p.module === module) });
+    if (!hasAccess) {
+      console.log(`❌ Module access denied: ${module}`);
+      console.log('Module permissions:', permissions.filter(p => p.module === module));
+    } else {
+      console.log(`✅ Module access granted: ${module}`);
+    }
+    
     return hasAccess;
   };
 
   // Função para forçar reload das permissões (útil para debug)
   const reloadPermissions = async () => {
     if (profile?.role) {
-      console.log('🔄 Forçando reload das permissões...');
+      console.log('🔄 Forcing permissions reload for role:', profile.role);
       setPermissionsCache({} as Record<UserRole, Permission[]>);
+      setPermissions([]); // Clear current permissions first
       await fetchPermissions(profile.role);
+    } else {
+      console.log('❌ Cannot reload permissions: no profile or role');
     }
   };
 

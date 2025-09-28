@@ -8,6 +8,7 @@ import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehous
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PermissionsDebug } from "@/components/debug/permissions-debug";
 const navigationItems = [{
   name: "Dashboard",
   href: "/",
@@ -65,6 +66,15 @@ export function AppSidebar() {
     open
   } = useSidebar();
   const navigation = navigationItems.filter(item => canAccessModule(item.module));
+  
+  // Debug log para diagnóstico
+  console.log('🔍 Sidebar Debug:', {
+    userRole: profile?.role,
+    totalItems: navigationItems.length,
+    accessibleItems: navigation.length,
+    filteredOut: navigationItems.filter(item => !canAccessModule(item.module)).map(i => i.module),
+    availableModules: navigation.map(i => i.module)
+  });
   const handleSignOut = async () => {
     await signOut();
   };
@@ -121,6 +131,13 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
+        {/* Debug component - only show in development and when sidebar is open */}
+        {process.env.NODE_ENV === 'development' && open && (
+          <div className="px-2 pb-2">
+            <PermissionsDebug />
+          </div>
+        )}
 
         <SidebarFooter className="border-t border-white/10 pt-4">
           <SidebarMenu>
