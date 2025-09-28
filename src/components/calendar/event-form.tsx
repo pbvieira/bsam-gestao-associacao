@@ -236,7 +236,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
   const totalParticipants = selectedParticipants.length + externalParticipants.length;
 
   return (
-    <div className="max-h-[80vh] overflow-hidden">
+    <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-hidden">
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="basic" className="flex items-center gap-2">
@@ -254,7 +254,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
         </TabsList>
 
         <ScrollArea className="h-[60vh] mt-4">
-          <form onSubmit={handleSubmit} className="space-y-6 pr-4">
+          <div className="space-y-6 pr-4">
             <TabsContent value="basic" className="space-y-4 mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -551,7 +551,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
                 )}
               </div>
             </TabsContent>
-          </form>
+          </div>
         </ScrollArea>
 
         <div className="flex justify-end space-x-2 mt-4 pt-4 border-t">
@@ -561,19 +561,11 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
           <Button 
             type="submit" 
             disabled={loading}
-            onClick={(e) => {
-              e.preventDefault();
-              const form = e.currentTarget.closest('div')?.querySelector('form');
-              if (form) {
-                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                form.dispatchEvent(submitEvent);
-              }
-            }}
           >
             {loading ? "Salvando..." : (isEdit ? "Atualizar" : "Criar")} Evento
           </Button>
         </div>
       </Tabs>
-    </div>
+    </form>
   );
 }
