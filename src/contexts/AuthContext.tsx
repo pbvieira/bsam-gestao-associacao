@@ -20,6 +20,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   isInitialized: boolean;
+  permissionsLoading: boolean;
   canAccess: (module: string) => boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [accessibleModules, setAccessibleModules] = useState<string[]>([]);
 
   const initializeAuth = async () => {
@@ -92,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchAccessibleModules = async (role: UserRole) => {
+    setPermissionsLoading(true);
     try {
       const { data, error } = await supabase
         .from('role_module_access')
@@ -112,6 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('❌ Failed to fetch accessible modules:', error);
       setAccessibleModules(['dashboard']);
+    } finally {
+      setPermissionsLoading(false);
     }
   };
 
@@ -204,15 +209,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Defer profile fetching to avoid potential deadlock
-          setTimeout(() => {
-            fetchUserProfile(session.user.id).catch(error => {
-              console.error('❌ Failed to fetch profile after auth change:', error);
-            });
-          }, 0);
+          // Fetch profile immediately to avoid race condition
+          fetchUserProfile(session.user.id).catch(error => {
+            console.error('❌ Failed to fetch profile after auth change:', error);
+          });
         } else {
           setProfile(null);
           setAccessibleModules([]);
+          setPermissionsLoading(false);
         }
       }
     );
@@ -229,6 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     loading,
     isInitialized,
+    permissionsLoading,
     canAccess,
     signIn,
     signUp,

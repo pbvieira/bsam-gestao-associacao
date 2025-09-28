@@ -16,7 +16,7 @@ export function UnifiedRoute({
   action = 'read',
   allowGuests = false 
 }: UnifiedRouteProps) {
-  const { user, loading, isInitialized, canAccess, profile } = useAuth();
+  const { user, loading, isInitialized, permissionsLoading, canAccess, profile } = useAuth();
   const location = useLocation();
   const [debugInfo, setDebugInfo] = useState<any>(null);
 
@@ -35,14 +35,17 @@ export function UnifiedRoute({
     }
   }, [isInitialized, user, profile, location.pathname, module, action, canAccess]);
 
-  // Loading state
-  if (loading || !isInitialized) {
+  // Loading state - incluindo carregamento de permissões
+  if (loading || !isInitialized || (user && permissionsLoading && module)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="space-y-4 p-6">
-          <Skeleton className="h-8 w-1/4" />
-          <Skeleton className="h-4 w-1/2" />
+        <div className="space-y-4 p-6 text-center">
+          <Skeleton className="h-8 w-1/4 mx-auto" />
+          <Skeleton className="h-4 w-1/2 mx-auto" />
           <Skeleton className="h-32 w-full" />
+          {permissionsLoading && (
+            <p className="text-sm text-muted-foreground">Verificando permissões...</p>
+          )}
         </div>
       </div>
     );
