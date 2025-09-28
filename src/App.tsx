@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { DynamicRoute } from "@/components/auth/dynamic-route";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
@@ -49,9 +50,9 @@ const App = () => (
             <Route 
               path="/" 
               element={
-                <ProtectedRoute module="dashboard">
+                <DynamicRoute preferredModule="dashboard">
                   <Index />
-                </ProtectedRoute>
+                </DynamicRoute>
               } 
             />
             <Route 

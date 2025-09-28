@@ -1,8 +1,9 @@
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { useNavigationFallback } from '@/hooks/use-navigation-fallback';
+import { PermissionDenied } from './permission-denied';
+import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ export function ProtectedRoute({
   fallback 
 }: ProtectedRouteProps) {
   const { user, loading, isInitialized, hasPermission } = useAuth();
+  const { navigateToAccessible } = useNavigationFallback();
 
   // Show loading while auth is initializing
   if (loading || !isInitialized) {
@@ -42,16 +44,7 @@ export function ProtectedRoute({
     const hasAccess = hasPermission(module, action);
     
     if (!hasAccess) {
-      return fallback || (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <Alert className="max-w-md">
-            <Lock className="h-4 w-4" />
-            <AlertDescription>
-              Você não tem permissão para acessar esta funcionalidade.
-            </AlertDescription>
-          </Alert>
-        </div>
-      );
+      return fallback || <PermissionDenied />;
     }
   }
 
