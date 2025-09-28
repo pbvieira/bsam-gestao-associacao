@@ -37,7 +37,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
+const App = () => {
+  // Force refresh to clear DynamicRoute cache
+  return (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -101,6 +103,7 @@ const App = () => (
       </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
-);
+  );
+};
 
 export default App;
