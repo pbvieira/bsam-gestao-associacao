@@ -16,6 +16,7 @@ import Inventory from "./pages/Inventory";
 import Suppliers from "./pages/Suppliers";
 import Purchases from "./pages/Purchases";
 import Reports from "./pages/Reports";
+import RoleManagement from "./pages/RoleManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -95,6 +96,11 @@ const App = () => {
           <Route path="/relatorios" element={
             <UnifiedRoute module="reports">
               <Reports />
+            </UnifiedRoute>
+          } />
+          <Route path="/gestao-roles" element={
+            <UnifiedRoute module="users">
+              <RoleManagement />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />

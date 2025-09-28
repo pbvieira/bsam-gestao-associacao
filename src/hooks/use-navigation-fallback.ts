@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { getAccessibleModules } from '@/lib/role-access';
+import { useAccessibleModules } from '@/hooks/use-role-access';
 
 const routes = [
   { path: '/', module: 'dashboard', name: 'Dashboard' },
@@ -19,11 +19,11 @@ export function useNavigationFallback() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { modules: accessibleModules } = useAccessibleModules(profile?.role);
 
   const getAccessibleRoutes = () => {
     if (!profile) return [];
     
-    const accessibleModules = getAccessibleModules(profile.role);
     const accessibleRoutes = routes.filter(route => accessibleModules.includes(route.module));
     console.log('🛣️ Rotas acessíveis:', { accessibleModules, accessibleRoutes });
     return accessibleRoutes;

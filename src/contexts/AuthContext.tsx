@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { canAccessModule } from '@/lib/role-access';
 
 export type UserRole = 'aluno' | 'auxiliar' | 'coordenador' | 'diretor' | 'administrador';
 
@@ -35,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [accessibleModules, setAccessibleModules] = useState<string[]>([]);
 
   const initializeAuth = async () => {
     try {
@@ -79,6 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('✅ Profile fetched successfully:', data);
       setProfile(data);
+      
+      // Buscar módulos acessíveis após definir o profile
+      await fetchAccessibleModules(data.role);
+      
       return data;
     } catch (error) {
       console.error('❌ Failed to fetch user profile:', error);
@@ -87,9 +91,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Função simplificada para verificar acesso a módulos baseado no role
+  const fetchAccessibleModules = async (role: UserRole) => {
+    try {
+      const { data, error } = await supabase
+        .from('role_module_access')
+        .select('module')
+        .eq('role', role)
+        .eq('allowed', true);
+
+      if (error) {
+        console.error('❌ Error fetching accessible modules:', error);
+        // Fallback para módulos básicos
+        setAccessibleModules(['dashboard']);
+        return;
+      }
+
+      const modules = data.map(item => item.module);
+      console.log('✅ Accessible modules fetched:', modules);
+      setAccessibleModules(modules);
+    } catch (error) {
+      console.error('❌ Failed to fetch accessible modules:', error);
+      setAccessibleModules(['dashboard']);
+    }
+  };
+
+  // Função simplificada para verificar acesso a módulos baseado no cache local
   const canAccess = (module: string): boolean => {
-    const access = canAccessModule(profile?.role, module);
+    const access = accessibleModules.includes(module);
     console.log(`🔍 Role-based access check - ${profile?.role} can access ${module}:`, access);
     return access;
   };
@@ -157,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setSession(null);
       setProfile(null);
+      setAccessibleModules([]);
       console.log('✅ Sign out successful');
     } catch (error) {
       console.error('❌ Sign out failed:', error);
@@ -183,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setProfile(null);
+          setAccessibleModules([]);
         }
       }
     );
