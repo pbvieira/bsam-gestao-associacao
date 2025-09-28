@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, X, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -155,7 +156,16 @@ export function StudentForm({
                   }) => <FormItem>
                           <FormLabel>Horário de Entrada</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ex: Manhã, Tarde, 14:00" {...field} />
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o horário de entrada" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ENTRE - 00H00 ÀS 12H00">ENTRE - 00H00 ÀS 12H00</SelectItem>
+                                <SelectItem value="ENTRE - 12H01 ÀS 18H00">ENTRE - 12H01 ÀS 18H00</SelectItem>
+                                <SelectItem value="ENTRE - 18H01 ÀS 00H00">ENTRE - 18H01 ÀS 00H00</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />
