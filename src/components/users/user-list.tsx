@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Edit, Trash2, UserPlus, KeyRound } from 'lucide-react';
+import { Search, Edit, Trash2, UserPlus, KeyRound, UserX } from 'lucide-react';
 import { UserForm } from './user-form';
 import { UserCredentialsDialog } from './user-credentials-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -117,7 +117,7 @@ export function UserList() {
     setShowCredentials(true);
   };
 
-  const handleDelete = async (user: UserProfile) => {
+  const handleDeactivate = async (user: UserProfile) => {
     try {
       // Verificar se é administrador e se é o último
       if (user.role === 'administrador') {
@@ -158,6 +158,68 @@ export function UserList() {
       toast({
         title: "Usuário desativado",
         description: "O usuário foi desativado com sucesso.",
+      });
+      
+      refetch();
+    } catch (error) {
+      handleError(error, 'database');
+    }
+  };
+
+  const handlePermanentDelete = async (user: UserProfile) => {
+    try {
+      // Verificar se é administrador e se é o último
+      if (user.role === 'administrador') {
+        const { data: adminCount, error: countError } = await supabase
+          .rpc('count_active_admins');
+
+        if (countError) {
+          console.error('Erro ao contar administradores:', countError);
+          toast({
+            title: "Erro",
+            description: "Não foi possível verificar os administradores do sistema.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (adminCount <= 1) {
+          toast({
+            title: "Ação não permitida",
+            description: "Não é possível excluir o último administrador do sistema. Deve haver pelo menos um administrador ativo.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      const firstConfirm = confirm(
+        `⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n` +
+        `Você está prestes a EXCLUIR PERMANENTEMENTE o usuário:\n` +
+        `${user.full_name}\n\n` +
+        `Todos os dados associados a este usuário serão removidos do sistema.\n\n` +
+        `Deseja continuar?`
+      );
+
+      if (!firstConfirm) return;
+
+      const secondConfirm = confirm(
+        `Digite "EXCLUIR" para confirmar a exclusão permanente do usuário ${user.full_name}.\n\n` +
+        `Esta é sua última chance de cancelar!`
+      );
+
+      if (!secondConfirm) return;
+
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Usuário excluído",
+        description: "O usuário foi excluído permanentemente do sistema.",
       });
       
       refetch();
@@ -285,12 +347,24 @@ export function UserList() {
                           <Edit className="h-4 w-4" />
                         </Button>
                         
+                        {user.active && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1)}
+                            onClick={() => handleDeactivate(user)}
+                            className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                          >
+                            <UserX className="h-4 w-4" />
+                          </Button>
+                        )}
+                        
                         <Button
                           variant="ghost"
                           size="sm"
                           disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1)}
-                          onClick={() => handleDelete(user)}
-                          className="text-destructive hover:text-destructive"
+                          onClick={() => handlePermanentDelete(user)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

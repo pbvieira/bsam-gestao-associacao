@@ -29,7 +29,8 @@ import {
   UserX, 
   Calendar,
   Phone,
-  Filter
+  Filter,
+  Trash2
 } from 'lucide-react';
 import { format, differenceInYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -40,7 +41,7 @@ interface StudentListProps {
 }
 
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
-  const { students, loading, deactivateStudent } = useStudents();
+  const { students, loading, deactivateStudent, deleteStudent } = useStudents();
   const { canAccess } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -95,6 +96,32 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
     if (confirm('Tem certeza que deseja desativar este aluno?')) {
       await deactivateStudent(studentId);
     }
+  };
+
+  const handlePermanentDelete = async (studentId: string, studentName: string) => {
+    const firstConfirm = confirm(
+      `⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n` +
+      `Você está prestes a EXCLUIR PERMANENTEMENTE o aluno:\n` +
+      `${studentName}\n\n` +
+      `Todos os dados associados a este aluno serão removidos do sistema, incluindo:\n` +
+      `- Dados básicos e complementares\n` +
+      `- Anotações e histórico\n` +
+      `- Documentos anexados\n` +
+      `- Contatos de emergência\n` +
+      `- Informações de saúde e trabalho\n\n` +
+      `Deseja continuar?`
+    );
+
+    if (!firstConfirm) return;
+
+    const secondConfirm = confirm(
+      `Digite "EXCLUIR" para confirmar a exclusão permanente do aluno ${studentName}.\n\n` +
+      `Esta é sua última chance de cancelar!`
+    );
+
+    if (!secondConfirm) return;
+
+    await deleteStudent(studentId);
   };
 
   if (loading) {
@@ -340,6 +367,17 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                               Desativar
                             </Button>
                           )}
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canDelete}
+                            onClick={() => handlePermanentDelete(student.id, student.nome_completo)}
+                            className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Excluir
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

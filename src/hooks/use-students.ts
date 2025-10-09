@@ -115,6 +115,21 @@ export function useStudents() {
     }
   };
 
+  const deleteStudent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      await fetchStudents(); // Refresh list
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message };
+    }
+  };
+
   return {
     students,
     loading,
@@ -122,6 +137,7 @@ export function useStudents() {
     fetchStudents,
     createStudent,
     updateStudent,
-    deactivateStudent
+    deactivateStudent,
+    deleteStudent
   };
 }
