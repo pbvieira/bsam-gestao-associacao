@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStudents } from '@/hooks/use-students';
 import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +44,7 @@ interface StudentListProps {
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
   const { students, loading, deactivateStudent, deleteStudent } = useStudents();
   const { canAccess } = useAuth();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('nome_completo');
@@ -94,7 +96,19 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
 
   const handleDeactivate = async (studentId: string) => {
     if (confirm('Tem certeza que deseja desativar este aluno?')) {
-      await deactivateStudent(studentId);
+      const result = await deactivateStudent(studentId);
+      if (result.error) {
+        toast({
+          title: "Erro ao desativar",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Aluno desativado",
+          description: "O aluno foi desativado com sucesso.",
+        });
+      }
     }
   };
 
@@ -121,7 +135,19 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
 
     if (!secondConfirm) return;
 
-    await deleteStudent(studentId);
+    const result = await deleteStudent(studentId);
+    if (result.error) {
+      toast({
+        title: "Erro ao excluir",
+        description: result.error,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Aluno excluído",
+        description: "O aluno foi excluído permanentemente do sistema.",
+      });
+    }
   };
 
   if (loading) {
