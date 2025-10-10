@@ -240,15 +240,11 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-hidden">
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="basic" className="flex items-center gap-2">
+      <Tabs defaultValue="info" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="info" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
-            Básico
-          </TabsTrigger>
-          <TabsTrigger value="datetime" className="flex items-center gap-2">
-            <CalendarTabIcon className="w-4 h-4" />
-            Agenda
+            Informações do Evento
           </TabsTrigger>
           <TabsTrigger value="participants" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
@@ -258,7 +254,8 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
 
         <ScrollArea className="h-[60vh] mt-4">
           <div className="space-y-6 pr-4">
-            <TabsContent value="basic" className="space-y-4 mt-0">
+            <TabsContent value="info" className="space-y-4 mt-0">
+              {/* Título e Tipo */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="titulo">Título *</Label>
@@ -289,38 +286,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="descricao">Descrição</Label>
-                <Textarea
-                  id="descricao"
-                  value={formData.descricao}
-                  onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
-                  placeholder="Descrição do evento"
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="location">Local</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="Local do evento"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="all_day"
-                  checked={formData.all_day}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, all_day: !!checked }))}
-                />
-                <Label htmlFor="all_day">Evento de dia inteiro</Label>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="datetime" className="space-y-4 mt-0">
+              {/* Datas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Data de Início</Label>
@@ -377,6 +343,17 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
                 </div>
               </div>
 
+              {/* Checkbox Evento de Dia Inteiro */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="all_day"
+                  checked={formData.all_day}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, all_day: !!checked }))}
+                />
+                <Label htmlFor="all_day">Evento de dia inteiro</Label>
+              </div>
+
+              {/* Horários (condicionais) */}
               {!formData.all_day && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -409,6 +386,30 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
                 </div>
               )}
 
+              {/* Local */}
+              <div className="space-y-2">
+                <Label htmlFor="location">Local</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Local do evento"
+                />
+              </div>
+
+              {/* Descrição */}
+              <div className="space-y-2">
+                <Label htmlFor="descricao">Descrição</Label>
+                <Textarea
+                  id="descricao"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
+                  placeholder="Descrição do evento"
+                  rows={3}
+                />
+              </div>
+
+              {/* Recorrência */}
               <div className="space-y-2">
                 <Label>Repetir</Label>
                 <Select 
@@ -426,6 +427,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
                 </Select>
               </div>
 
+              {/* Repetir Até (condicional) */}
               {formData.recurrence_type !== 'none' && (
                 <div className="space-y-2">
                   <Label>Repetir até</Label>
