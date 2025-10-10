@@ -611,11 +611,12 @@ export type Database = {
       student_basic_data: {
         Row: {
           bairro: string | null
-          batizado: boolean | null
+          batizado: string | null
           cartao_sus: string | null
           cep: string | null
           cidade: string | null
           cidade_nascimento: string | null
+          cidade_reside: string | null
           comarca_juridica: string | null
           created_at: string
           data_nascimento_conjuge: string | null
@@ -629,6 +630,9 @@ export type Database = {
           estado_mae: string | null
           estado_nascimento: string | null
           estado_pai: string | null
+          estado_reside: string | null
+          estuda: boolean | null
+          ha_processos: boolean | null
           id: string
           nome_conjuge: string | null
           nome_mae: string | null
@@ -644,11 +648,12 @@ export type Database = {
         }
         Insert: {
           bairro?: string | null
-          batizado?: boolean | null
+          batizado?: string | null
           cartao_sus?: string | null
           cep?: string | null
           cidade?: string | null
           cidade_nascimento?: string | null
+          cidade_reside?: string | null
           comarca_juridica?: string | null
           created_at?: string
           data_nascimento_conjuge?: string | null
@@ -662,6 +667,9 @@ export type Database = {
           estado_mae?: string | null
           estado_nascimento?: string | null
           estado_pai?: string | null
+          estado_reside?: string | null
+          estuda?: boolean | null
+          ha_processos?: boolean | null
           id?: string
           nome_conjuge?: string | null
           nome_mae?: string | null
@@ -677,11 +685,12 @@ export type Database = {
         }
         Update: {
           bairro?: string | null
-          batizado?: boolean | null
+          batizado?: string | null
           cartao_sus?: string | null
           cep?: string | null
           cidade?: string | null
           cidade_nascimento?: string | null
+          cidade_reside?: string | null
           comarca_juridica?: string | null
           created_at?: string
           data_nascimento_conjuge?: string | null
@@ -695,6 +704,9 @@ export type Database = {
           estado_mae?: string | null
           estado_nascimento?: string | null
           estado_pai?: string | null
+          estado_reside?: string | null
+          estuda?: boolean | null
+          ha_processos?: boolean | null
           id?: string
           nome_conjuge?: string | null
           nome_mae?: string | null
