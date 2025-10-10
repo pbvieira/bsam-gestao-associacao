@@ -10,6 +10,8 @@ export const studentHeaderSchema = z.object({
   rg: z.string().optional(),
   nome_responsavel: z.string().optional(),
   parentesco_responsavel: z.string().optional(),
+  data_abertura: z.string().optional(),
+  data_saida: z.string().optional(),
 });
 
 // Basic data schema

@@ -20,6 +20,63 @@ import { StudentContactsTab } from './tabs/student-contacts-tab';
 import { StudentHealthTab } from './tabs/student-health-tab';
 import { StudentAnnotationsTab } from './tabs/student-annotations-tab';
 import { StudentDocumentsTab } from './tabs/student-documents-tab';
+
+const PARENTESCO_OPTIONS = [
+  "PAI",
+  "MÃE",
+  "AVÔ",
+  "AVÓ",
+  "IRMÃO(A)",
+  "TIO(A)",
+  "PASTOR",
+  "ASSISTENTE SOCIAL",
+  "ENCAMINHADO AD SEDE",
+  "ESPOSA",
+  "MADRINHA",
+  "PADRINHO",
+  "SOBRINHO(A)",
+  "ENTEADO(A)",
+  "FILHO(A)",
+  "GENRO",
+  "SOGRO(A)",
+  "DESCONHECIDO",
+  "PADRASTO",
+  "MADASTRA",
+  "AMIGO(A)"
+];
+
+const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string => {
+  if (!dataAbertura) return '';
+  
+  const inicio = new Date(dataAbertura);
+  const fim = dataSaida ? new Date(dataSaida) : new Date();
+  
+  const diffMs = fim.getTime() - inicio.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return 'Data inválida';
+  if (diffDays === 0) return 'Hoje';
+  if (diffDays === 1) return '1 dia';
+  if (diffDays < 30) return `${diffDays} dias`;
+  
+  if (diffDays < 365) {
+    const meses = Math.floor(diffDays / 30);
+    const dias = diffDays % 30;
+    if (dias === 0) return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+    return `${meses} ${meses === 1 ? 'mês' : 'meses'} e ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+  }
+  
+  const anos = Math.floor(diffDays / 365);
+  const restoDias = diffDays % 365;
+  const meses = Math.floor(restoDias / 30);
+  const dias = restoDias % 30;
+  
+  let result = `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+  if (meses > 0) result += `, ${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+  if (dias > 0) result += ` e ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+  
+  return result;
+};
 interface StudentFormProps {
   student?: any;
   onSuccess: () => void;
@@ -51,9 +108,25 @@ export function StudentForm({
       cpf: student?.cpf || '',
       rg: student?.rg || '',
       nome_responsavel: student?.nome_responsavel || '',
-      parentesco_responsavel: student?.parentesco_responsavel || ''
+      parentesco_responsavel: student?.parentesco_responsavel || '',
+      data_abertura: student?.data_abertura || '',
+      data_saida: student?.data_saida || ''
     }
   });
+
+  // Auto-fill data_abertura when creating new student
+  useEffect(() => {
+    if (!student && !form.getValues('data_abertura')) {
+      const now = new Date();
+      const formatted = now.toISOString().slice(0, 16);
+      form.setValue('data_abertura', formatted);
+    }
+  }, [student, form]);
+
+  // Watch for changes to calculate permanencia
+  const dataAbertura = form.watch('data_abertura');
+  const dataSaida = form.watch('data_saida');
+  const permanencia = calculatePermanencia(dataAbertura, dataSaida);
   const onSubmit = async (data: StudentHeaderForm) => {
     setIsSubmitting(true);
     try {
@@ -65,9 +138,9 @@ export function StudentForm({
           nome_completo: data.nome_completo || '',
           data_nascimento: data.data_nascimento || '',
           ativo: true,
-          data_abertura: new Date().toISOString().split('T')[0],
-          data_saida: null,
-          hora_saida: null,
+          data_abertura: data.data_abertura ? data.data_abertura.split('T')[0] : new Date().toISOString().split('T')[0],
+          data_saida: data.data_saida ? data.data_saida.split('T')[0] : null,
+          hora_saida: data.data_saida ? data.data_saida.split('T')[1]?.slice(0, 5) : null,
           numero_interno: data.numero_interno,
           hora_entrada: data.hora_entrada,
           cpf: data.cpf,
@@ -170,11 +243,19 @@ export function StudentForm({
                           <FormMessage />
                         </FormItem>} />
 
-                    <div></div> {/* Spacer */}
+                    <FormField control={form.control} name="data_abertura" render={({
+                    field
+                  }) => <FormItem>
+                          <FormLabel>Data de Abertura</FormLabel>
+                          <FormControl>
+                            <Input type="datetime-local" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />
 
                     <FormField control={form.control} name="nome_completo" render={({
                     field
-                  }) => <FormItem className="md:col-span-2">
+                  }) => <FormItem className="lg:col-span-3">
                           <FormLabel>Nome Completo *</FormLabel>
                           <FormControl>
                             <Input placeholder="Nome completo do aluno" {...field} />
@@ -191,6 +272,27 @@ export function StudentForm({
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />
+
+                    <FormField control={form.control} name="data_saida" render={({
+                    field
+                  }) => <FormItem>
+                          <FormLabel>Data e Hora de Saída</FormLabel>
+                          <FormControl>
+                            <Input type="datetime-local" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>} />
+
+                    <FormItem>
+                      <FormLabel>Permanência</FormLabel>
+                      <FormControl>
+                        <Input 
+                          value={permanencia} 
+                          disabled 
+                          className="bg-muted"
+                        />
+                      </FormControl>
+                    </FormItem>
 
                     <FormField control={form.control} name="cpf" render={({
                     field
@@ -212,9 +314,11 @@ export function StudentForm({
                           <FormMessage />
                         </FormItem>} />
 
+                    <div></div> {/* Spacer */}
+
                     <FormField control={form.control} name="nome_responsavel" render={({
                     field
-                  }) => <FormItem>
+                  }) => <FormItem className="lg:col-span-2">
                           <FormLabel>Nome do Responsável</FormLabel>
                           <FormControl>
                             <Input placeholder="Nome da pessoa de referência" {...field} />
@@ -227,7 +331,18 @@ export function StudentForm({
                   }) => <FormItem>
                           <FormLabel>Parentesco do Responsável</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ex: Pai, Mãe, Irmão, etc." {...field} />
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o parentesco" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PARENTESCO_OPTIONS.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />
