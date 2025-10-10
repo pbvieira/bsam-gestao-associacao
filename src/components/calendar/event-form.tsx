@@ -57,9 +57,12 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
     location: '',
   });
 
-  // Initialize form data based on selectedDate or existing event
+  const isEdit = !!eventId;
+  const currentEvent = isEdit ? events.find(e => e.id === eventId) : null;
+
+  // Initialize form data based on selectedDate (only for new events)
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && !isEdit) {
       // Criar data local sem problemas de timezone
       const localDate = new Date(
         selectedDate.getFullYear(), 
@@ -75,10 +78,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
         hora_fim: '10:00'
       }));
     }
-  }, [selectedDate]);
-
-  const isEdit = !!eventId;
-  const currentEvent = isEdit ? events.find(e => e.id === eventId) : null;
+  }, [selectedDate, isEdit]);
 
   // Carregar usuários
   useEffect(() => {
@@ -100,9 +100,9 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
     fetchUsers();
   }, []);
 
-  // Carregar dados do evento para edição
+  // Carregar dados do evento para edição (only for edit mode)
   useEffect(() => {
-    if (currentEvent) {
+    if (currentEvent && isEdit) {
       const startDate = new Date(currentEvent.data_inicio);
       const endDate = new Date(currentEvent.data_fim);
       
@@ -129,7 +129,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
         );
       }
     }
-  }, [currentEvent]);
+  }, [currentEvent, isEdit]);
 
   // Funções para gerenciar participantes externos
   const addExternalParticipant = () => {
