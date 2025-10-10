@@ -12,6 +12,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save } from 'lucide-react';
 
+interface Estado {
+  id: number;
+  sigla: string;
+  nome: string;
+}
+
+interface Cidade {
+  id: number;
+  nome: string;
+}
+
 interface StudentBasicDataTabProps {
   studentId?: string;
 }
@@ -20,6 +31,14 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [estados, setEstados] = useState<Estado[]>([]);
+  const [cidadesNascimento, setCidadesNascimento] = useState<Cidade[]>([]);
+  const [cidadesReside, setCidadesReside] = useState<Cidade[]>([]);
+  const [cidadesEndereco, setCidadesEndereco] = useState<Cidade[]>([]);
+  const [loadingEstados, setLoadingEstados] = useState(true);
+  const [loadingCidadesNascimento, setLoadingCidadesNascimento] = useState(false);
+  const [loadingCidadesReside, setLoadingCidadesReside] = useState(false);
+  const [loadingCidadesEndereco, setLoadingCidadesEndereco] = useState(false);
 
   const form = useForm<StudentBasicDataForm>({
     resolver: zodResolver(studentBasicDataSchema),
@@ -29,6 +48,94 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       ha_processos: false,
     },
   });
+
+  useEffect(() => {
+    setLoadingEstados(true);
+    fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+      .then(response => response.json())
+      .then(data => {
+        const estadosOrdenados = data.sort((a: Estado, b: Estado) => 
+          a.nome.localeCompare(b.nome)
+        );
+        setEstados(estadosOrdenados);
+      })
+      .catch(error => {
+        console.error('Erro ao carregar estados:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao carregar lista de estados',
+          variant: 'destructive',
+        });
+      })
+      .finally(() => setLoadingEstados(false));
+  }, []);
+
+  useEffect(() => {
+    const estado = form.watch('estado');
+    if (estado) {
+      setLoadingCidadesEndereco(true);
+      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios`)
+        .then(response => response.json())
+        .then(data => {
+          const cidadesOrdenadas = data.sort((a: Cidade, b: Cidade) => 
+            a.nome.localeCompare(b.nome)
+          );
+          setCidadesEndereco(cidadesOrdenadas);
+        })
+        .catch(error => {
+          console.error('Erro ao carregar cidades:', error);
+          toast({
+            title: 'Erro',
+            description: 'Erro ao carregar lista de cidades',
+            variant: 'destructive',
+          });
+        })
+        .finally(() => setLoadingCidadesEndereco(false));
+    } else {
+      setCidadesEndereco([]);
+      form.setValue('cidade', '');
+    }
+  }, [form.watch('estado')]);
+
+  useEffect(() => {
+    const estadoNascimento = form.watch('estado_nascimento');
+    if (estadoNascimento) {
+      setLoadingCidadesNascimento(true);
+      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoNascimento}/municipios`)
+        .then(response => response.json())
+        .then(data => {
+          const cidadesOrdenadas = data.sort((a: Cidade, b: Cidade) => 
+            a.nome.localeCompare(b.nome)
+          );
+          setCidadesNascimento(cidadesOrdenadas);
+        })
+        .catch(error => console.error('Erro ao carregar cidades de nascimento:', error))
+        .finally(() => setLoadingCidadesNascimento(false));
+    } else {
+      setCidadesNascimento([]);
+      form.setValue('cidade_nascimento', '');
+    }
+  }, [form.watch('estado_nascimento')]);
+
+  useEffect(() => {
+    const estadoReside = form.watch('estado_reside');
+    if (estadoReside) {
+      setLoadingCidadesReside(true);
+      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoReside}/municipios`)
+        .then(response => response.json())
+        .then(data => {
+          const cidadesOrdenadas = data.sort((a: Cidade, b: Cidade) => 
+            a.nome.localeCompare(b.nome)
+          );
+          setCidadesReside(cidadesOrdenadas);
+        })
+        .catch(error => console.error('Erro ao carregar cidades onde reside:', error))
+        .finally(() => setLoadingCidadesReside(false));
+    } else {
+      setCidadesReside([]);
+      form.setValue('cidade_reside', '');
+    }
+  }, [form.watch('estado_reside')]);
 
   useEffect(() => {
     if (studentId) {
@@ -193,9 +300,30 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Cidade</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome da cidade" {...field} />
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={!form.watch('estado') || loadingCidadesEndereco}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              !form.watch('estado') 
+                                ? "Selecione o estado primeiro" 
+                                : loadingCidadesEndereco 
+                                ? "Carregando..." 
+                                : "Selecione"
+                            } />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {cidadesEndereco.map((cidade) => (
+                            <SelectItem key={cidade.id} value={cidade.nome}>
+                              {cidade.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -207,40 +335,25 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Estado</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue('cidade', '');
+                        }} 
+                        value={field.value}
+                        disabled={loadingEstados}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={loadingEstados ? "Carregando..." : "Selecione"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="AC">Acre</SelectItem>
-                          <SelectItem value="AL">Alagoas</SelectItem>
-                          <SelectItem value="AP">Amapá</SelectItem>
-                          <SelectItem value="AM">Amazonas</SelectItem>
-                          <SelectItem value="BA">Bahia</SelectItem>
-                          <SelectItem value="CE">Ceará</SelectItem>
-                          <SelectItem value="DF">Distrito Federal</SelectItem>
-                          <SelectItem value="ES">Espírito Santo</SelectItem>
-                          <SelectItem value="GO">Goiás</SelectItem>
-                          <SelectItem value="MA">Maranhão</SelectItem>
-                          <SelectItem value="MT">Mato Grosso</SelectItem>
-                          <SelectItem value="MS">Mato Grosso do Sul</SelectItem>
-                          <SelectItem value="MG">Minas Gerais</SelectItem>
-                          <SelectItem value="PA">Pará</SelectItem>
-                          <SelectItem value="PB">Paraíba</SelectItem>
-                          <SelectItem value="PR">Paraná</SelectItem>
-                          <SelectItem value="PE">Pernambuco</SelectItem>
-                          <SelectItem value="PI">Piauí</SelectItem>
-                          <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                          <SelectItem value="RN">Rio Grande do Norte</SelectItem>
-                          <SelectItem value="RS">Rio Grande do Sul</SelectItem>
-                          <SelectItem value="RO">Rondônia</SelectItem>
-                          <SelectItem value="RR">Roraima</SelectItem>
-                          <SelectItem value="SC">Santa Catarina</SelectItem>
-                          <SelectItem value="SP">São Paulo</SelectItem>
-                          <SelectItem value="SE">Sergipe</SelectItem>
-                          <SelectItem value="TO">Tocantins</SelectItem>
+                          {estados.map((estado) => (
+                            <SelectItem key={estado.id} value={estado.sigla}>
+                              {estado.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -437,40 +550,25 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Estado Nascimento</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue('cidade_nascimento', '');
+                        }} 
+                        value={field.value}
+                        disabled={loadingEstados}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={loadingEstados ? "Carregando..." : "Selecione"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="AC">Acre</SelectItem>
-                          <SelectItem value="AL">Alagoas</SelectItem>
-                          <SelectItem value="AP">Amapá</SelectItem>
-                          <SelectItem value="AM">Amazonas</SelectItem>
-                          <SelectItem value="BA">Bahia</SelectItem>
-                          <SelectItem value="CE">Ceará</SelectItem>
-                          <SelectItem value="DF">Distrito Federal</SelectItem>
-                          <SelectItem value="ES">Espírito Santo</SelectItem>
-                          <SelectItem value="GO">Goiás</SelectItem>
-                          <SelectItem value="MA">Maranhão</SelectItem>
-                          <SelectItem value="MT">Mato Grosso</SelectItem>
-                          <SelectItem value="MS">Mato Grosso do Sul</SelectItem>
-                          <SelectItem value="MG">Minas Gerais</SelectItem>
-                          <SelectItem value="PA">Pará</SelectItem>
-                          <SelectItem value="PB">Paraíba</SelectItem>
-                          <SelectItem value="PR">Paraná</SelectItem>
-                          <SelectItem value="PE">Pernambuco</SelectItem>
-                          <SelectItem value="PI">Piauí</SelectItem>
-                          <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                          <SelectItem value="RN">Rio Grande do Norte</SelectItem>
-                          <SelectItem value="RS">Rio Grande do Sul</SelectItem>
-                          <SelectItem value="RO">Rondônia</SelectItem>
-                          <SelectItem value="RR">Roraima</SelectItem>
-                          <SelectItem value="SC">Santa Catarina</SelectItem>
-                          <SelectItem value="SP">São Paulo</SelectItem>
-                          <SelectItem value="SE">Sergipe</SelectItem>
-                          <SelectItem value="TO">Tocantins</SelectItem>
+                          {estados.map((estado) => (
+                            <SelectItem key={estado.id} value={estado.sigla}>
+                              {estado.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -484,9 +582,30 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Cidade Nascimento</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Cidade onde nasceu" {...field} />
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={!form.watch('estado_nascimento') || loadingCidadesNascimento}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              !form.watch('estado_nascimento') 
+                                ? "Selecione o estado primeiro" 
+                                : loadingCidadesNascimento 
+                                ? "Carregando..." 
+                                : "Selecione"
+                            } />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {cidadesNascimento.map((cidade) => (
+                            <SelectItem key={cidade.id} value={cidade.nome}>
+                              {cidade.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -498,40 +617,25 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Estado Reside</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue('cidade_reside', '');
+                        }} 
+                        value={field.value}
+                        disabled={loadingEstados}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={loadingEstados ? "Carregando..." : "Selecione"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="AC">Acre</SelectItem>
-                          <SelectItem value="AL">Alagoas</SelectItem>
-                          <SelectItem value="AP">Amapá</SelectItem>
-                          <SelectItem value="AM">Amazonas</SelectItem>
-                          <SelectItem value="BA">Bahia</SelectItem>
-                          <SelectItem value="CE">Ceará</SelectItem>
-                          <SelectItem value="DF">Distrito Federal</SelectItem>
-                          <SelectItem value="ES">Espírito Santo</SelectItem>
-                          <SelectItem value="GO">Goiás</SelectItem>
-                          <SelectItem value="MA">Maranhão</SelectItem>
-                          <SelectItem value="MT">Mato Grosso</SelectItem>
-                          <SelectItem value="MS">Mato Grosso do Sul</SelectItem>
-                          <SelectItem value="MG">Minas Gerais</SelectItem>
-                          <SelectItem value="PA">Pará</SelectItem>
-                          <SelectItem value="PB">Paraíba</SelectItem>
-                          <SelectItem value="PR">Paraná</SelectItem>
-                          <SelectItem value="PE">Pernambuco</SelectItem>
-                          <SelectItem value="PI">Piauí</SelectItem>
-                          <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                          <SelectItem value="RN">Rio Grande do Norte</SelectItem>
-                          <SelectItem value="RS">Rio Grande do Sul</SelectItem>
-                          <SelectItem value="RO">Rondônia</SelectItem>
-                          <SelectItem value="RR">Roraima</SelectItem>
-                          <SelectItem value="SC">Santa Catarina</SelectItem>
-                          <SelectItem value="SP">São Paulo</SelectItem>
-                          <SelectItem value="SE">Sergipe</SelectItem>
-                          <SelectItem value="TO">Tocantins</SelectItem>
+                          {estados.map((estado) => (
+                            <SelectItem key={estado.id} value={estado.sigla}>
+                              {estado.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -545,9 +649,30 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Cidade Reside</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Cidade onde reside" {...field} />
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={!form.watch('estado_reside') || loadingCidadesReside}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              !form.watch('estado_reside') 
+                                ? "Selecione o estado primeiro" 
+                                : loadingCidadesReside 
+                                ? "Carregando..." 
+                                : "Selecione"
+                            } />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {cidadesReside.map((cidade) => (
+                            <SelectItem key={cidade.id} value={cidade.nome}>
+                              {cidade.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
