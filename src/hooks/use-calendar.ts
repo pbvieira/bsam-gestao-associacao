@@ -25,6 +25,12 @@ export interface CalendarEvent {
     full_name: string;
   };
   participants?: EventParticipant[];
+  external_participants?: Array<{
+    id: string;
+    name: string;
+    email: string;
+    status: ParticipantStatus;
+  }>;
 }
 
 export interface EventParticipant {
@@ -56,7 +62,8 @@ export function useCalendar() {
           participants:event_participants(
             *,
             user_profile:profiles!event_participants_user_id_fkey(full_name)
-          )
+          ),
+          external_participants:external_event_participants(*)
         `)
         .order('data_inicio', { ascending: true });
 
@@ -141,6 +148,32 @@ export function useCalendar() {
         if (participantsError) {
           console.error('Error adding participants:', participantsError);
           throw participantsError;
+        }
+      }
+
+      // Adicionar participantes externos ao banco
+      if (externalParticipants.length > 0) {
+        const externalParticipantsData = externalParticipants.map(ext => ({
+          event_id: data.id,
+          name: ext.name,
+          email: ext.email,
+          status: 'pendente' as ParticipantStatus
+        }));
+
+        console.log('Adding external participants:', externalParticipantsData);
+        const { error: externalError } = await supabase
+          .from('external_event_participants')
+          .insert(externalParticipantsData);
+
+        if (externalError) {
+          console.error('Error adding external participants:', externalError);
+          toast({
+            title: "Aviso",
+            description: "Evento criado, mas houve erro ao registrar participantes externos",
+            variant: "destructive",
+          });
+        } else {
+          console.log('External participants added successfully');
         }
       }
 

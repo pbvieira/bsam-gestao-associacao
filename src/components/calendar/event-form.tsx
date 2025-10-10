@@ -120,12 +120,22 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
         location: currentEvent.location || '',
       });
 
-      // Carregar participantes
+      // Carregar participantes internos
       if (currentEvent.participants) {
         setSelectedParticipants(
           currentEvent.participants
             .filter(p => !p.is_organizer)
             .map(p => p.user_id)
+        );
+      }
+
+      // Carregar participantes externos
+      if (currentEvent.external_participants) {
+        setExternalParticipants(
+          currentEvent.external_participants.map(ep => ({
+            name: ep.name,
+            email: ep.email
+          }))
         );
       }
     }
