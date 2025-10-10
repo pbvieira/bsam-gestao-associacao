@@ -133,9 +133,11 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
             isSameDay(day, selectedDate) && "ring-2 ring-primary"
           )}
           onClick={() => {
-            setSelectedDate(new Date(day));
+            // Criar uma nova data local sem problemas de timezone
+            const clickedDate = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+            setSelectedDate(clickedDate);
             setShowingSpecificDay(true);
-            onDateSelect(new Date(day));
+            onDateSelect(clickedDate);
           }}
         >
           <div className="flex items-center justify-between mb-2">

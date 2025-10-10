@@ -60,8 +60,12 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
   // Initialize form data based on selectedDate or existing event
   useEffect(() => {
     if (selectedDate) {
-      // Create a new date object to avoid mutation
-      const localDate = new Date(selectedDate.getTime());
+      // Criar data local sem problemas de timezone
+      const localDate = new Date(
+        selectedDate.getFullYear(), 
+        selectedDate.getMonth(), 
+        selectedDate.getDate()
+      );
       
       setFormData(prev => ({
         ...prev,
