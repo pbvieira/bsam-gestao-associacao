@@ -212,8 +212,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
       onSuccess();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`Erro ao salvar evento: ${errorMessage}`);
+      // O erro já é tratado no hook use-calendar com toast
     } finally {
       setLoading(false);
     }

@@ -8,51 +8,65 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CheckSquare, Clock, AlertCircle, Plus } from "lucide-react";
-import { format, isToday, isPast, isFuture } from "date-fns";
+import { format, isToday, isPast, startOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Task } from "@/hooks/use-tasks";
+
+type TimeFilter = 'day' | 'week' | 'month';
 
 export function TodayTasks() {
   const { tasks, updateTask } = useTasks();
   const { profile } = useAuth();
   const { createQuickTask } = useQuickActions();
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
 
-  const myTasks = tasks.filter(task => 
+  const today = new Date();
+
+  // Filtrar apenas tarefas do usuário atual
+  const userTasks = tasks.filter(task => 
     task.assigned_to === profile?.user_id || task.created_by === profile?.user_id
   );
 
-  const pendingTasks = myTasks.filter(task => task.status === 'pendente');
+  // Filtrar tarefas pendentes
+  const pendingTasks = userTasks.filter(task => task.status === "pendente");
 
-  const todayTasks = pendingTasks.filter(task => {
-    if (!task.data_vencimento) return false;
-    const dueDate = new Date(task.data_vencimento);
-    return isToday(dueDate);
-  });
-
-  const overdueTasks = pendingTasks.filter(task => {
-    if (!task.data_vencimento) return false;
-    const dueDate = new Date(task.data_vencimento);
-    return isPast(dueDate) && !isToday(dueDate);
-  });
-
-  const upcomingTasks = pendingTasks.filter(task => {
-    if (!task.data_vencimento) return false;
-    const dueDate = new Date(task.data_vencimento);
-    return isFuture(dueDate) && !isToday(dueDate);
-  }).slice(0, 5);
-
-  const priorityTasks = pendingTasks.filter(task => 
-    task.prioridade === 'alta'
-  );
-
-  const otherTasks = pendingTasks.filter(task => {
-    if (task.prioridade === 'alta') return false;
-    if (task.data_vencimento) {
-      const dueDate = new Date(task.data_vencimento);
-      return !isToday(dueDate) && !isPast(dueDate) && !isFuture(dueDate);
+  const getFilteredTasks = () => {
+    let startDate: Date;
+    let endDate: Date;
+    
+    switch (timeFilter) {
+      case 'day':
+        startDate = startOfDay(today);
+        endDate = startOfDay(today);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case 'week':
+        startDate = startOfWeek(today, { locale: ptBR });
+        endDate = endOfWeek(today, { locale: ptBR });
+        break;
+      case 'month':
+        startDate = startOfMonth(today);
+        endDate = endOfMonth(today);
+        break;
     }
-    return true; // Tasks without due date
-  }).slice(0, 3);
+    
+    return pendingTasks.filter(task => {
+      if (!task.data_vencimento) return false;
+      const dueDate = new Date(task.data_vencimento);
+      return isWithinInterval(dueDate, { start: startDate, end: endDate });
+    }).sort((a, b) => {
+      // Ordenar por prioridade e data
+      const priorityOrder = { alta: 0, media: 1, baixa: 2 };
+      const priorityDiff = priorityOrder[a.prioridade] - priorityOrder[b.prioridade];
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      if (!a.data_vencimento) return 1;
+      if (!b.data_vencimento) return -1;
+      return new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime();
+    });
+  };
+
+  const filteredTasks = getFilteredTasks();
 
   const handleTaskComplete = async (task: Task) => {
     await updateTask(task.id, {
@@ -93,7 +107,7 @@ export function TodayTasks() {
         {task.data_vencimento && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
-            {format(new Date(task.data_vencimento), "HH:mm", { locale: ptBR })}
+            {format(new Date(task.data_vencimento), "dd/MM 'às' HH:mm", { locale: ptBR })}
           </div>
         )}
       </div>
@@ -103,10 +117,18 @@ export function TodayTasks() {
     </div>
   );
 
+  const getTimeFilterLabel = () => {
+    switch (timeFilter) {
+      case 'day': return 'Hoje';
+      case 'week': return 'Esta Semana';
+      case 'month': return 'Este Mês';
+    }
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <CardTitle className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
             Minhas Tarefas
@@ -116,90 +138,62 @@ export function TodayTasks() {
             Nova
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="mb-4 text-sm text-muted-foreground">
-          Total: {pendingTasks.length} tarefas pendentes
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant={timeFilter === 'day' ? 'default' : 'ghost'}
+            onClick={() => setTimeFilter('day')}
+            className="flex-1 h-8"
+          >
+            Dia
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'week' ? 'default' : 'ghost'}
+            onClick={() => setTimeFilter('week')}
+            className="flex-1 h-8"
+          >
+            Semana
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'month' ? 'default' : 'ghost'}
+            onClick={() => setTimeFilter('month')}
+            className="flex-1 h-8"
+          >
+            Mês
+          </Button>
         </div>
+      </CardHeader>
+      <CardContent className="flex flex-col h-full overflow-hidden">
+        <ScrollArea className="flex-1">
+          <div className="space-y-4 pr-4">
+            {/* Tarefas Filtradas */}
+            {filteredTasks.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-foreground">
+                  {getTimeFilterLabel()} ({filteredTasks.length})
+                </h4>
+                <div className="space-y-2">
+                  {filteredTasks.map(task => {
+                    const isOverdue = task.data_vencimento && isPast(new Date(task.data_vencimento)) && !isToday(new Date(task.data_vencimento));
+                    return (
+                      <TaskItem key={task.id} task={task} showOverdue={isOverdue} />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-        {/* Tarefas Atrasadas */}
-        {overdueTasks.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-danger flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              Atrasadas ({overdueTasks.length})
-            </h4>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {overdueTasks.map(task => (
-                <TaskItem key={task.id} task={task} showOverdue />
-              ))}
-            </div>
+            {filteredTasks.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckSquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
+                <p>Nenhuma tarefa neste período</p>
+                <p className="text-sm">Você está em dia!</p>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Tarefas de Hoje */}
-        {todayTasks.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-foreground">
-              Hoje ({todayTasks.length})
-            </h4>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {todayTasks.map(task => (
-                <TaskItem key={task.id} task={task} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tarefas Prioritárias */}
-        {priorityTasks.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-warning">
-              Prioridade Alta ({priorityTasks.length})
-            </h4>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {priorityTasks.map(task => (
-                <TaskItem key={task.id} task={task} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Próximas Tarefas */}
-        {upcomingTasks.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Próximas ({upcomingTasks.length})
-            </h4>
-            <div className="space-y-2 max-h-[150px] overflow-y-auto">
-              {upcomingTasks.map(task => (
-                <TaskItem key={task.id} task={task} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Outras Tarefas */}
-        {otherTasks.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Outras ({otherTasks.length})
-            </h4>
-            <div className="space-y-2 max-h-[150px] overflow-y-auto">
-              {otherTasks.map(task => (
-                <TaskItem key={task.id} task={task} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {pendingTasks.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <CheckSquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
-            <p>Nenhuma tarefa pendente</p>
-            <p className="text-sm">Você está em dia!</p>
-          </div>
-        )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );

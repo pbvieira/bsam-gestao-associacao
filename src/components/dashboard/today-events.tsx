@@ -1,22 +1,50 @@
+import { useState } from "react";
 import { useCalendar } from "@/hooks/use-calendar";
 import { useQuickActions } from "@/hooks/use-quick-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, Clock, MapPin, Plus, Users } from "lucide-react";
-import { format, isToday, startOfDay, endOfDay } from "date-fns";
+import { Calendar, Clock, MapPin, Plus } from "lucide-react";
+import { format, isToday, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+type TimeFilter = 'day' | 'week' | 'month';
 
 export function TodayEvents() {
   const { events } = useCalendar();
   const { createQuickEvent } = useQuickActions();
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
 
   const today = new Date();
-  const todayEvents = events.filter(event => {
-    const eventStart = new Date(event.data_inicio);
-    return isToday(eventStart);
-  }).sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime());
+  
+  const getFilteredEvents = () => {
+    let startDate: Date;
+    let endDate: Date;
+    
+    switch (timeFilter) {
+      case 'day':
+        startDate = startOfDay(today);
+        endDate = endOfDay(today);
+        break;
+      case 'week':
+        startDate = startOfWeek(today, { locale: ptBR });
+        endDate = endOfWeek(today, { locale: ptBR });
+        break;
+      case 'month':
+        startDate = startOfMonth(today);
+        endDate = endOfMonth(today);
+        break;
+    }
+    
+    return events.filter(event => {
+      const eventStart = new Date(event.data_inicio);
+      return isWithinInterval(eventStart, { start: startDate, end: endDate });
+    }).sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime());
+  };
+
+  const filteredEvents = getFilteredEvents();
+  const todayEvents = events.filter(event => isToday(new Date(event.data_inicio)));
 
   const upcomingEvents = events.filter(event => {
     const eventStart = new Date(event.data_inicio);
@@ -80,10 +108,18 @@ export function TodayEvents() {
     </div>
   );
 
+  const getTimeFilterLabel = () => {
+    switch (timeFilter) {
+      case 'day': return 'Hoje';
+      case 'week': return 'Esta Semana';
+      case 'month': return 'Este Mês';
+    }
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             Minha Agenda
@@ -93,43 +129,55 @@ export function TodayEvents() {
             Agendar
           </Button>
         </div>
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant={timeFilter === 'day' ? 'default' : 'ghost'}
+            onClick={() => setTimeFilter('day')}
+            className="flex-1 h-8"
+          >
+            Dia
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'week' ? 'default' : 'ghost'}
+            onClick={() => setTimeFilter('week')}
+            className="flex-1 h-8"
+          >
+            Semana
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'month' ? 'default' : 'ghost'}
+            onClick={() => setTimeFilter('month')}
+            className="flex-1 h-8"
+          >
+            Mês
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="flex flex-col h-full overflow-hidden">
         <ScrollArea className="flex-1">
           <div className="space-y-4 pr-4">
-            {/* Eventos de Hoje */}
-            {todayEvents.length > 0 && (
+            {/* Eventos Filtrados */}
+            {filteredEvents.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-foreground">
-                  Hoje ({todayEvents.length})
+                  {getTimeFilterLabel()} ({filteredEvents.length})
                 </h4>
                 <div className="space-y-2">
-                  {todayEvents.map(event => (
-                    <EventItem key={event.id} event={event} />
+                  {filteredEvents.map(event => (
+                    <EventItem key={event.id} event={event} showDate={timeFilter !== 'day'} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Próximos Eventos */}
-            {upcomingEvents.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Próximos
-                </h4>
-                <div className="space-y-2">
-                  {upcomingEvents.map(event => (
-                    <EventItem key={event.id} event={event} showDate />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {todayEvents.length === 0 && upcomingEvents.length === 0 && (
+            {filteredEvents.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
-                <p>Nenhum compromisso hoje</p>
-                <p className="text-sm">Sua agenda está livre!</p>
+                <p>Nenhum compromisso</p>
+                <p className="text-sm">Sua agenda está livre neste período!</p>
               </div>
             )}
           </div>
