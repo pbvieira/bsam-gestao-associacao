@@ -19,7 +19,9 @@ const Calendar = () => {
 
   const canCreateEvents = canAccess('calendar');
 
-  const handleEventCreated = () => {
+  const handleEventCreated = async () => {
+    // Aguardar breve momento para garantir que o realtime atualize
+    await new Promise(resolve => setTimeout(resolve, 300));
     setIsFormOpen(false);
     setEditingEvent(null);
     setSelectedDate(null);

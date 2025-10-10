@@ -35,7 +35,7 @@ interface ExternalParticipant {
 }
 
 export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) {
-  const { createEvent, updateEvent, events } = useCalendar();
+  const { createEvent, updateEvent, events, refetch } = useCalendar();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -213,6 +213,8 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
         await createEvent(eventData, selectedParticipants, externalParticipants);
       }
 
+      // Garantir que os dados estão atualizados antes de fechar
+      await refetch();
       onSuccess();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);

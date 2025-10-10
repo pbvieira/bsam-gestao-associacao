@@ -288,6 +288,28 @@ export function useCalendar() {
 
   useEffect(() => {
     fetchEvents();
+
+    // Configurar subscription para atualizações em tempo real
+    const channel = supabase
+      .channel('calendar-events-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'calendar_events'
+        },
+        (payload) => {
+          console.log('Mudança no calendário detectada:', payload);
+          // Recarregar eventos quando houver qualquer mudança
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {
