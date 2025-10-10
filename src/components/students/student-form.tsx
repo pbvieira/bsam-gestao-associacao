@@ -118,7 +118,10 @@ export function StudentForm({
   useEffect(() => {
     if (!student && !form.getValues('data_abertura')) {
       const now = new Date();
-      const formatted = now.toISOString().slice(0, 16);
+      // Ajustar para o fuso horário local (São Paulo)
+      const offset = now.getTimezoneOffset() * 60000;
+      const localDate = new Date(now.getTime() - offset);
+      const formatted = localDate.toISOString().slice(0, 16);
       form.setValue('data_abertura', formatted);
     }
   }, [student, form]);
