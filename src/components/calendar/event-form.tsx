@@ -241,7 +241,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
   const totalParticipants = selectedParticipants.length + externalParticipants.length;
 
   return (
-    <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-hidden">
+    <form onSubmit={handleSubmit} className="max-h-[85vh] overflow-hidden">
       <Tabs defaultValue="info" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="info" className="flex items-center gap-2">
@@ -254,8 +254,8 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
           </TabsTrigger>
         </TabsList>
 
-        <ScrollArea className="h-[60vh] mt-4">
-          <div className="space-y-6 pr-4">
+        <ScrollArea className="h-[65vh] mt-4">
+          <div className="space-y-6 pr-6">
             <TabsContent value="info" className="space-y-4 mt-0">
               {/* Título e Tipo */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -464,7 +464,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
               {/* Usuários Internos */}
               <div className="space-y-3">
                 <Label className="text-base font-medium">Usuários do Sistema</Label>
-                <div className="border rounded-lg p-3 max-h-40 overflow-y-auto bg-background">
+                <div className="border rounded-lg p-3 max-h-48 overflow-y-auto bg-background">
                   {users.length === 0 ? (
                     <p className="text-sm text-muted-foreground">Carregando usuários...</p>
                   ) : (
