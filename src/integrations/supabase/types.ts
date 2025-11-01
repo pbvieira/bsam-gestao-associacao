@@ -1323,30 +1323,12 @@ export type Database = {
         Args: { creator_uuid: string; event_uuid: string }
         Returns: boolean
       }
-      count_active_admins: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_user_email: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
-      is_admin_user: {
-        Args: { check_user_id: string }
-        Returns: boolean
-      }
-      is_event_participant: {
-        Args: { event_uuid: string }
-        Returns: boolean
-      }
-      process_event_reminders: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      count_active_admins: { Args: never; Returns: number }
+      get_current_user_role: { Args: never; Returns: string }
+      get_user_email: { Args: { user_uuid: string }; Returns: string }
+      is_admin_user: { Args: { check_user_id: string }; Returns: boolean }
+      is_event_participant: { Args: { event_uuid: string }; Returns: boolean }
+      process_event_reminders: { Args: never; Returns: undefined }
       update_external_participant_status: {
         Args: {
           p_invite_token: string
