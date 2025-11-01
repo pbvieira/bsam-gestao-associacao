@@ -124,19 +124,80 @@ export function useNotifications() {
 
   const respondToEventInvite = async (eventId: string, response: 'aceito' | 'recusado') => {
     try {
-      const { error } = await supabase
-        .from('event_participants')
-        .update({ status: response })
-        .eq('event_id', eventId)
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
 
-      if (error) throw error;
+      // Buscar informações do evento
+      const { data: eventData, error: eventError } = await supabase
+        .from('calendar_events')
+        .select('titulo, created_by')
+        .eq('id', eventId)
+        .single();
 
-      toast({
-        title: "Sucesso",
-        description: `Convite ${response === 'aceito' ? 'aceito' : 'recusado'} com sucesso`,
-      });
+      if (eventError) throw eventError;
+
+      // Buscar nome do usuário que está respondendo
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const userName = profileData?.full_name || 'Um participante';
+
+      if (response === 'aceito') {
+        // Atualizar status para aceito
+        const { error } = await supabase
+          .from('event_participants')
+          .update({ status: 'aceito' })
+          .eq('event_id', eventId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Convite aceito com sucesso",
+        });
+      } else {
+        // Recusar = remover participante
+        const { error } = await supabase
+          .from('event_participants')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        // Enviar notificação para o criador do evento
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: eventData.created_by,
+            type: 'calendar_update',
+            reference_id: eventId,
+            title: 'Convite recusado',
+            message: `${userName} recusou o convite para o evento "${eventData.titulo}"`,
+            read: false
+          });
+
+        toast({
+          title: "Sucesso",
+          description: "Convite recusado com sucesso",
+        });
+      }
+
+      // Ocultar a notificação do convite
+      const notification = notifications.find(
+        n => n.type === 'calendar_invite' && n.reference_id === eventId
+      );
+      
+      if (notification) {
+        await deleteNotification(notification.id);
+      }
+
     } catch (err) {
+      console.error('Erro ao responder convite:', err);
       toast({
         title: "Erro",
         description: "Erro ao responder convite",

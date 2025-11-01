@@ -136,9 +136,9 @@ export function NotificationCenter() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                respondToEventInvite(notification.reference_id!, 'aceito');
+                                await respondToEventInvite(notification.reference_id!, 'aceito');
                               }}
                               className="h-6 px-2 text-xs"
                             >
@@ -148,9 +148,9 @@ export function NotificationCenter() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                respondToEventInvite(notification.reference_id!, 'recusado');
+                                await respondToEventInvite(notification.reference_id!, 'recusado');
                               }}
                               className="h-6 px-2 text-xs"
                             >
