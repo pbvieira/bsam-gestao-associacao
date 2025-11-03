@@ -46,7 +46,7 @@ export function WorkspaceActions() {
         description: `${pendingTasks} pendentes`,
         icon: CheckSquare,
         action: markLastTaskComplete,
-        variant: "default" as const,
+        variant: "outline" as const,
         color: "text-success",
         badge: pendingTasks
       });
@@ -116,7 +116,7 @@ export function WorkspaceActions() {
               <Button
                 variant={action.variant}
                 size="sm"
-                className="h-auto p-3 flex flex-row items-center gap-3 text-left w-full justify-start relative hover:bg-secondary/50"
+                className="h-auto p-3 flex flex-row items-center gap-3 text-left w-full justify-start relative hover:bg-muted/80 transition-colors"
                 onClick={isAction ? action.action : undefined}
               >
                 <Icon className={`h-5 w-5 ${action.color} shrink-0`} />
