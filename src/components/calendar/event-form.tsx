@@ -218,13 +218,55 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
       };
 
       if (isEdit && eventId) {
+        // Atualizar evento
         await updateEvent(eventId, eventData);
+        
+        // Atualizar participantes internos
+        // 1. Deletar participantes existentes (exceto organizador)
+        await supabase
+          .from('event_participants')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('is_organizer', false);
+        
+        // 2. Adicionar novos participantes
+        if (selectedParticipants.length > 0) {
+          const participantsToAdd = selectedParticipants.map(userId => ({
+            event_id: eventId,
+            user_id: userId,
+            status: 'pendente' as const,
+            is_organizer: false
+          }));
+          
+          await supabase
+            .from('event_participants')
+            .insert(participantsToAdd);
+        }
+        
+        // Atualizar participantes externos
+        // 1. Deletar existentes
+        await supabase
+          .from('external_event_participants')
+          .delete()
+          .eq('event_id', eventId);
+        
+        // 2. Adicionar novos
+        if (externalParticipants.length > 0) {
+          const externalData = externalParticipants.map(ext => ({
+            event_id: eventId,
+            name: ext.name,
+            email: ext.email,
+            status: 'pendente' as const
+          }));
+          
+          await supabase
+            .from('external_event_participants')
+            .insert(externalData);
+        }
       } else {
         await createEvent(eventData, selectedParticipants, externalParticipants);
       }
 
-      // Garantir que os dados estão atualizados antes de fechar
-      await refetch();
       onSuccess();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);

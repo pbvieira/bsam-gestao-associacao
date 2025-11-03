@@ -20,8 +20,14 @@ const Calendar = () => {
   const canCreateEvents = canAccess('calendar');
 
   const handleEventCreated = async () => {
-    // Aguardar breve momento para garantir que o realtime atualize
-    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log('⏳ Aguardando atualização do realtime...');
+    // Delay maior para garantir:
+    // 1. Evento/participantes salvos no DB
+    // 2. Realtime propagar mudanças
+    // 3. fetchEvents() completar
+    // 4. React re-renderizar
+    await new Promise(resolve => setTimeout(resolve, 800));
+    console.log('✅ Fechando modal');
     setIsFormOpen(false);
     setEditingEvent(null);
     setSelectedDate(null);

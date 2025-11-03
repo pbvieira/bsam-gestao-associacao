@@ -54,6 +54,8 @@ export function useCalendar() {
   const fetchEvents = async (startDate?: Date, endDate?: Date) => {
     try {
       setLoading(true);
+      console.log('🔄 Iniciando fetchEvents...', { startDate, endDate });
+      
       let query = supabase
         .from('calendar_events')
         .select(`
@@ -77,8 +79,12 @@ export function useCalendar() {
       const { data, error } = await query;
 
       if (error) throw error;
+      
+      console.log('✅ Eventos carregados:', data?.length || 0);
+      console.log('📋 Dados:', data);
       setEvents(data || []);
     } catch (err) {
+      console.error('❌ Erro ao carregar eventos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar eventos');
       setEvents([]); // Set empty array on error
       toast({
@@ -244,8 +250,7 @@ export function useCalendar() {
         description: "Evento atualizado com sucesso",
       });
 
-      // Força re-fetch para garantir que os dados estejam atualizados
-      await fetchEvents();
+      // Não chamar fetchEvents() aqui - deixar o realtime cuidar da atualização
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar evento';
       setError(errorMessage);
@@ -322,8 +327,8 @@ export function useCalendar() {
   useEffect(() => {
     fetchEvents();
 
-    // Configurar subscription para atualizações em tempo real
-    const channel = supabase
+    // Canal 1: Monitora eventos
+    const eventsChannel = supabase
       .channel('calendar-events-changes')
       .on(
         'postgres_changes',
@@ -333,15 +338,50 @@ export function useCalendar() {
           table: 'calendar_events'
         },
         (payload) => {
-          console.log('Mudança no calendário detectada:', payload);
-          // Recarregar eventos quando houver qualquer mudança
+          console.log('📅 Evento alterado:', payload);
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    // Canal 2: Monitora participantes internos
+    const participantsChannel = supabase
+      .channel('event-participants-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_participants'
+        },
+        (payload) => {
+          console.log('👤 Participante alterado:', payload);
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    // Canal 3: Monitora participantes externos
+    const externalChannel = supabase
+      .channel('external-participants-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'external_event_participants'
+        },
+        (payload) => {
+          console.log('📧 Participante externo alterado:', payload);
           fetchEvents();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(eventsChannel);
+      supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(externalChannel);
     };
   }, []);
 
