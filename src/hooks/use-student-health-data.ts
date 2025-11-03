@@ -74,9 +74,12 @@ export function useStudentHealthData(studentId?: string) {
     if (!studentId || !user) return { error: 'Dados insuficientes' };
 
     try {
+      // Convert empty strings to null for date fields
       const healthDataInput = {
         student_id: studentId,
         ...data,
+        data_teste_covid: data.data_teste_covid === '' ? null : data.data_teste_covid,
+        data_teste_ist: data.data_teste_ist === '' ? null : data.data_teste_ist,
       };
 
       let result;
