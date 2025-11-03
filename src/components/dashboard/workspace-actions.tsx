@@ -174,7 +174,7 @@ export function WorkspaceActions() {
         <div className="border-t border-border pt-3">
           <p className="text-xs text-muted-foreground mb-2">Acesso Direto</p>
           <div className="flex flex-wrap gap-1">
-            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs hover:bg-transparent" asChild>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" asChild>
               <Link to="/students">
                 <Users className="h-3 w-3 mr-1" />
                 Alunos
