@@ -32,8 +32,8 @@ Todas as cores devem ser HSL para consistência com o sistema de design
     --muted-foreground: 210 15% 50%;
 
     /* Verde-azulado harmonioso como accent */
-    --accent: 180 45% 55%;
-    --accent-foreground: 180 45% 15%;
+    --accent: 180 55% 35%;
+    --accent-foreground: 0 0% 100%;
 
     /* Cores de apoio com melhor contraste */
     --success: 155 60% 50%;
@@ -92,8 +92,8 @@ Todas as cores devem ser HSL para consistência com o sistema de design
     --muted-foreground: 210 10% 65%;
 
     /* Verde-azulado escuro para accent */
-    --accent: 180 35% 40%;
-    --accent-foreground: 180 35% 90%;
+    --accent: 180 45% 45%;
+    --accent-foreground: 0 0% 100%;
 
     /* Cores de apoio em modo escuro com melhor contraste */
     --success: 155 50% 45%;
