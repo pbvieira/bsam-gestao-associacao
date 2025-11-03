@@ -16,7 +16,7 @@ const Tasks = () => {
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const location = useLocation();
 
-  const { tasks, loading } = useTasks();
+  const { tasks, loading, refetch } = useTasks();
   const { canAccess } = useAuth();
 
   // Abrir formulário automaticamente se vier do dashboard
@@ -33,6 +33,7 @@ const Tasks = () => {
   const handleTaskCreated = () => {
     setIsFormOpen(false);
     setEditingTask(null);
+    refetch(); // Força atualização da lista
   };
 
   const handleEditTask = (taskId: string) => {
