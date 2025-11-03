@@ -186,6 +186,9 @@ export function useTasks() {
 
       console.log('Task updated successfully in database');
 
+      // Buscar dados atualizados imediatamente
+      await fetchTasks();
+
       toast({
         title: "Sucesso",
         description: "Tarefa atualizada com sucesso",
