@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, MapPin, Plus } from "lucide-react";
 import { format, isToday, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -129,32 +130,28 @@ export function TodayEvents() {
             Agendar
           </Button>
         </div>
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant={timeFilter === 'day' ? 'default' : 'ghost'}
-            onClick={() => setTimeFilter('day')}
-            className="flex-1 h-8"
-          >
-            Dia
-          </Button>
-          <Button
-            size="sm"
-            variant={timeFilter === 'week' ? 'default' : 'ghost'}
-            onClick={() => setTimeFilter('week')}
-            className="flex-1 h-8"
-          >
-            Semana
-          </Button>
-          <Button
-            size="sm"
-            variant={timeFilter === 'month' ? 'default' : 'ghost'}
-            onClick={() => setTimeFilter('month')}
-            className="flex-1 h-8"
-          >
-            Mês
-          </Button>
-        </div>
+        <Tabs value={timeFilter} onValueChange={(value) => setTimeFilter(value as TimeFilter)}>
+          <TabsList className="w-full border-b border-border rounded-none bg-transparent p-0 h-auto">
+            <TabsTrigger 
+              value="day" 
+              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2"
+            >
+              Dia
+            </TabsTrigger>
+            <TabsTrigger 
+              value="week"
+              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2"
+            >
+              Semana
+            </TabsTrigger>
+            <TabsTrigger 
+              value="month"
+              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2"
+            >
+              Mês
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </CardHeader>
       <CardContent className="flex flex-col h-full overflow-hidden">
         <ScrollArea className="flex-1">
