@@ -118,10 +118,7 @@ export function StudentForm({
   useEffect(() => {
     if (!student && !form.getValues('data_abertura')) {
       const now = new Date();
-      // Ajustar para o fuso horário local (São Paulo)
-      const offset = now.getTimezoneOffset() * 60000;
-      const localDate = new Date(now.getTime() - offset);
-      const formatted = localDate.toISOString().slice(0, 16);
+      const formatted = now.toISOString().split('T')[0];
       form.setValue('data_abertura', formatted);
     }
   }, [student, form]);
@@ -141,7 +138,7 @@ export function StudentForm({
           nome_completo: data.nome_completo || '',
           data_nascimento: data.data_nascimento || '',
           ativo: true,
-          data_abertura: data.data_abertura ? data.data_abertura.split('T')[0] : new Date().toISOString().split('T')[0],
+          data_abertura: data.data_abertura || new Date().toISOString().split('T')[0],
           data_saida: data.data_saida ? data.data_saida.split('T')[0] : null,
           hora_saida: data.data_saida ? data.data_saida.split('T')[1]?.slice(0, 5) : null,
           numero_interno: data.numero_interno,
@@ -251,7 +248,7 @@ export function StudentForm({
                   }) => <FormItem>
                           <FormLabel>Data de Abertura</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" {...field} />
+                            <Input type="date" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />
