@@ -107,7 +107,7 @@ export function WorkspaceActions() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Ações Inteligentes */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-2">
           {smartActions.map((action) => {
             const Icon = action.icon;
             const isAction = !!action.action;
@@ -116,18 +116,18 @@ export function WorkspaceActions() {
               <Button
                 variant={action.variant}
                 size="sm"
-                className="h-auto p-3 flex flex-col items-center gap-1.5 text-center min-w-0 relative hover:bg-transparent hover:text-inherit"
+                className="h-auto p-3 flex flex-row items-center gap-3 text-left w-full justify-start relative hover:bg-secondary/50"
                 onClick={isAction ? action.action : undefined}
               >
                 <Icon className={`h-5 w-5 ${action.color} shrink-0`} />
-                <div className="min-w-0 w-full">
-                  <p className="font-medium text-xs truncate">{action.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{action.title}</p>
+                  <p className="text-xs text-muted-foreground">
                     {action.description}
                   </p>
                 </div>
                 {action.badge && (
-                  <Badge variant="secondary" className="absolute -top-1 -right-1 text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                  <Badge variant="secondary" className="text-xs h-5 px-2 rounded-full">
                     {action.badge}
                   </Badge>
                 )}
@@ -139,7 +139,7 @@ export function WorkspaceActions() {
                 {isAction ? (
                   ButtonComponent
                 ) : (
-                  <Link to={action.href!}>
+                  <Link to={action.href!} className="block">
                     {ButtonComponent}
                   </Link>
                 )}
