@@ -76,8 +76,7 @@ export function TodayEvents() {
   }: {
     event: any;
     showDate?: boolean;
-  }) => <div className="flex items-start gap-3 p-3 rounded-lg border border-accent/30 bg-gradient-to-br from-accent/8 via-accent/5 to-transparent hover:from-accent/12 hover:via-accent/8 hover:scale-[1.02] shadow-sm hover:shadow-md transition-all duration-300">
-      <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0 shadow-[0_0_8px_rgba(77,182,172,0.6)]" />
+  }) => <div className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-l-accent">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <p className="font-medium truncate">{event.titulo}</p>

@@ -111,7 +111,7 @@ export function TodayTasks() {
   }: {
     task: Task;
     showOverdue?: boolean;
-  }) => <div className={`flex items-center gap-3 p-3 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 ${showOverdue ? 'border-destructive/30 bg-gradient-to-br from-destructive/8 via-destructive/5 to-transparent hover:from-destructive/12 hover:via-destructive/8 hover:scale-[1.02]' : 'border-primary/30 bg-gradient-to-br from-primary/8 via-primary/5 to-transparent hover:from-primary/12 hover:via-primary/8 hover:scale-[1.02]'}`}>
+  }) => <div className={`flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 shadow-sm hover:shadow-md transition-all duration-200 ${showOverdue ? 'border-l-4 border-l-destructive' : 'border-l-4 border-l-primary'}`}>
       <Checkbox checked={task.status === 'realizada'} onCheckedChange={() => handleTaskComplete(task)} className="shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
