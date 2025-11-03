@@ -93,9 +93,14 @@ export function useTasks() {
           assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name)
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
+      if (!data) {
+        console.log('Task not found for ID:', id);
+        return null;
+      }
       
       console.log('Fresh task data fetched:', data);
       return data as Task;

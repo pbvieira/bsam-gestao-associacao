@@ -99,9 +99,18 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
           }
         } catch (error) {
           console.error('Error loading task data:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao carregar dados da tarefa",
+            variant: "destructive",
+          });
         } finally {
           setLoadingTask(false);
         }
+      } else {
+        // Resetar formulário para criação
+        setLoadingTask(false);
+        setCurrentTask(null);
       }
     };
 
@@ -192,7 +201,13 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {loadingTask ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Carregando dados da tarefa...</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="titulo">Título *</Label>
           <Input
@@ -335,14 +350,16 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
           type="button"
           variant="outline"
           onClick={onSuccess}
-          disabled={loading}
+          disabled={loading || loadingTask}
         >
           Cancelar
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || loadingTask}>
           {loading ? 'Salvando...' : (isEdit ? 'Atualizar' : 'Criar')} Tarefa
         </Button>
       </div>
+        </>
+      )}
     </form>
   );
 }
