@@ -112,7 +112,6 @@ export function TodayTasks() {
     task: Task;
     showOverdue?: boolean;
   }) => <div className={`flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 shadow-sm hover:shadow-md transition-all duration-200 ${showOverdue ? 'border-l-4 border-l-destructive' : 'border-l-4 border-l-primary'}`}>
-      <Checkbox checked={task.status === 'realizada'} onCheckedChange={() => handleTaskComplete(task)} className="shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <p className={`font-medium truncate ${task.status === 'realizada' ? 'line-through text-muted-foreground' : ''}`}>
@@ -121,6 +120,7 @@ export function TodayTasks() {
           <Badge className={getPriorityColor(task.prioridade)}>
             {task.prioridade}
           </Badge>
+          {showOverdue && <AlertCircle className="h-4 w-4 text-destructive shrink-0" />}
         </div>
         {task.data_vencimento && <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
@@ -129,7 +129,10 @@ export function TodayTasks() {
         })}
           </div>}
       </div>
-      {showOverdue && <AlertCircle className="h-4 w-4 text-destructive shrink-0" />}
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-xs text-muted-foreground">Concluir</span>
+        <Checkbox checked={task.status === 'realizada'} onCheckedChange={() => handleTaskComplete(task)} />
+      </div>
     </div>;
   const getTimeFilterLabel = () => {
     switch (timeFilter) {
