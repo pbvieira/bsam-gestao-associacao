@@ -296,6 +296,38 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
 
                 <FormField
                   control={form.control}
+                  name="estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue('cidade', '');
+                        }} 
+                        value={field.value}
+                        disabled={loadingEstados}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={loadingEstados ? "Carregando..." : "Selecione"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {estados.map((estado) => (
+                            <SelectItem key={estado.id} value={estado.sigla}>
+                              {estado.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="cidade"
                   render={({ field }) => (
                     <FormItem>
@@ -320,38 +352,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                           {cidadesEndereco.map((cidade) => (
                             <SelectItem key={cidade.id} value={cidade.nome}>
                               {cidade.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          form.setValue('cidade', '');
-                        }} 
-                        value={field.value}
-                        disabled={loadingEstados}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={loadingEstados ? "Carregando..." : "Selecione"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {estados.map((estado) => (
-                            <SelectItem key={estado.id} value={estado.sigla}>
-                              {estado.nome}
                             </SelectItem>
                           ))}
                         </SelectContent>
