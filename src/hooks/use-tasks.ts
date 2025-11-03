@@ -46,12 +46,13 @@ export function useTasks() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Real-time subscription
+  // Real-time subscription - usando canal único compartilhado
   useEffect(() => {
     console.log('Setting up realtime subscription for tasks...');
     
+    // Usar um nome de canal fixo para compartilhar entre múltiplas instâncias
     const channel = supabase
-      .channel('tasks-changes')
+      .channel('shared-tasks-realtime')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -65,13 +66,19 @@ export function useTasks() {
           fetchTasks();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Realtime connected for tasks');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Realtime error for tasks');
+        }
+      });
 
     return () => {
       console.log('Cleaning up realtime subscription for tasks...');
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Empty dependency array to run only once
 
   // Função para buscar uma tarefa específica
   const fetchTaskById = async (id: string): Promise<Task | null> => {
