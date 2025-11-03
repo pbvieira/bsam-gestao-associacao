@@ -28,8 +28,10 @@ export function TodayTasks() {
     task.assigned_to === profile?.user_id || task.created_by === profile?.user_id
   );
 
-  // Filtrar tarefas pendentes
-  const pendingTasks = userTasks.filter(task => task.status === "pendente");
+  // Filtrar tarefas ativas (pendentes e em andamento)
+  const pendingTasks = userTasks.filter(task => 
+    task.status === "pendente" || task.status === "em_andamento"
+  );
 
   const getFilteredTasks = () => {
     let startDate: Date;
