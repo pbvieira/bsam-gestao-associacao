@@ -52,7 +52,8 @@ export function TodayTasks() {
     }
     
     return pendingTasks.filter(task => {
-      if (!task.data_vencimento) return false;
+      // Incluir tarefas sem data de vencimento
+      if (!task.data_vencimento) return true;
       const dueDate = new Date(task.data_vencimento);
       return isWithinInterval(dueDate, { start: startDate, end: endDate });
     }).sort((a, b) => {
@@ -61,6 +62,7 @@ export function TodayTasks() {
       const priorityDiff = priorityOrder[a.prioridade] - priorityOrder[b.prioridade];
       if (priorityDiff !== 0) return priorityDiff;
       
+      // Tarefas sem data vão para o final
       if (!a.data_vencimento) return 1;
       if (!b.data_vencimento) return -1;
       return new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime();
