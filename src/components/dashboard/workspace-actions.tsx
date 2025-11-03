@@ -148,28 +148,6 @@ export function WorkspaceActions() {
           })}
         </div>
 
-        {/* Status Rápido */}
-        <div className="border-t border-border pt-3">
-          <p className="text-xs text-muted-foreground mb-2">Status Atual</p>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-muted/30 rounded-lg p-2">
-              <CheckSquare className="h-4 w-4 text-primary mx-auto mb-1" />
-              <p className="text-xs font-medium">{pendingTasks}</p>
-              <p className="text-xs text-muted-foreground">Tarefas</p>
-            </div>
-            <div className="bg-muted/30 rounded-lg p-2">
-              <Package className="h-4 w-4 text-warning mx-auto mb-1" />
-              <p className="text-xs font-medium">{lowStockItems}</p>
-              <p className="text-xs text-muted-foreground">Baixo</p>
-            </div>
-            <div className="bg-muted/30 rounded-lg p-2">
-              <Bell className="h-4 w-4 text-accent mx-auto mb-1" />
-              <p className="text-xs font-medium">{unreadCount}</p>
-              <p className="text-xs text-muted-foreground">Avisos</p>
-            </div>
-          </div>
-        </div>
-
         {/* Acesso Rápido aos Módulos */}
         <div className="border-t border-border pt-3">
           <p className="text-xs text-muted-foreground mb-2">Acesso Direto</p>
