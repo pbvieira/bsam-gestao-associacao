@@ -61,11 +61,11 @@ export function TodayEvents() {
   const getEventTypeColor = (type: string) => {
     switch (type) {
       case 'reuniao':
-        return 'bg-primary text-primary-foreground';
+        return 'bg-primary/90 text-white border-primary shadow-sm';
       case 'evento':
-        return 'bg-accent text-accent-foreground';
+        return 'bg-accent/90 text-white border-accent shadow-sm';
       case 'tarefa':
-        return 'bg-warning text-warning-foreground';
+        return 'bg-warning/90 text-white border-warning shadow-sm';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -76,8 +76,8 @@ export function TodayEvents() {
   }: {
     event: any;
     showDate?: boolean;
-  }) => <div className="flex items-start gap-3 p-3 rounded-lg border border-border">
-      <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+  }) => <div className="flex items-start gap-3 p-3 rounded-lg border border-accent/30 bg-gradient-to-br from-accent/8 via-accent/5 to-transparent hover:from-accent/12 hover:via-accent/8 hover:scale-[1.02] shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0 shadow-[0_0_8px_rgba(77,182,172,0.6)]" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <p className="font-medium truncate">{event.titulo}</p>

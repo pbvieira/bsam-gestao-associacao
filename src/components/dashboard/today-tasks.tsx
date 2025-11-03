@@ -96,11 +96,11 @@ export function TodayTasks() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'alta':
-        return 'bg-danger text-danger-foreground';
+        return 'bg-destructive/80 text-white border-destructive shadow-sm';
       case 'media':
-        return 'bg-warning text-warning-foreground';
+        return 'bg-warning/80 text-white border-warning shadow-sm';
       case 'baixa':
-        return 'bg-success text-success-foreground';
+        return 'bg-success/80 text-white border-success shadow-sm';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -111,7 +111,7 @@ export function TodayTasks() {
   }: {
     task: Task;
     showOverdue?: boolean;
-  }) => <div className={`flex items-center gap-3 p-3 rounded-lg border ${showOverdue ? 'border-danger bg-danger/5' : 'border-border'}`}>
+  }) => <div className={`flex items-center gap-3 p-3 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 ${showOverdue ? 'border-destructive/30 bg-gradient-to-br from-destructive/8 via-destructive/5 to-transparent hover:from-destructive/12 hover:via-destructive/8 hover:scale-[1.02]' : 'border-primary/30 bg-gradient-to-br from-primary/8 via-primary/5 to-transparent hover:from-primary/12 hover:via-primary/8 hover:scale-[1.02]'}`}>
       <Checkbox checked={task.status === 'realizada'} onCheckedChange={() => handleTaskComplete(task)} className="shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
@@ -129,7 +129,7 @@ export function TodayTasks() {
         })}
           </div>}
       </div>
-      {showOverdue && <AlertCircle className="h-4 w-4 text-danger shrink-0" />}
+      {showOverdue && <AlertCircle className="h-4 w-4 text-destructive shrink-0" />}
     </div>;
   const getTimeFilterLabel = () => {
     switch (timeFilter) {
