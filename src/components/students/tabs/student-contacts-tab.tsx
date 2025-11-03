@@ -54,6 +54,25 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
   };
 
 
+  if (!studentId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Contatos de Emergência</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            <Phone className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium mb-2">Salve o aluno primeiro</p>
+            <p className="text-sm">
+              Para adicionar contatos de emergência, primeiro salve os dados básicos do aluno.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (loading) {
     return (
       <Card>

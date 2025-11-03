@@ -70,6 +70,25 @@ export function StudentChildrenTab({ studentId }: StudentChildrenTabProps) {
     );
   }
 
+  if (!studentId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Filhos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium mb-2">Salve o aluno primeiro</p>
+            <p className="text-sm">
+              Para adicionar informações sobre filhos, primeiro salve os dados básicos do aluno.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
