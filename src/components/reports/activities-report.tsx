@@ -29,7 +29,6 @@ import { cn } from '@/lib/utils';
 
 interface ActivityReportData {
   id: string;
-  tipo: string;
   categoria: string;
   descricao: string;
   data_evento: string;
@@ -41,12 +40,27 @@ interface ActivityReportData {
 
 export function ActivitiesReport() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
+  // Buscar categorias disponíveis
+  const { data: categories } = useQuery({
+    queryKey: ['annotation-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('annotation_categories')
+        .select('nome')
+        .eq('ativo', true)
+        .order('ordem', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: activities, isLoading } = useQuery({
-    queryKey: ['activities-report', searchTerm, typeFilter, dateFrom, dateTo],
+    queryKey: ['activities-report', searchTerm, categoryFilter, dateFrom, dateTo],
     queryFn: async () => {
       let query = supabase
         .from('student_annotations')
@@ -64,8 +78,8 @@ export function ActivitiesReport() {
         );
       }
 
-      if (typeFilter !== 'all') {
-        query = query.eq('tipo', typeFilter);
+      if (categoryFilter !== 'all') {
+        query = query.eq('categoria', categoryFilter);
       }
 
       if (dateFrom) {
@@ -104,12 +118,11 @@ export function ActivitiesReport() {
     if (!activities) return;
 
     const csv = [
-      ['Data', 'Aluno', 'Código', 'Tipo', 'Categoria', 'Descrição', 'Responsável'].join(','),
+      ['Data', 'Aluno', 'Código', 'Categoria', 'Descrição', 'Responsável'].join(','),
       ...activities.map(activity => [
         new Date(activity.data_evento).toLocaleDateString('pt-BR'),
         activity.student_name,
         activity.student_code,
-        activity.tipo,
         activity.categoria || '',
         activity.descricao.replace(/,/g, ';'), // Replace commas to avoid CSV issues
         activity.created_by_name
@@ -125,17 +138,6 @@ export function ActivitiesReport() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
-
-  const getTypeBadge = (tipo: string) => {
-    switch (tipo) {
-      case 'geral':
-        return <Badge variant="default">Geral</Badge>;
-      case 'despesa':
-        return <Badge variant="outline">Despesa</Badge>;
-      default:
-        return <Badge variant="secondary">{tipo}</Badge>;
-    }
   };
 
   if (isLoading) {
@@ -191,14 +193,17 @@ export function ActivitiesReport() {
             />
           </div>
           
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger>
-              <SelectValue placeholder="Filtrar por tipo" />
+              <SelectValue placeholder="Filtrar por categoria" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os Tipos</SelectItem>
-              <SelectItem value="geral">Geral</SelectItem>
-              <SelectItem value="despesa">Despesa</SelectItem>
+              <SelectItem value="all">Todas as Categorias</SelectItem>
+              {categories?.map((category) => (
+                <SelectItem key={category.nome} value={category.nome}>
+                  {category.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -266,7 +271,6 @@ export function ActivitiesReport() {
                 <TableRow>
                   <TableHead>Data</TableHead>
                   <TableHead>Aluno</TableHead>
-                  <TableHead>Tipo</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Responsável</TableHead>
@@ -285,9 +289,6 @@ export function ActivitiesReport() {
                           {activity.student_code}
                         </p>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {getTypeBadge(activity.tipo)}
                     </TableCell>
                     <TableCell>
                       {activity.categoria && (
