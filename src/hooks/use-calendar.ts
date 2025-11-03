@@ -245,13 +245,12 @@ export function useCalendar() {
 
       if (error) throw error;
 
-      // Refetch síncrono - aguardar completar antes de continuar
-      await fetchEvents();
-
       toast({
         title: "Sucesso",
         description: "Evento atualizado com sucesso",
       });
+
+      // Não chamar fetchEvents() aqui - deixar o realtime cuidar da atualização
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar evento';
       setError(errorMessage);
@@ -327,7 +326,63 @@ export function useCalendar() {
 
   useEffect(() => {
     fetchEvents();
-    // Realtime removido - usando refetch manual para garantir sincronização
+
+    // Canal 1: Monitora eventos
+    const eventsChannel = supabase
+      .channel('calendar-events-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'calendar_events'
+        },
+        (payload) => {
+          console.log('📅 Evento alterado:', payload);
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    // Canal 2: Monitora participantes internos
+    const participantsChannel = supabase
+      .channel('event-participants-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_participants'
+        },
+        (payload) => {
+          console.log('👤 Participante alterado:', payload);
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    // Canal 3: Monitora participantes externos
+    const externalChannel = supabase
+      .channel('external-participants-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'external_event_participants'
+        },
+        (payload) => {
+          console.log('📧 Participante externo alterado:', payload);
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(eventsChannel);
+      supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(externalChannel);
+    };
   }, []);
 
   return {

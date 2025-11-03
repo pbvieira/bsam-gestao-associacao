@@ -19,8 +19,15 @@ const Calendar = () => {
 
   const canCreateEvents = canAccess('calendar');
 
-  const handleEventCreated = () => {
-    // Sem delay - o refetch já é síncrono no form
+  const handleEventCreated = async () => {
+    console.log('⏳ Aguardando atualização do realtime...');
+    // Delay maior para garantir:
+    // 1. Evento/participantes salvos no DB
+    // 2. Realtime propagar mudanças
+    // 3. fetchEvents() completar
+    // 4. React re-renderizar
+    await new Promise(resolve => setTimeout(resolve, 800));
+    console.log('✅ Fechando modal');
     setIsFormOpen(false);
     setEditingEvent(null);
     setSelectedDate(null);
