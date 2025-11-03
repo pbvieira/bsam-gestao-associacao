@@ -118,7 +118,7 @@ export function TaskCard({ task, onEdit, variant = 'list', onStatusChange }: Tas
               {isBoard ? statusLabels[task.status].split(' ')[0] : statusLabels[task.status]}
             </Badge>
             {task.categoria && !isBoard && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="accent" className="text-xs font-medium">
                 {task.categoria}
               </Badge>
             )}
