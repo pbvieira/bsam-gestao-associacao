@@ -24,7 +24,7 @@ export function TodayTasks() {
   const {
     createQuickTask
   } = useQuickActions();
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('month');
   const today = new Date();
 
   // Filtrar apenas tarefas do usuário atual

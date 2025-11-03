@@ -17,7 +17,7 @@ export function TodayEvents() {
   const {
     createQuickEvent
   } = useQuickActions();
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('day');
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('month');
   const today = new Date();
   const getFilteredEvents = () => {
     let startDate: Date;
