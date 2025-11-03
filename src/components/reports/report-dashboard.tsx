@@ -16,6 +16,7 @@ import {
 import { StudentsReport } from './students-report';
 import { InventoryReport } from './inventory-report';
 import { ActivitiesReport } from './activities-report';
+import { CategoryStatistics } from './category-statistics';
 
 interface DashboardStats {
   totalStudents: number;
@@ -150,6 +151,7 @@ export function ReportDashboard() {
           <TabsTrigger value="students">Relatório de Alunos</TabsTrigger>
           <TabsTrigger value="inventory">Relatório de Estoque</TabsTrigger>
           <TabsTrigger value="activities">Relatório de Atividades</TabsTrigger>
+          <TabsTrigger value="categories">Estatísticas por Categoria</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4">
@@ -162,6 +164,10 @@ export function ReportDashboard() {
 
         <TabsContent value="activities" className="space-y-4">
           <ActivitiesReport />
+        </TabsContent>
+
+        <TabsContent value="categories" className="space-y-4">
+          <CategoryStatistics />
         </TabsContent>
       </Tabs>
     </div>
