@@ -115,7 +115,8 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
     };
 
     loadTaskData();
-  }, [taskId, fetchTaskById, toast]);
+    // Remover fetchTaskById das dependências para evitar loop infinito
+  }, [taskId, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
