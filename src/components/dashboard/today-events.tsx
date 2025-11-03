@@ -134,14 +134,14 @@ export function TodayEvents() {
         </div>
         <Tabs value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
           <TabsList className="w-full border-b border-border rounded-none bg-transparent p-0 h-auto">
-            <TabsTrigger value="day" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2">
-              Dia
+            <TabsTrigger value="month" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2">
+              Mês
             </TabsTrigger>
             <TabsTrigger value="week" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2">
               Semana
             </TabsTrigger>
-            <TabsTrigger value="month" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2">
-              Mês
+            <TabsTrigger value="day" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none pb-2">
+              Dia
             </TabsTrigger>
           </TabsList>
         </Tabs>
