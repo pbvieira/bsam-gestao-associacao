@@ -62,7 +62,11 @@ export function TaskCard({ task, onEdit, variant = 'list', onStatusChange }: Tas
         status: newStatus,
         data_conclusao: newStatus === 'realizada' ? new Date().toISOString() : null
       });
-      // Resetar filtros após mudança de status para visualizar o resultado
+      
+      // Aguardar um momento para garantir que o banco foi atualizado
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Resetar filtros e forçar recarregamento após mudança de status
       if (onStatusChange) {
         onStatusChange();
       }

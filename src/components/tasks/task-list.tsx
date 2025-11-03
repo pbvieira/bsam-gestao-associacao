@@ -13,19 +13,24 @@ interface TaskListProps {
   tasks: Task[];
   loading: boolean;
   onEditTask: (taskId: string) => void;
+  refetch?: () => void;
 }
 
-export function TaskList({ tasks, loading, onEditTask }: TaskListProps) {
+export function TaskList({ tasks, loading, onEditTask, refetch }: TaskListProps) {
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list');
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
 
-  // Função para resetar filtros
+  // Função para resetar filtros e recarregar dados
   const resetFilters = () => {
     setStatusFilter("all");
     setPriorityFilter("all");
     setSearchTerm("");
+    // Forçar recarregamento dos dados
+    if (refetch) {
+      refetch();
+    }
   };
 
   // Filtrar tarefas

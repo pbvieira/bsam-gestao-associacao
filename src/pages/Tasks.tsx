@@ -75,6 +75,7 @@ const Tasks = () => {
           tasks={tasks}
           loading={loading}
           onEditTask={handleEditTask}
+          refetch={refetch}
         />
       </PageLayout>
     </MainLayout>

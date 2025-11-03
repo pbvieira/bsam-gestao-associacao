@@ -198,7 +198,10 @@ export function useTasks() {
 
       console.log('Task updated successfully in database');
 
-      // Buscar dados atualizados imediatamente
+      // Aguardar um momento para garantir consistência do banco
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Buscar dados atualizados
       await fetchTasks();
 
       toast({
