@@ -6,9 +6,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface TaskBoardProps {
   tasks: Task[];
   onEditTask: (taskId: string) => void;
+  onStatusChange?: () => void;
 }
 
-export function TaskBoard({ tasks, onEditTask }: TaskBoardProps) {
+export function TaskBoard({ tasks, onEditTask, onStatusChange }: TaskBoardProps) {
   const isMobile = useIsMobile();
   const statusColumns: Array<{ status: TaskStatus; title: string; count: number }> = [
     { status: 'pendente', title: 'Pendente', count: 0 },
@@ -55,6 +56,7 @@ export function TaskBoard({ tasks, onEditTask }: TaskBoardProps) {
                 task={task} 
                 onEdit={() => onEditTask(task.id)}
                 variant="board"
+                onStatusChange={onStatusChange}
               />
             )) || (
               <div className="text-center py-8 text-muted-foreground text-sm">

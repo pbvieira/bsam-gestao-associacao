@@ -21,6 +21,13 @@ export function TaskList({ tasks, loading, onEditTask }: TaskListProps) {
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
 
+  // Função para resetar filtros
+  const resetFilters = () => {
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setSearchTerm("");
+  };
+
   // Filtrar tarefas
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,11 +165,12 @@ export function TaskList({ tasks, loading, onEditTask }: TaskListProps) {
                     key={task.id}
                     task={task}
                     onEdit={() => onEditTask(task.id)}
+                    onStatusChange={resetFilters}
                   />
                 ))}
               </div>
             ) : (
-              <TaskBoard tasks={filteredTasks} onEditTask={onEditTask} />
+              <TaskBoard tasks={filteredTasks} onEditTask={onEditTask} onStatusChange={resetFilters} />
             )}
           </>
         )}

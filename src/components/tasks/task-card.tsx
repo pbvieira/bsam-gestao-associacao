@@ -13,9 +13,10 @@ interface TaskCardProps {
   task: Task;
   onEdit: () => void;
   variant?: 'list' | 'board';
+  onStatusChange?: () => void;
 }
 
-export function TaskCard({ task, onEdit, variant = 'list' }: TaskCardProps) {
+export function TaskCard({ task, onEdit, variant = 'list', onStatusChange }: TaskCardProps) {
   const { updateTask, deleteTask } = useTasks();
   const { user, canAccess } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -61,6 +62,10 @@ export function TaskCard({ task, onEdit, variant = 'list' }: TaskCardProps) {
         status: newStatus,
         data_conclusao: newStatus === 'realizada' ? new Date().toISOString() : null
       });
+      // Resetar filtros após mudança de status para visualizar o resultado
+      if (onStatusChange) {
+        onStatusChange();
+      }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
     } finally {
