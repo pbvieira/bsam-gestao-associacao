@@ -52,8 +52,13 @@ export function TodayTasks() {
     }
     
     return pendingTasks.filter(task => {
-      // Incluir tarefas sem data de vencimento
-      if (!task.data_vencimento) return true;
+      // Para tarefas sem data de vencimento, usar data de criação
+      if (!task.data_vencimento) {
+        const createdDate = new Date(task.created_at);
+        return isWithinInterval(createdDate, { start: startDate, end: endDate });
+      }
+      
+      // Para tarefas com data de vencimento, usar normalmente
       const dueDate = new Date(task.data_vencimento);
       return isWithinInterval(dueDate, { start: startDate, end: endDate });
     }).sort((a, b) => {
