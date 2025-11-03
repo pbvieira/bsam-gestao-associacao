@@ -17,8 +17,8 @@ export function CategoryStatistics() {
   const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
 
   const { statistics, loading } = useCategoryStatistics(
-    new Date(startDate),
-    new Date(endDate),
+    startDate,
+    endDate,
     mode
   );
 

@@ -11,7 +11,7 @@ export interface CategoryStatistic {
 
 export type GroupingMode = 'por_aluno' | 'total_geral';
 
-export function useCategoryStatistics(startDate: Date, endDate: Date, mode: GroupingMode) {
+export function useCategoryStatistics(startDate: string, endDate: string, mode: GroupingMode) {
   const { user } = useAuth();
   const [statistics, setStatistics] = useState<CategoryStatistic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,8 +45,8 @@ export function useCategoryStatistics(startDate: Date, endDate: Date, mode: Grou
       const { data: annotations, error: annotationsError } = await supabase
         .from('student_annotations')
         .select('categoria, student_id')
-        .gte('data_evento', startDate.toISOString().split('T')[0])
-        .lte('data_evento', endDate.toISOString().split('T')[0])
+        .gte('data_evento', startDate)
+        .lte('data_evento', endDate)
         .not('categoria', 'is', null);
 
       if (annotationsError) throw annotationsError;
