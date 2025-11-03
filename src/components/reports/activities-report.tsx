@@ -21,9 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Search, Download, Calendar as CalendarIcon, Activity } from 'lucide-react';
+import { Search, Download, Calendar as CalendarIcon, Activity, Users, List } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +34,7 @@ interface ActivityReportData {
   descricao: string;
   data_evento: string;
   created_at: string;
+  student_id: string;
   student_name: string;
   student_code: string;
   created_by_name: string;
@@ -43,6 +45,7 @@ export function ActivitiesReport() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
+  const [groupingMode, setGroupingMode] = useState<'list' | 'by_student'>('list');
 
   // Buscar categorias disponíveis
   const { data: categories } = useQuery({
@@ -90,7 +93,7 @@ export function ActivitiesReport() {
         query = query.lte('data_evento', format(dateTo, 'yyyy-MM-dd'));
       }
 
-      const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
+      const { data, error } = await query.order('data_evento', { ascending: false }).limit(500);
       if (error) throw error;
 
       // Get created_by profiles separately to avoid relation issues
@@ -107,12 +110,29 @@ export function ActivitiesReport() {
 
       return data?.map(activity => ({
         ...activity,
+        student_id: activity.student_id,
         student_name: activity.students?.nome_completo || 'Aluno não encontrado',
         student_code: activity.students?.codigo_cadastro || '',
         created_by_name: profilesData.find(p => p.user_id === activity.created_by)?.full_name || 'Usuário não encontrado',
       })) as ActivityReportData[];
     },
   });
+
+  // Agrupar dados por aluno
+  const groupedByStudent = activities?.reduce((acc, activity) => {
+    const studentId = activity.student_id;
+    if (!acc[studentId]) {
+      acc[studentId] = {
+        student_name: activity.student_name,
+        student_code: activity.student_code,
+        activities: [],
+        total: 0
+      };
+    }
+    acc[studentId].activities.push(activity);
+    acc[studentId].total += 1;
+    return acc;
+  }, {} as Record<string, { student_name: string; student_code: string; activities: ActivityReportData[]; total: number }>);
 
   const handleExport = () => {
     if (!activities) return;
@@ -182,78 +202,93 @@ export function ActivitiesReport() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Buscar atividades..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        <div className="flex flex-col gap-4">
+          <Tabs value={groupingMode} onValueChange={(v) => setGroupingMode(v as 'list' | 'by_student')}>
+            <TabsList>
+              <TabsTrigger value="list" className="flex items-center gap-2">
+                <List className="h-4 w-4" />
+                Lista Completa
+              </TabsTrigger>
+              <TabsTrigger value="by_student" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Agrupado por Aluno
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar atividades..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrar por categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Categorias</SelectItem>
+                {categories?.map((category) => (
+                  <SelectItem key={category.nome} value={category.nome}>
+                    {category.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !dateFrom && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={setDateFrom}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !dateTo && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={setDateTo}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
-          
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filtrar por categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as Categorias</SelectItem>
-              {categories?.map((category) => (
-                <SelectItem key={category.nome} value={category.nome}>
-                  {category.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal",
-                  !dateFrom && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Data inicial"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dateFrom}
-                onSelect={setDateFrom}
-                initialFocus
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal",
-                  !dateTo && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateTo ? format(dateTo, "dd/MM/yyyy") : "Data final"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dateTo}
-                onSelect={setDateTo}
-                initialFocus
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
         </div>
       </CardHeader>
 
@@ -264,7 +299,7 @@ export function ActivitiesReport() {
               {searchTerm ? 'Nenhuma atividade encontrada.' : 'Nenhuma atividade registrada ainda.'}
             </p>
           </div>
-        ) : (
+        ) : groupingMode === 'list' ? (
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -308,12 +343,55 @@ export function ActivitiesReport() {
               </TableBody>
             </Table>
           </div>
+        ) : (
+          <div className="space-y-4">
+            {Object.entries(groupedByStudent || {})
+              .sort(([, a], [, b]) => b.total - a.total)
+              .map(([studentId, data]) => (
+                <Card key={studentId}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{data.student_name}</CardTitle>
+                        <CardDescription className="font-mono">{data.student_code}</CardDescription>
+                      </div>
+                      <Badge variant="secondary">{data.total} atividades</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {data.activities.map((activity) => (
+                        <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(activity.data_evento).toLocaleDateString('pt-BR')}
+                              </span>
+                              {activity.categoria && (
+                                <Badge variant="outline" className="text-xs">{activity.categoria}</Badge>
+                              )}
+                            </div>
+                            <p className="text-sm">{activity.descricao}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Por: {activity.created_by_name}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
         )}
 
         {activities && activities.length > 0 && (
           <div className="flex items-center justify-between pt-4">
             <p className="text-sm text-muted-foreground">
-              Mostrando {activities.length} atividade{activities.length !== 1 ? 's' : ''} (últimas 100)
+              {groupingMode === 'list' 
+                ? `Mostrando ${activities.length} atividade${activities.length !== 1 ? 's' : ''}`
+                : `${Object.keys(groupedByStudent || {}).length} alunos com atividades`
+              }
             </p>
             {(dateFrom || dateTo) && (
               <Button
