@@ -85,9 +85,15 @@ export function useStudents() {
 
   const updateStudent = async (id: string, studentData: Partial<Student>) => {
     try {
+      // Converter strings vazias para null nos campos de data
+      const cleanedData = {
+        ...studentData,
+        data_saida: studentData.data_saida === '' ? null : studentData.data_saida,
+      };
+
       const { data, error } = await supabase
         .from('students')
-        .update(studentData)
+        .update(cleanedData)
         .eq('id', id)
         .select()
         .single();
