@@ -144,14 +144,13 @@ export function TodayTasks() {
         return 'Este Mês';
     }
   };
-  return <Card className="h-full">
+  return <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between mb-3">
           <CardTitle className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
             Minhas Tarefas
           </CardTitle>
-          
         </div>
         <Tabs value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
           <TabsList className="w-full border-b border-border rounded-none bg-transparent p-0 h-auto">
@@ -167,8 +166,8 @@ export function TodayTasks() {
           </TabsList>
         </Tabs>
       </CardHeader>
-      <CardContent className="flex flex-col h-full overflow-hidden">
-        <ScrollArea className="flex-1">
+      <CardContent>
+        <ScrollArea className="h-[400px]">
           <div className="space-y-4 pr-4">
             {/* Tarefas Filtradas */}
             {filteredTasks.length > 0 && <div className="space-y-2">

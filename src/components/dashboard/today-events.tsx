@@ -123,7 +123,7 @@ export function TodayEvents() {
         return 'Este Mês';
     }
   };
-  return <Card className="h-full">
+  return <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between mb-3">
           <CardTitle className="flex items-center gap-2">
@@ -146,8 +146,8 @@ export function TodayEvents() {
           </TabsList>
         </Tabs>
       </CardHeader>
-      <CardContent className="flex flex-col h-full overflow-hidden">
-        <ScrollArea className="flex-1">
+      <CardContent>
+        <ScrollArea className="h-[400px]">
           <div className="space-y-4 pr-4">
             {/* Eventos Filtrados */}
             {filteredEvents.length > 0 && <div className="space-y-2">
