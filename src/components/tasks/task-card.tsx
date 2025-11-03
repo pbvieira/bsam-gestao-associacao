@@ -34,7 +34,7 @@ export function TaskCard({ task, onEdit, variant = 'list', onStatusChange }: Tas
 
   const statusColors = {
     pendente: "bg-warning/10 text-warning-foreground border-warning/20",
-    em_andamento: "bg-primary/10 text-primary-foreground border-primary/20",
+    em_andamento: "bg-primary text-primary-foreground border-primary",
     realizada: "bg-success text-success-foreground border-success",
     cancelada: "bg-muted text-muted-foreground border-border",
     transferida: "bg-accent/10 text-accent-foreground border-accent/20"
