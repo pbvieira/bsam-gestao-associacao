@@ -218,10 +218,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
       };
 
       if (isEdit && eventId) {
-        // Atualizar evento
-        await updateEvent(eventId, eventData);
-        
-        // Atualizar participantes internos
+        // Atualizar participantes internos ANTES de atualizar o evento
         // 1. Deletar participantes existentes (exceto organizador)
         await supabase
           .from('event_participants')
@@ -243,14 +240,12 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
             .insert(participantsToAdd);
         }
         
-        // Atualizar participantes externos
-        // 1. Deletar existentes
+        // 3. Atualizar participantes externos
         await supabase
           .from('external_event_participants')
           .delete()
           .eq('event_id', eventId);
         
-        // 2. Adicionar novos
         if (externalParticipants.length > 0) {
           const externalData = externalParticipants.map(ext => ({
             event_id: eventId,
@@ -263,10 +258,19 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
             .from('external_event_participants')
             .insert(externalData);
         }
+        
+        // 4. Atualizar evento (já faz refetch interno)
+        await updateEvent(eventId, eventData);
       } else {
         await createEvent(eventData, selectedParticipants, externalParticipants);
       }
 
+      // Refetch adicional para garantir
+      await refetch();
+      
+      // Aguardar um pouco para garantir renderização
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       onSuccess();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);
