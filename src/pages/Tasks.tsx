@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { MainLayout } from "@/components/layout/main-layout";
 import { PageLayout } from "@/components/layout/page-layout";
 import { Button } from "@/components/ui/button";
@@ -13,9 +14,19 @@ import { useAuth } from "@/hooks/use-auth";
 const Tasks = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<string | null>(null);
+  const location = useLocation();
 
   const { tasks, loading } = useTasks();
   const { canAccess } = useAuth();
+
+  // Abrir formulário automaticamente se vier do dashboard
+  useEffect(() => {
+    if (location.state?.openForm) {
+      setIsFormOpen(true);
+      // Limpar o state para evitar reabrir ao voltar
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const canCreateTasks = canAccess('tasks');
 
