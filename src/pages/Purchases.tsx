@@ -28,6 +28,14 @@ export default function Purchases() {
     setViewMode('view');
   };
 
+  const handleUpdateOrder = () => {
+    // Refresh the order data after workflow updates
+    if (selectedOrder) {
+      handleViewOrder(selectedOrder);
+    }
+    handleBackToList();
+  };
+
   const handleBackToList = () => {
     setViewMode('list');
     setSelectedOrder(null);
@@ -92,6 +100,7 @@ export default function Purchases() {
             <PurchaseView 
               order={selectedOrder}
               onEdit={() => handleEditOrder(selectedOrder)}
+              onUpdate={handleUpdateOrder}
             />
           )}
         </div>

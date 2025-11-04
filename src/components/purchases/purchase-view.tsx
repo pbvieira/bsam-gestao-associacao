@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Edit, Package, DollarSign, Calendar, User } from "lucide-react";
+import { PurchaseWorkflow } from "./purchase-workflow";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface PurchaseViewProps {
   order: any;
   onEdit: () => void;
+  onUpdate: () => void;
 }
 
-export function PurchaseView({ order, onEdit }: PurchaseViewProps) {
+export function PurchaseView({ order, onEdit, onUpdate }: PurchaseViewProps) {
   const { items } = usePurchaseItems(order.id);
   const { suppliers } = useSuppliers();
 
@@ -64,6 +66,9 @@ export function PurchaseView({ order, onEdit }: PurchaseViewProps) {
 
   return (
     <div className="space-y-6">
+      {/* Workflow */}
+      <PurchaseWorkflow order={order} onUpdate={onUpdate} />
+
       {/* Order Header */}
       <Card>
         <CardHeader>

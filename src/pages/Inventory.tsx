@@ -123,9 +123,18 @@ export default function Inventory() {
               
               <TabsContent value="purchases">
                 <PurchaseList 
-                  onCreateOrder={() => {}}
-                  onEditOrder={() => {}}
-                  onViewOrder={() => {}}
+                  onCreateOrder={() => {
+                    // TODO: Implementar navegação para formulário de pedido
+                    console.log('Criar pedido');
+                  }}
+                  onEditOrder={(order) => {
+                    // TODO: Implementar navegação para edição
+                    console.log('Editar pedido', order);
+                  }}
+                  onViewOrder={(order) => {
+                    // TODO: Implementar navegação para visualização
+                    console.log('Ver pedido', order);
+                  }}
                 />
               </TabsContent>
             </Tabs>
