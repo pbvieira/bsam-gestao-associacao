@@ -32,6 +32,16 @@ export interface InventoryMovement {
   created_at: string;
 }
 
+export interface InventoryFilters {
+  searchTerm?: string;
+  categoria?: string;
+  stockStatus?: 'todos' | 'normal' | 'baixo' | 'zerado';
+  origem?: 'todos' | 'compra' | 'doacao';
+  unidadeMedida?: string;
+  sortBy?: 'nome' | 'estoque_atual' | 'valor_unitario' | 'categoria';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export function useInventory() {
   const { user } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -39,18 +49,61 @@ export function useInventory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchItems = async () => {
+  const fetchItems = async (filters?: InventoryFilters) => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('inventory_items')
         .select('*')
-        .eq('ativo', true)
-        .order('nome', { ascending: true });
+        .eq('ativo', true);
+
+      // Apply search filter
+      if (filters?.searchTerm) {
+        query = query.or(`nome.ilike.%${filters.searchTerm}%,descricao.ilike.%${filters.searchTerm}%`);
+      }
+
+      // Apply category filter
+      if (filters?.categoria && filters.categoria !== 'todos') {
+        query = query.eq('categoria', filters.categoria);
+      }
+
+      // Apply origin filter
+      if (filters?.origem && filters.origem !== 'todos') {
+        query = query.eq('origem', filters.origem);
+      }
+
+      // Apply unit filter
+      if (filters?.unidadeMedida && filters.unidadeMedida !== 'todos') {
+        query = query.eq('unidade_medida', filters.unidadeMedida);
+      }
+
+      // Apply sorting
+      const sortBy = filters?.sortBy || 'nome';
+      const ascending = filters?.sortOrder === 'asc';
+      query = query.order(sortBy, { ascending });
+
+      const { data, error } = await query;
 
       if (error) throw error;
-      setItems((data || []) as InventoryItem[]);
+      
+      let filteredData = (data || []) as InventoryItem[];
+
+      // Apply stock status filter (client-side)
+      if (filters?.stockStatus && filters.stockStatus !== 'todos') {
+        filteredData = filteredData.filter(item => {
+          if (filters.stockStatus === 'zerado') {
+            return item.estoque_atual === 0;
+          } else if (filters.stockStatus === 'baixo') {
+            return item.estoque_atual > 0 && item.estoque_atual <= item.estoque_minimo && item.estoque_minimo > 0;
+          } else if (filters.stockStatus === 'normal') {
+            return item.estoque_atual > item.estoque_minimo || item.estoque_minimo === 0;
+          }
+          return true;
+        });
+      }
+
+      setItems(filteredData);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -85,6 +138,14 @@ export function useInventory() {
     fetchItems();
     fetchMovements();
   }, [user]);
+
+  const getCategories = () => {
+    return Array.from(new Set(items.map(item => item.categoria).filter(Boolean))) as string[];
+  };
+
+  const getUnits = () => {
+    return Array.from(new Set(items.map(item => item.unidade_medida).filter(Boolean))) as string[];
+  };
 
   const createItem = async (itemData: {
     nome: string;
@@ -177,6 +238,8 @@ export function useInventory() {
     updateItem,
     createMovement,
     getLowStockItems,
-    getTotalValue
+    getTotalValue,
+    getCategories,
+    getUnits
   };
 }
