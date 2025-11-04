@@ -4,11 +4,22 @@ import { useTasks } from "@/hooks/use-tasks";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, MapPin, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, CheckCircle2, AlertCircle, Check } from "lucide-react";
 import { format, isToday, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, isPast } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -202,12 +213,6 @@ export function WorkspaceArea() {
       <div className={`flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 shadow-sm hover:shadow-md transition-all duration-200 border-l-4 ${
         isOverdue ? 'border-l-destructive' : 'border-l-primary'
       }`}>
-        <Checkbox
-          checked={task.status === 'realizada'}
-          onCheckedChange={() => handleTaskComplete(task)}
-          className="mt-1"
-        />
-        
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p className="font-medium truncate">{task.titulo}</p>
@@ -238,6 +243,33 @@ export function WorkspaceArea() {
             </p>
           )}
         </div>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="shrink-0 gap-1 text-xs"
+            >
+              <Check className="h-3 w-3" />
+              Concluir
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Concluir tarefa?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja marcar a tarefa "{task.titulo}" como concluída?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleTaskComplete(task)}>
+                Concluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   };
