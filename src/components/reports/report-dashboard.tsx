@@ -11,10 +11,15 @@ import {
   FileText, 
   TrendingUp, 
   Calendar,
-  Download
+  Download,
+  ShoppingCart,
+  TrendingDown
 } from 'lucide-react';
 import { StudentsReport } from './students-report';
 import { InventoryReport } from './inventory-report';
+import { MovementsReport } from './movements-report';
+import { PurchasesReport } from './purchases-report';
+import { ABCAnalysis } from './abc-analysis';
 import { ActivitiesReport } from './activities-report';
 import { CategoryStatistics } from './category-statistics';
 
@@ -147,11 +152,14 @@ export function ReportDashboard() {
 
       {/* Detailed Reports */}
       <Tabs defaultValue="students" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="students">Relatório de Alunos</TabsTrigger>
-          <TabsTrigger value="inventory">Relatório de Estoque</TabsTrigger>
-          <TabsTrigger value="activities">Relatório de Atividades</TabsTrigger>
-          <TabsTrigger value="categories">Estatísticas por Categoria</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+          <TabsTrigger value="students">Alunos</TabsTrigger>
+          <TabsTrigger value="inventory">Estoque</TabsTrigger>
+          <TabsTrigger value="movements">Movimentações</TabsTrigger>
+          <TabsTrigger value="purchases">Compras</TabsTrigger>
+          <TabsTrigger value="abc">Curva ABC</TabsTrigger>
+          <TabsTrigger value="activities">Atividades</TabsTrigger>
+          <TabsTrigger value="categories">Categorias</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4">
@@ -160,6 +168,18 @@ export function ReportDashboard() {
 
         <TabsContent value="inventory" className="space-y-4">
           <InventoryReport />
+        </TabsContent>
+
+        <TabsContent value="movements" className="space-y-4">
+          <MovementsReport />
+        </TabsContent>
+
+        <TabsContent value="purchases" className="space-y-4">
+          <PurchasesReport />
+        </TabsContent>
+
+        <TabsContent value="abc" className="space-y-4">
+          <ABCAnalysis />
         </TabsContent>
 
         <TabsContent value="activities" className="space-y-4">
