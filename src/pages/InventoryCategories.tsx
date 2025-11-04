@@ -251,10 +251,10 @@ export default function InventoryCategories() {
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div
-                      className="w-12 h-12 rounded-lg flex items-center justify-center"
+                      className="w-6 h-6 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: category.cor }}
                     >
-                      <Tag className="h-6 w-6 text-white" />
+                      <Tag className="h-3 w-3 text-white" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
