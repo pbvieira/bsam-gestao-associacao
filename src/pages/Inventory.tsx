@@ -9,6 +9,7 @@ import { InventoryList } from "@/components/inventory/inventory-list";
 import { InventoryForm } from "@/components/inventory/inventory-form";
 import { InventoryMovements } from "@/components/inventory/inventory-movements";
 import { InventoryStats } from "@/components/inventory/inventory-stats";
+import { InventoryAlerts } from "@/components/inventory/inventory-alerts";
 import { SupplierList } from "@/components/suppliers/supplier-list";
 import { PurchaseList } from "@/components/purchases/purchase-list";
 import { useInventory } from "@/hooks/use-inventory";
@@ -97,6 +98,7 @@ export default function Inventory() {
             <Tabs defaultValue="items" className="space-y-6">
               <TabsList>
                 <TabsTrigger value="items">Itens</TabsTrigger>
+                <TabsTrigger value="alerts">Alertas</TabsTrigger>
                 <TabsTrigger value="movements">Movimentações</TabsTrigger>
                 <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
                 <TabsTrigger value="purchases">Compras</TabsTrigger>
@@ -108,6 +110,10 @@ export default function Inventory() {
                   onEditItem={handleEditItem}
                   onViewMovements={handleViewMovements}
                 />
+              </TabsContent>
+
+              <TabsContent value="alerts">
+                <InventoryAlerts />
               </TabsContent>
               
               <TabsContent value="movements">
