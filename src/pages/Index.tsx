@@ -1,7 +1,6 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { WorkspaceHeader } from "@/components/dashboard/workspace-header";
-import { TodayTasks } from "@/components/dashboard/today-tasks";
-import { TodayEvents } from "@/components/dashboard/today-events";
+import { WorkspaceArea } from "@/components/dashboard/workspace-area";
 import { ProductivityStats } from "@/components/dashboard/productivity-stats";
 import { WorkspaceActions } from "@/components/dashboard/workspace-actions";
 import { NotificationCenter } from "@/components/dashboard/notification-center";
@@ -22,15 +21,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Minha Agenda */}
-        <div className="h-[50vh]">
-          <TodayEvents />
-        </div>
-
-        {/* Minhas Tarefas */}
-        <div className="h-[50vh]">
-          <TodayTasks />
-        </div>
+        {/* Minha Área de Trabalho */}
+        <WorkspaceArea />
       </div>
     </MainLayout>
   );
