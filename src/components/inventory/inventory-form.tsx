@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useInventory } from '@/hooks/use-inventory';
+import { useInventoryCategories } from '@/hooks/use-inventory-categories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,23 +31,13 @@ interface InventoryFormProps {
   onCancel: () => void;
 }
 
-const categorias = [
-  'Alimentos',
-  'Roupas',
-  'Medicamentos',
-  'Materiais de Limpeza',
-  'Material Escolar',
-  'Materiais de Construção',
-  'Equipamentos',
-  'Outros'
-];
-
 const unidadesMedida = [
   'UN', 'KG', 'G', 'L', 'ML', 'M', 'CM', 'M²', 'CX', 'PC', 'PAR', 'DZ'
 ];
 
 export function InventoryForm({ item, onSuccess, onCancel }: InventoryFormProps) {
   const { createItem, updateItem } = useInventory();
+  const { categories } = useInventoryCategories();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -154,9 +145,15 @@ export function InventoryForm({ item, onSuccess, onCancel }: InventoryFormProps)
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categorias.map((categoria) => (
-                          <SelectItem key={categoria} value={categoria}>
-                            {categoria}
+                        {categories.map((categoria) => (
+                          <SelectItem key={categoria.id} value={categoria.nome}>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: categoria.cor }}
+                              />
+                              {categoria.nome}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>

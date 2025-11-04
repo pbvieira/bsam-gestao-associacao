@@ -46,7 +46,7 @@ export function InventoryAlerts() {
         .from('inventory_items')
         .select('id, nome, estoque_atual, estoque_minimo, categoria')
         .eq('ativo', true)
-        .lte('estoque_atual', supabase.raw('estoque_minimo'))
+        .filter('estoque_atual', 'lte', 'estoque_minimo')
         .order('estoque_atual', { ascending: true });
 
       if (error) throw error;

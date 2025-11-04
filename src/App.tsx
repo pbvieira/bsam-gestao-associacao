@@ -18,6 +18,7 @@ import Purchases from "./pages/Purchases";
 import Reports from "./pages/Reports";
 import RoleManagement from "./pages/RoleManagement";
 import AnnotationCategories from "./pages/AnnotationCategories";
+import InventoryCategories from "./pages/InventoryCategories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -107,6 +108,11 @@ const App = () => {
           <Route path="/categorias-anotacoes" element={
             <UnifiedRoute module="students">
               <AnnotationCategories />
+            </UnifiedRoute>
+          } />
+          <Route path="/categorias-inventario" element={
+            <UnifiedRoute module="inventory">
+              <InventoryCategories />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
