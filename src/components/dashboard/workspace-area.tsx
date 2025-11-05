@@ -89,15 +89,31 @@ export function WorkspaceArea() {
         if (!task.data_vencimento) return true;
         
         const dueDate = new Date(task.data_vencimento);
+        
+        // ⭐ Tarefas atrasadas sempre aparecem (independente do filtro)
+        if (isPast(dueDate)) {
+          return true;
+        }
+        
+        // Tarefas futuras: apenas se dentro do período
         return isWithinInterval(dueDate, { start: startDate, end: endDate });
       })
       .sort((a, b) => {
+        // 1. Ordenar tarefas atrasadas primeiro
+        const aOverdue = a.data_vencimento && isPast(new Date(a.data_vencimento));
+        const bOverdue = b.data_vencimento && isPast(new Date(b.data_vencimento));
+        
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+        
+        // 2. Depois por prioridade
         const priorityOrder = { 'alta': 0, 'media': 1, 'baixa': 2 };
         const aPriority = priorityOrder[a.prioridade as keyof typeof priorityOrder] || 3;
         const bPriority = priorityOrder[b.prioridade as keyof typeof priorityOrder] || 3;
         
         if (aPriority !== bPriority) return aPriority - bPriority;
         
+        // 3. Por fim, por data de vencimento
         if (!a.data_vencimento && !b.data_vencimento) return 0;
         if (!a.data_vencimento) return 1;
         if (!b.data_vencimento) return -1;
@@ -108,6 +124,21 @@ export function WorkspaceArea() {
 
   const filteredEvents = getFilteredEvents();
   const filteredTasks = getFilteredTasks();
+  
+  // Separar tarefas atrasadas das demais
+  const overdueTasks = filteredTasks.filter(task => 
+    task.data_vencimento && isPast(new Date(task.data_vencimento))
+  );
+  const upcomingTasks = filteredTasks.filter(task => 
+    !task.data_vencimento || !isPast(new Date(task.data_vencimento))
+  );
+  
+  const getDaysOverdue = (dueDate: string) => {
+    const due = new Date(dueDate);
+    const diffTime = Math.abs(today.getTime() - due.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   const handleTaskComplete = async (task: any) => {
     try {
@@ -208,17 +239,23 @@ export function WorkspaceArea() {
 
   const TaskItem = ({ task }: { task: any }) => {
     const isOverdue = task.data_vencimento && isPast(new Date(task.data_vencimento)) && task.status !== 'realizada';
+    const daysOverdue = isOverdue ? getDaysOverdue(task.data_vencimento) : 0;
     
     return (
       <div className={`flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 shadow-sm hover:shadow-md transition-all duration-200 border-l-4 ${
-        isOverdue ? 'border-l-destructive' : 'border-l-primary'
+        isOverdue ? 'border-l-destructive bg-destructive/5' : 'border-l-primary'
       }`}>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <p className="font-medium truncate">{task.titulo}</p>
             <Badge className={getPriorityColor(task.prioridade)}>
               {task.prioridade}
             </Badge>
+            {isOverdue && (
+              <Badge className="bg-destructive text-destructive-foreground">
+                ATRASADA
+              </Badge>
+            )}
           </div>
           
           <div className="space-y-1 text-xs text-muted-foreground">
@@ -231,7 +268,7 @@ export function WorkspaceArea() {
                 )}
                 <span className={isOverdue ? 'text-destructive font-medium' : ''}>
                   {format(new Date(task.data_vencimento), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                  {isOverdue && ' (Atrasada)'}
+                  {isOverdue && ` (${daysOverdue} ${daysOverdue === 1 ? 'dia' : 'dias'} de atraso)`}
                 </span>
               </div>
             )}
@@ -327,15 +364,30 @@ export function WorkspaceArea() {
             </div>
           )}
 
-          {/* Tarefas */}
-          {filteredTasks.length > 0 && (
+          {/* Tarefas Atrasadas */}
+          {overdueTasks.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-destructive flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                ⚠️ Tarefas Atrasadas ({overdueTasks.length})
+              </h4>
+              <div className="space-y-2">
+                {overdueTasks.map(task => (
+                  <TaskItem key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tarefas Pendentes */}
+          {upcomingTasks.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
-                Tarefas ({filteredTasks.length})
+                Tarefas ({upcomingTasks.length})
               </h4>
               <div className="space-y-2">
-                {filteredTasks.map(task => (
+                {upcomingTasks.map(task => (
                   <TaskItem key={task.id} task={task} />
                 ))}
               </div>
