@@ -43,6 +43,11 @@ const navigationItems = [{
   icon: Warehouse,
   module: "inventory"
 }, {
+  name: "Categorias de Inventário",
+  href: "/categorias-inventario",
+  icon: Tag,
+  module: "inventory"
+}, {
   name: "Fornecedores",
   href: "/fornecedores",
   icon: Package,
