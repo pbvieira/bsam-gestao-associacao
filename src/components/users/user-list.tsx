@@ -168,31 +168,6 @@ export function UserList() {
 
   const handlePermanentDelete = async (user: UserProfile) => {
     try {
-      // Verificar se é administrador e se é o último
-      if (user.role === 'administrador') {
-        const { data: adminCount, error: countError } = await supabase
-          .rpc('count_active_admins');
-
-        if (countError) {
-          console.error('Erro ao contar administradores:', countError);
-          toast({
-            title: "Erro",
-            description: "Não foi possível verificar os administradores do sistema.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        if (adminCount <= 1) {
-          toast({
-            title: "Ação não permitida",
-            description: "Não é possível excluir o último administrador do sistema. Deve haver pelo menos um administrador ativo.",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-
       const firstConfirm = confirm(
         `⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n` +
         `Você está prestes a EXCLUIR PERMANENTEMENTE o usuário:\n` +
@@ -210,12 +185,21 @@ export function UserList() {
 
       if (!secondConfirm) return;
 
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', user.id);
+      // Chamar Edge Function para exclusão segura
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId: user.user_id }
+      });
 
       if (error) throw error;
+
+      if (data?.success === false) {
+        toast({
+          title: "Erro ao excluir",
+          description: data.error || "Não foi possível excluir o usuário.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       toast({
         title: "Usuário excluído",
@@ -223,8 +207,19 @@ export function UserList() {
       });
       
       refetch();
-    } catch (error) {
-      handleError(error, 'database');
+    } catch (error: any) {
+      // Verificar se é erro de vínculo com aluno
+      const errorMessage = error?.message || String(error);
+      
+      if (errorMessage.includes('vinculado a um cadastro de aluno')) {
+        toast({
+          title: "Exclusão não permitida",
+          description: "Este usuário está vinculado a um cadastro de aluno. Os dados do aluno devem ser preservados.",
+          variant: "destructive",
+        });
+      } else {
+        handleError(error, 'database');
+      }
     }
   };
 
