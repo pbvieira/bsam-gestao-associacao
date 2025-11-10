@@ -123,40 +123,47 @@ export function UserForm({ user, onClose }: UserFormProps) {
         console.log('🔥 UserForm: Sucesso na atualização, chamando handleSuccess');
         handleSuccess('Usuário atualizado com sucesso!');
       } else {
-        console.log('🔥 UserForm: Criando novo usuário');
+        console.log('🔥 UserForm: Criando novo usuário via Edge Function');
         
-        // Create new user
         if (!data.password || !data.email) {
           console.error('🔥 UserForm: Email ou senha faltando');
           handleError('Email e senha são obrigatórios para novos usuários', 'auth');
           return;
         }
 
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              full_name: data.full_name,
-              role: data.role,
-            },
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        console.log('🔥 UserForm: Resultado da criação', { authData, authError });
-
-        if (authError) {
-          console.error('🔥 UserForm: Erro na criação', authError);
-          throw authError;
+        // Obter token da sessão atual
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          handleError('Sessão expirada. Faça login novamente.', 'auth');
+          return;
         }
 
-        // Check if user was created successfully
-        if (authData.user) {
-          console.log('🔥 UserForm: Usuário criado com sucesso');
-          handleSuccess('Usuário criado com sucesso! Um email de confirmação foi enviado.');
+        console.log('🔥 UserForm: Chamando Edge Function create-user');
+
+        // Chamar Edge Function para criar usuário (NÃO faz login automático)
+        const { data: result, error: functionError } = await supabase.functions.invoke('create-user', {
+          body: {
+            email: data.email,
+            password: data.password,
+            full_name: data.full_name,
+            role: data.role,
+            active: data.active
+          }
+        });
+
+        console.log('🔥 UserForm: Resultado da Edge Function', { result, functionError });
+
+        if (functionError) {
+          console.error('🔥 UserForm: Erro ao chamar Edge Function', functionError);
+          throw functionError;
+        }
+
+        if (result?.success) {
+          console.log('🔥 UserForm: Usuário criado com sucesso (admin permanece logado)');
+          handleSuccess('Usuário criado com sucesso!');
         } else {
-          console.error('🔥 UserForm: Usuário não foi criado');
+          console.error('🔥 UserForm: Edge Function não retornou sucesso');
           handleError('Erro ao criar usuário', 'auth');
           return;
         }
