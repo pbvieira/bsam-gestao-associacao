@@ -62,7 +62,7 @@ export function UserList() {
   const [adminCount, setAdminCount] = useState<number>(0);
   const { handleError } = useErrorHandler();
   const { toast } = useToast();
-  const { canAccess } = useAuth();
+  const { canAccess, profile } = useAuth();
 
   const canCreate = canAccess('users');
   const canUpdate = canAccess('users');
@@ -208,13 +208,19 @@ export function UserList() {
       
       refetch();
     } catch (error: any) {
-      // Verificar se é erro de vínculo com aluno
+      // Verificar tipos específicos de erro
       const errorMessage = error?.message || String(error);
       
       if (errorMessage.includes('vinculado a um cadastro de aluno')) {
         toast({
           title: "Exclusão não permitida",
           description: "Este usuário está vinculado a um cadastro de aluno. Os dados do aluno devem ser preservados.",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('não pode excluir seu próprio usuário')) {
+        toast({
+          title: "Ação não permitida",
+          description: "Você não pode excluir seu próprio usuário.",
           variant: "destructive",
         });
       } else {
@@ -346,7 +352,7 @@ export function UserList() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1)}
+                            disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1) || user.user_id === profile?.user_id}
                             onClick={() => handleDeactivate(user)}
                             className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                           >
@@ -357,7 +363,7 @@ export function UserList() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1)}
+                          disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1) || user.user_id === profile?.user_id}
                           onClick={() => handlePermanentDelete(user)}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
