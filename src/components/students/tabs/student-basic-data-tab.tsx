@@ -23,6 +23,11 @@ interface Cidade {
   nome: string;
 }
 
+interface FiliationStatusOption {
+  id: string;
+  nome: string;
+}
+
 interface StudentBasicDataTabProps {
   studentId?: string;
 }
@@ -37,6 +42,8 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const [loadingEstados, setLoadingEstados] = useState(true);
   const [loadingCidadesNascimento, setLoadingCidadesNascimento] = useState(false);
   const [loadingCidadesEndereco, setLoadingCidadesEndereco] = useState(false);
+  const [filiationStatus, setFiliationStatus] = useState<FiliationStatusOption[]>([]);
+  const [loadingFiliationStatus, setLoadingFiliationStatus] = useState(true);
 
   const form = useForm<StudentBasicDataForm>({
     resolver: zodResolver(studentBasicDataSchema),
@@ -66,6 +73,28 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
         });
       })
       .finally(() => setLoadingEstados(false));
+  }, []);
+
+  // Fetch filiation status options
+  useEffect(() => {
+    const fetchFiliationStatus = async () => {
+      setLoadingFiliationStatus(true);
+      try {
+        const { data, error } = await supabase
+          .from('filiation_status')
+          .select('id, nome')
+          .eq('ativo', true)
+          .order('ordem', { ascending: true });
+        
+        if (error) throw error;
+        setFiliationStatus((data as FiliationStatusOption[]) || []);
+      } catch (error) {
+        console.error('Erro ao carregar estados de filiação:', error);
+      } finally {
+        setLoadingFiliationStatus(false);
+      }
+    };
+    fetchFiliationStatus();
   }, []);
 
   useEffect(() => {
@@ -632,16 +661,22 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Estado Filiação Mãe</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={loadingFiliationStatus}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={loadingFiliationStatus ? "Carregando..." : "Selecione"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="presente">Presente</SelectItem>
-                          <SelectItem value="falecida">Falecida</SelectItem>
-                          <SelectItem value="desaparecida">Desaparecida</SelectItem>
+                          {filiationStatus.map((status) => (
+                            <SelectItem key={status.id} value={status.nome}>
+                              {status.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -686,16 +721,22 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Estado Filiação Pai</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={loadingFiliationStatus}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={loadingFiliationStatus ? "Carregando..." : "Selecione"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="presente">Presente</SelectItem>
-                          <SelectItem value="falecido">Falecido</SelectItem>
-                          <SelectItem value="desaparecido">Desaparecido</SelectItem>
+                          {filiationStatus.map((status) => (
+                            <SelectItem key={status.id} value={status.nome}>
+                              {status.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
