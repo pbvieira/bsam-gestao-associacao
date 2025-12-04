@@ -33,11 +33,9 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const [saving, setSaving] = useState(false);
   const [estados, setEstados] = useState<Estado[]>([]);
   const [cidadesNascimento, setCidadesNascimento] = useState<Cidade[]>([]);
-  const [cidadesReside, setCidadesReside] = useState<Cidade[]>([]);
   const [cidadesEndereco, setCidadesEndereco] = useState<Cidade[]>([]);
   const [loadingEstados, setLoadingEstados] = useState(true);
   const [loadingCidadesNascimento, setLoadingCidadesNascimento] = useState(false);
-  const [loadingCidadesReside, setLoadingCidadesReside] = useState(false);
   const [loadingCidadesEndereco, setLoadingCidadesEndereco] = useState(false);
 
   const form = useForm<StudentBasicDataForm>({
@@ -117,25 +115,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     }
   }, [form.watch('estado_nascimento')]);
 
-  useEffect(() => {
-    const estadoReside = form.watch('estado_reside');
-    if (estadoReside) {
-      setLoadingCidadesReside(true);
-      fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoReside}/municipios`)
-        .then(response => response.json())
-        .then(data => {
-          const cidadesOrdenadas = data.sort((a: Cidade, b: Cidade) => 
-            a.nome.localeCompare(b.nome)
-          );
-          setCidadesReside(cidadesOrdenadas);
-        })
-        .catch(error => console.error('Erro ao carregar cidades onde reside:', error))
-        .finally(() => setLoadingCidadesReside(false));
-    } else {
-      setCidadesReside([]);
-      form.setValue('cidade_reside', '');
-    }
-  }, [form.watch('estado_reside')]);
 
   useEffect(() => {
     if (studentId) {
@@ -543,7 +522,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
             {/* Naturalidade */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Naturalidade</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="estado_nascimento"
@@ -600,73 +579,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                         </FormControl>
                         <SelectContent>
                           {cidadesNascimento.map((cidade) => (
-                            <SelectItem key={cidade.id} value={cidade.nome}>
-                              {cidade.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="estado_reside"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado Reside</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          form.setValue('cidade_reside', '');
-                        }} 
-                        value={field.value}
-                        disabled={loadingEstados}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={loadingEstados ? "Carregando..." : "Selecione"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {estados.map((estado) => (
-                            <SelectItem key={estado.id} value={estado.sigla}>
-                              {estado.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cidade_reside"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade Reside</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value}
-                        disabled={!form.watch('estado_reside') || loadingCidadesReside}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={
-                              !form.watch('estado_reside') 
-                                ? "Selecione o estado primeiro" 
-                                : loadingCidadesReside 
-                                ? "Carregando..." 
-                                : "Selecione"
-                            } />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {cidadesReside.map((cidade) => (
                             <SelectItem key={cidade.id} value={cidade.nome}>
                               {cidade.nome}
                             </SelectItem>

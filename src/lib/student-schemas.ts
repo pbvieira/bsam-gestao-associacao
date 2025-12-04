@@ -30,8 +30,6 @@ export const studentBasicDataSchema = z.object({
   cartao_sus: z.string().optional(),
   estado_nascimento: z.string().optional(),
   cidade_nascimento: z.string().optional(),
-  estado_reside: z.string().optional(),
-  cidade_reside: z.string().optional(),
   situacao_moradia: z.string().optional(),
   estuda: z.boolean().default(false),
   escolaridade: z.string().optional(),
