@@ -163,11 +163,12 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Error in delete-user function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao excluir usuário';
     
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message || 'Erro ao excluir usuário'
+        error: errorMessage
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
