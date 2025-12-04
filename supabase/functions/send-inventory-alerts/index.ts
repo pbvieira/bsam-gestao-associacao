@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -55,13 +55,17 @@ const handler = async (req: Request): Promise<Response> => {
     const userName = profile?.full_name || "Usuário";
 
     // Get detailed low stock items
-    const { data: lowStockItems, error: stockError } = await supabase
+    const { data: allItems, error: stockError } = await supabase
       .from("inventory_items")
       .select("nome, estoque_atual, estoque_minimo, categoria")
       .eq("ativo", true)
-      .lte("estoque_atual", supabase.raw("estoque_minimo"))
-      .order("estoque_atual", { ascending: true })
-      .limit(10);
+      .order("estoque_atual", { ascending: true });
+
+    // Filter items where estoque_atual <= estoque_minimo
+    const lowStockItems = allItems?.filter(
+      (item: { estoque_atual: number | null; estoque_minimo: number | null }) => 
+        (item.estoque_atual ?? 0) <= (item.estoque_minimo ?? 0)
+    ).slice(0, 10);
 
     if (stockError) {
       console.error("Error fetching stock items:", stockError);
