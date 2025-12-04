@@ -365,31 +365,31 @@ export function StudentForm({
           </Card>
         </TabsContent>
 
-        <TabsContent value="basic">
+        <TabsContent value="basic" forceMount className={activeTab !== 'basic' ? 'hidden' : ''}>
           <StudentBasicDataTab studentId={savedStudentId} />
         </TabsContent>
 
-        <TabsContent value="children">
+        <TabsContent value="children" forceMount className={activeTab !== 'children' ? 'hidden' : ''}>
           <StudentChildrenTab studentId={savedStudentId} />
         </TabsContent>
 
-        <TabsContent value="work">
+        <TabsContent value="work" forceMount className={activeTab !== 'work' ? 'hidden' : ''}>
           <StudentWorkTab studentId={savedStudentId} />
         </TabsContent>
 
-        <TabsContent value="contacts">
+        <TabsContent value="contacts" forceMount className={activeTab !== 'contacts' ? 'hidden' : ''}>
           <StudentContactsTab studentId={savedStudentId} />
         </TabsContent>
 
-        <TabsContent value="health">
+        <TabsContent value="health" forceMount className={activeTab !== 'health' ? 'hidden' : ''}>
           <StudentHealthTab studentId={savedStudentId} />
         </TabsContent>
 
-        <TabsContent value="annotations">
+        <TabsContent value="annotations" forceMount className={activeTab !== 'annotations' ? 'hidden' : ''}>
           <StudentAnnotationsTab studentId={savedStudentId} />
         </TabsContent>
 
-        <TabsContent value="documents">
+        <TabsContent value="documents" forceMount className={activeTab !== 'documents' ? 'hidden' : ''}>
           <StudentDocumentsTab studentId={savedStudentId} />
         </TabsContent>
       </Tabs>
