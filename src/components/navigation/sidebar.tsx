@@ -3,11 +3,14 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-const navigationItems = [{
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+const mainNavigationItems = [{
   name: "Dashboard",
   href: "/",
   icon: Home,
@@ -28,11 +31,6 @@ const navigationItems = [{
   icon: Users,
   module: "students"
 }, {
-  name: "Categorias de Anotações",
-  href: "/categorias-anotacoes",
-  icon: Tag,
-  module: "students"
-}, {
   name: "Usuários",
   href: "/usuarios",
   icon: User,
@@ -41,11 +39,6 @@ const navigationItems = [{
   name: "Estoque",
   href: "/estoque",
   icon: Warehouse,
-  module: "inventory"
-}, {
-  name: "Categorias de Inventário",
-  href: "/categorias-inventario",
-  icon: Tag,
   module: "inventory"
 }, {
   name: "Fornecedores",
@@ -68,6 +61,18 @@ const navigationItems = [{
   icon: Shield,
   module: "users"
 }];
+
+const auxiliaryTablesItems = [{
+  name: "Categorias de Anotações",
+  href: "/categorias-anotacoes",
+  icon: Tag,
+  module: "students"
+}, {
+  name: "Categorias de Inventário",
+  href: "/categorias-inventario",
+  icon: Tag,
+  module: "inventory"
+}];
 export function AppSidebar() {
   const {
     profile,
@@ -80,36 +85,88 @@ export function AppSidebar() {
   } = useSidebar();
 
   // Filter navigation items based on user role access
-  const navigation = navigationItems.filter(item => canAccess(item.module));
+  const mainNavigation = mainNavigationItems.filter(item => canAccess(item.module));
+  const auxiliaryNavigation = auxiliaryTablesItems.filter(item => canAccess(item.module));
+  
+  // Check if any auxiliary item is active to auto-expand
+  const isAuxiliaryItemActive = auxiliaryNavigation.some(item => location.pathname === item.href);
+  const [auxiliaryTablesOpen, setAuxiliaryTablesOpen] = useState(isAuxiliaryItemActive);
+
+  // Auto-expand when navigating to an auxiliary item
+  useEffect(() => {
+    if (isAuxiliaryItemActive && !auxiliaryTablesOpen) {
+      setAuxiliaryTablesOpen(true);
+    }
+  }, [isAuxiliaryItemActive]);
 
   // Debug log para diagnóstico
   console.log('🔍 Sidebar Debug:', {
     userRole: profile?.role,
-    totalItems: navigationItems.length,
-    accessibleItems: navigation.length,
-    filteredOut: navigationItems.filter(item => !canAccess(item.module)).map(i => i.module),
-    availableModules: navigation.map(i => i.module)
+    mainItems: mainNavigation.length,
+    auxiliaryItems: auxiliaryNavigation.length
   });
+
   const handleSignOut = async () => {
     await signOut();
   };
+
   const getUserInitials = () => {
     if (!profile?.full_name) return 'U';
     return profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   };
-  return <TooltipProvider>
+
+  const renderMenuItem = (item: typeof mainNavigationItems[0]) => {
+    const Icon = item.icon;
+    const isActive = location.pathname === item.href;
+    const menuButton = (
+      <SidebarMenuButton asChild className={cn(
+        "h-11 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200",
+        isActive && "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20"
+      )}>
+        <Link to={item.href} className="flex items-center gap-3">
+          <Icon className="h-5 w-5 flex-shrink-0" />
+          {open && <span className="font-medium">{item.name}</span>}
+        </Link>
+      </SidebarMenuButton>
+    );
+
+    if (!open) {
+      return (
+        <SidebarMenuItem key={item.name}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {menuButton}
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-medium">
+              {item.name}
+            </TooltipContent>
+          </Tooltip>
+        </SidebarMenuItem>
+      );
+    }
+
+    return (
+      <SidebarMenuItem key={item.name}>
+        {menuButton}
+      </SidebarMenuItem>
+    );
+  };
+
+  return (
+    <TooltipProvider>
       <Sidebar collapsible="icon" className="border-r-0" style={{
-      background: 'var(--sidebar-gradient)'
-    }}>
+        background: 'var(--sidebar-gradient)'
+      }}>
         <SidebarHeader className="border-b border-white/10 pb-4">
           <div className="flex items-center gap-2 px-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
               <div className="h-5 w-5 bg-white rounded" />
             </div>
-            {open && <div className="flex flex-col">
+            {open && (
+              <div className="flex flex-col">
                 <span className="text-sm font-semibold text-white">O BOM SAMARITANO</span>
-                
-              </div>}
+              </div>
+            )}
           </div>
         </SidebarHeader>
 
@@ -117,34 +174,55 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navigation.map(item => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.href;
-                const menuButton = <SidebarMenuButton asChild className={cn("h-11 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200", isActive && "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20")}>
-                      <Link to={item.href} className="flex items-center gap-3">
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        {open && <span className="font-medium">{item.name}</span>}
-                      </Link>
-                    </SidebarMenuButton>;
-                if (!open) {
-                  return <SidebarMenuItem key={item.name}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            {menuButton}
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="font-medium">
-                            {item.name}
-                          </TooltipContent>
-                        </Tooltip>
-                      </SidebarMenuItem>;
-                }
-                return <SidebarMenuItem key={item.name}>
-                      {menuButton}
-                    </SidebarMenuItem>;
-              })}
+                {mainNavigation.map(renderMenuItem)}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          {/* Tabelas Auxiliares - Collapsible Section */}
+          {auxiliaryNavigation.length > 0 && (
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <Collapsible open={auxiliaryTablesOpen} onOpenChange={setAuxiliaryTablesOpen}>
+                  {!open ? (
+                    // Collapsed sidebar: show tooltip with section name
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton className="h-11 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 w-full">
+                            <Table2 className="h-5 w-5 flex-shrink-0" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="font-medium">
+                        Tabelas Auxiliares
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    // Expanded sidebar: show full trigger with chevron
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton className="h-11 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 w-full justify-between">
+                        <div className="flex items-center gap-3">
+                          <Table2 className="h-5 w-5 flex-shrink-0" />
+                          <span className="font-medium">Tabelas Auxiliares</span>
+                        </div>
+                        <ChevronDown className={cn(
+                          "h-4 w-4 transition-transform duration-200",
+                          auxiliaryTablesOpen && "rotate-180"
+                        )} />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  )}
+                  
+                  <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+                    <SidebarMenu className={cn(open && "pl-4 border-l border-white/10 ml-4 mt-1")}>
+                      {auxiliaryNavigation.map(renderMenuItem)}
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 pt-4">
@@ -185,5 +263,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-    </TooltipProvider>;
+    </TooltipProvider>
+  );
 }
