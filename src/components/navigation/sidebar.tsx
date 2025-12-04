@@ -72,6 +72,11 @@ const auxiliaryTablesItems = [{
   href: "/categorias-inventario",
   icon: Tag,
   module: "inventory"
+}, {
+  name: "Estado Filiação",
+  href: "/estado-filiacao",
+  icon: Users,
+  module: "students"
 }];
 export function AppSidebar() {
   const {
