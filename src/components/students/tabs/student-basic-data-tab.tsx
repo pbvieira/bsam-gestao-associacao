@@ -51,6 +51,8 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       batizado: 'Não',
       estuda: false,
       ha_processos: false,
+      estado_mae: '',
+      estado_pai: '',
     },
   });
 
@@ -185,10 +187,10 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
           escolaridade: data.escolaridade ?? undefined,
           nome_pai: data.nome_pai ?? undefined,
           data_nascimento_pai: data.data_nascimento_pai ?? undefined,
-          estado_pai: data.estado_pai ?? undefined,
+          estado_pai: data.estado_pai || '',
           nome_mae: data.nome_mae ?? undefined,
           data_nascimento_mae: data.data_nascimento_mae ?? undefined,
-          estado_mae: data.estado_mae ?? undefined,
+          estado_mae: data.estado_mae || '',
           nome_conjuge: data.nome_conjuge ?? undefined,
           data_nascimento_conjuge: data.data_nascimento_conjuge ?? undefined,
           estado_conjuge: data.estado_conjuge ?? undefined,
@@ -695,7 +697,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                       <FormLabel>Estado Filiação Mãe</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
-                        value={field.value}
+                        value={field.value || undefined}
                         disabled={loadingFiliationStatus}
                       >
                         <FormControl>
@@ -755,7 +757,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                       <FormLabel>Estado Filiação Pai</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
-                        value={field.value}
+                        value={field.value || undefined}
                         disabled={loadingFiliationStatus}
                       >
                         <FormControl>
