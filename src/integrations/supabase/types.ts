@@ -686,7 +686,9 @@ export type Database = {
           created_at: string
           data_nascimento_conjuge: string | null
           data_nascimento_mae: string | null
+          data_nascimento_mae_desconhecida: boolean | null
           data_nascimento_pai: string | null
+          data_nascimento_pai_desconhecida: boolean | null
           endereco: string | null
           escolaridade: string | null
           estado: string | null
@@ -721,7 +723,9 @@ export type Database = {
           created_at?: string
           data_nascimento_conjuge?: string | null
           data_nascimento_mae?: string | null
+          data_nascimento_mae_desconhecida?: boolean | null
           data_nascimento_pai?: string | null
+          data_nascimento_pai_desconhecida?: boolean | null
           endereco?: string | null
           escolaridade?: string | null
           estado?: string | null
@@ -756,7 +760,9 @@ export type Database = {
           created_at?: string
           data_nascimento_conjuge?: string | null
           data_nascimento_mae?: string | null
+          data_nascimento_mae_desconhecida?: boolean | null
           data_nascimento_pai?: string | null
+          data_nascimento_pai_desconhecida?: boolean | null
           endereco?: string | null
           escolaridade?: string | null
           estado?: string | null

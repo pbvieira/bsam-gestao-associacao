@@ -8,9 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save } from 'lucide-react';
+
+// Estados de filiação que tornam a data de nascimento automaticamente opcional
+const ESTADOS_DATA_OPCIONAL = ['Desconhecido(a)', 'Não declarado(a) no registro'];
 
 interface Estado {
   id: number;
@@ -53,6 +57,8 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       ha_processos: false,
       estado_mae: '',
       estado_pai: '',
+      data_nascimento_mae_desconhecida: false,
+      data_nascimento_pai_desconhecida: false,
     },
   });
 
@@ -155,6 +161,24 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     }
   }, [studentId]);
 
+  // Limpar data e checkbox quando estado da mãe muda para automático
+  const estadoMae = form.watch('estado_mae');
+  useEffect(() => {
+    if (ESTADOS_DATA_OPCIONAL.includes(estadoMae || '')) {
+      form.setValue('data_nascimento_mae', '');
+      form.setValue('data_nascimento_mae_desconhecida', false);
+    }
+  }, [estadoMae]);
+
+  // Limpar data e checkbox quando estado do pai muda para automático
+  const estadoPai = form.watch('estado_pai');
+  useEffect(() => {
+    if (ESTADOS_DATA_OPCIONAL.includes(estadoPai || '')) {
+      form.setValue('data_nascimento_pai', '');
+      form.setValue('data_nascimento_pai_desconhecida', false);
+    }
+  }, [estadoPai]);
+
   const fetchBasicData = async () => {
     try {
       const { data, error } = await supabase
@@ -187,9 +211,11 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
           escolaridade: data.escolaridade ?? undefined,
           nome_pai: data.nome_pai ?? undefined,
           data_nascimento_pai: data.data_nascimento_pai ?? undefined,
+          data_nascimento_pai_desconhecida: data.data_nascimento_pai_desconhecida ?? false,
           estado_pai: data.estado_pai || '',
           nome_mae: data.nome_mae ?? undefined,
           data_nascimento_mae: data.data_nascimento_mae ?? undefined,
+          data_nascimento_mae_desconhecida: data.data_nascimento_mae_desconhecida ?? false,
           estado_mae: data.estado_mae || '',
           nome_conjuge: data.nome_conjuge ?? undefined,
           data_nascimento_conjuge: data.data_nascimento_conjuge ?? undefined,
@@ -217,6 +243,26 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
         title: 'Erro',
         description: 'Salve o aluno primeiro para adicionar dados básicos',
         variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validação híbrida para data de nascimento
+    const maeAutoOptional = ESTADOS_DATA_OPCIONAL.includes(data.estado_mae || '');
+    const paiAutoOptional = ESTADOS_DATA_OPCIONAL.includes(data.estado_pai || '');
+
+    // Validar data da mãe: obrigatória se não for auto-opcional E não marcou "Não sabe"
+    if (!maeAutoOptional && !data.data_nascimento_mae_desconhecida && !data.data_nascimento_mae) {
+      form.setError('data_nascimento_mae', {
+        message: 'Data de nascimento é obrigatória (ou marque "Não sabe")'
+      });
+      return;
+    }
+
+    // Validar data do pai: obrigatória se não for auto-opcional E não marcou "Não sabe"
+    if (!paiAutoOptional && !data.data_nascimento_pai_desconhecida && !data.data_nascimento_pai) {
+      form.setError('data_nascimento_pai', {
+        message: 'Data de nascimento é obrigatória (ou marque "Não sabe")'
       });
       return;
     }
@@ -663,7 +709,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
               <h3 className="text-lg font-medium">Filiação</h3>
               
               {/* Mãe */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
                 <FormField
                   control={form.control}
                   name="nome_mae"
@@ -678,18 +724,52 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   )}
                 />
 
+                {/* Checkbox "Não sabe" - visível apenas quando estado não é automático */}
+                {!ESTADOS_DATA_OPCIONAL.includes(form.watch('estado_mae') || '') && (
+                  <FormField
+                    control={form.control}
+                    name="data_nascimento_mae_desconhecida"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0 pb-2">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal cursor-pointer">Não sabe</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="data_nascimento_mae"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data Nascimento Mãe</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const estadoMaeValue = form.watch('estado_mae');
+                    const naoSabe = form.watch('data_nascimento_mae_desconhecida');
+                    const isAutoOptional = ESTADOS_DATA_OPCIONAL.includes(estadoMaeValue || '');
+                    const isOptional = isAutoOptional || naoSabe;
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>
+                          Data Nascimento Mãe
+                          {!isOptional && <span className="text-destructive ml-1">*</span>}
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            disabled={isAutoOptional}
+                            className={isAutoOptional ? 'opacity-50' : ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
@@ -723,7 +803,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
               </div>
 
               {/* Pai */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
                 <FormField
                   control={form.control}
                   name="nome_pai"
@@ -738,18 +818,52 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   )}
                 />
 
+                {/* Checkbox "Não sabe" - visível apenas quando estado não é automático */}
+                {!ESTADOS_DATA_OPCIONAL.includes(form.watch('estado_pai') || '') && (
+                  <FormField
+                    control={form.control}
+                    name="data_nascimento_pai_desconhecida"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-y-0 pb-2">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal cursor-pointer">Não sabe</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="data_nascimento_pai"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data Nascimento Pai</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const estadoPaiValue = form.watch('estado_pai');
+                    const naoSabe = form.watch('data_nascimento_pai_desconhecida');
+                    const isAutoOptional = ESTADOS_DATA_OPCIONAL.includes(estadoPaiValue || '');
+                    const isOptional = isAutoOptional || naoSabe;
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>
+                          Data Nascimento Pai
+                          {!isOptional && <span className="text-destructive ml-1">*</span>}
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            disabled={isAutoOptional}
+                            className={isAutoOptional ? 'opacity-50' : ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
