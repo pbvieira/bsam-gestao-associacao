@@ -59,6 +59,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       estado_pai: '',
       data_nascimento_mae_desconhecida: false,
       data_nascimento_pai_desconhecida: false,
+      data_nascimento_conjuge_desconhecida: false,
     },
   });
 
@@ -219,6 +220,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
           estado_mae: data.estado_mae || '',
           nome_conjuge: data.nome_conjuge ?? undefined,
           data_nascimento_conjuge: data.data_nascimento_conjuge ?? undefined,
+          data_nascimento_conjuge_desconhecida: data.data_nascimento_conjuge_desconhecida ?? false,
           estado_conjuge: data.estado_conjuge ?? undefined,
           ha_processos: data.ha_processos ?? false,
           comarca_juridica: data.comarca_juridica ?? undefined,
@@ -897,7 +899,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
               </div>
 
               {/* Esposa */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
                 <FormField
                   control={form.control}
                   name="nome_conjuge"
@@ -908,6 +910,23 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                         <Input placeholder="Nome completo da esposa" {...field} />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Checkbox "Não sabe" */}
+                <FormField
+                  control={form.control}
+                  name="data_nascimento_conjuge_desconhecida"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 pb-2">
+                      <FormControl>
+                        <Checkbox 
+                          checked={field.value} 
+                          onCheckedChange={field.onChange} 
+                        />
+                      </FormControl>
+                      <FormLabel className="text-sm font-normal cursor-pointer">Não sabe</FormLabel>
                     </FormItem>
                   )}
                 />
