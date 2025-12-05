@@ -225,7 +225,10 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     try {
       const { error } = await supabase
         .from('student_basic_data')
-        .upsert({ ...data, student_id: studentId });
+        .upsert(
+          { ...data, student_id: studentId },
+          { onConflict: 'student_id' }
+        );
 
       if (error) throw error;
 
