@@ -164,7 +164,39 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       if (error) throw error;
 
       if (data) {
-        form.reset(data);
+        // Remove campos do banco que não fazem parte do schema e trata valores nulos
+        const formData: StudentBasicDataForm = {
+          telefone: data.telefone ?? undefined,
+          endereco: data.endereco ?? undefined,
+          cep: data.cep ?? undefined,
+          numero: data.numero ?? undefined,
+          bairro: data.bairro ?? undefined,
+          cidade: data.cidade ?? undefined,
+          estado: data.estado ?? undefined,
+          estado_civil: data.estado_civil ?? undefined,
+          religiao: data.religiao ?? undefined,
+          batizado: data.batizado ?? 'Não',
+          pis_nis: data.pis_nis ?? undefined,
+          cartao_sus: data.cartao_sus ?? undefined,
+          estado_nascimento: data.estado_nascimento ?? undefined,
+          cidade_nascimento: data.cidade_nascimento ?? undefined,
+          situacao_moradia: data.situacao_moradia ?? undefined,
+          estuda: data.estuda ?? false,
+          escolaridade: data.escolaridade ?? undefined,
+          nome_pai: data.nome_pai ?? undefined,
+          data_nascimento_pai: data.data_nascimento_pai ?? undefined,
+          estado_pai: data.estado_pai ?? undefined,
+          nome_mae: data.nome_mae ?? undefined,
+          data_nascimento_mae: data.data_nascimento_mae ?? undefined,
+          estado_mae: data.estado_mae ?? undefined,
+          nome_conjuge: data.nome_conjuge ?? undefined,
+          data_nascimento_conjuge: data.data_nascimento_conjuge ?? undefined,
+          estado_conjuge: data.estado_conjuge ?? undefined,
+          ha_processos: data.ha_processos ?? false,
+          comarca_juridica: data.comarca_juridica ?? undefined,
+          observacoes_juridicas: data.observacoes_juridicas ?? undefined,
+        };
+        form.reset(formData);
       }
     } catch (error) {
       toast({
