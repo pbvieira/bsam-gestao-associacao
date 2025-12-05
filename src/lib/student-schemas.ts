@@ -43,6 +43,7 @@ export const studentBasicDataSchema = z.object({
   estado_mae: z.string().nullish(),
   nome_conjuge: z.string().nullish(),
   data_nascimento_conjuge: z.string().nullish(),
+  data_nascimento_conjuge_desconhecida: z.boolean().default(false),
   estado_conjuge: z.string().nullish(),
   comarca_juridica: z.string().nullish(),
   ha_processos: z.boolean().default(false),

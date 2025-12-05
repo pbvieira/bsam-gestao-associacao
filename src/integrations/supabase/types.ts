@@ -685,6 +685,7 @@ export type Database = {
           comarca_juridica: string | null
           created_at: string
           data_nascimento_conjuge: string | null
+          data_nascimento_conjuge_desconhecida: boolean | null
           data_nascimento_mae: string | null
           data_nascimento_mae_desconhecida: boolean | null
           data_nascimento_pai: string | null
@@ -722,6 +723,7 @@ export type Database = {
           comarca_juridica?: string | null
           created_at?: string
           data_nascimento_conjuge?: string | null
+          data_nascimento_conjuge_desconhecida?: boolean | null
           data_nascimento_mae?: string | null
           data_nascimento_mae_desconhecida?: boolean | null
           data_nascimento_pai?: string | null
@@ -759,6 +761,7 @@ export type Database = {
           comarca_juridica?: string | null
           created_at?: string
           data_nascimento_conjuge?: string | null
+          data_nascimento_conjuge_desconhecida?: boolean | null
           data_nascimento_mae?: string | null
           data_nascimento_mae_desconhecida?: boolean | null
           data_nascimento_pai?: string | null
