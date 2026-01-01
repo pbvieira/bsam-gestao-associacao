@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useStudentHealthData } from '@/hooks/use-student-health-data';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Heart, Brain, Pill, Users } from 'lucide-react';
+import { Loader2, Heart, Brain, Pill, Users } from 'lucide-react';
+import { useStudentFormContext } from '@/contexts/StudentFormContext';
 
 const healthDataSchema = z.object({
   // Testes médicos
@@ -48,13 +48,13 @@ const healthDataSchema = z.object({
 type HealthDataForm = z.infer<typeof healthDataSchema>;
 
 interface StudentHealthTabProps {
-  studentId?: string;
+  studentId?: string | null;
 }
 
 export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
-  const { healthData, loading, createOrUpdateHealthData } = useStudentHealthData(studentId);
+  const { healthData, loading, createOrUpdateHealthData } = useStudentHealthData(studentId || undefined);
   const { toast } = useToast();
-  const [isSaving, setIsSaving] = useState(false);
+  const { registerHealthForm, registerHealthSave } = useStudentFormContext();
 
   const form = useForm<HealthDataForm>({
     resolver: zodResolver(healthDataSchema),
@@ -85,6 +85,47 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
       observacoes_gerais: '',
     },
   });
+
+  // Register form with context
+  useEffect(() => {
+    registerHealthForm(form);
+  }, [form, registerHealthForm]);
+
+  // Register save function with context
+  const saveData = useCallback(async (): Promise<boolean> => {
+    if (!studentId) return true; // No student yet, skip
+    
+    const isValid = await form.trigger();
+    if (!isValid) return false;
+    
+    const data = form.getValues();
+    
+    try {
+      const result = await createOrUpdateHealthData(data);
+
+      if (result?.error) {
+        toast({
+          title: 'Erro',
+          description: result.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao salvar dados de saúde.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  }, [studentId, form, createOrUpdateHealthData, toast]);
+
+  useEffect(() => {
+    registerHealthSave(saveData);
+  }, [saveData, registerHealthSave]);
 
   useEffect(() => {
     if (healthData) {
@@ -117,45 +158,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
     }
   }, [healthData, form]);
 
-  const onSubmit = async (data: HealthDataForm) => {
-    if (!studentId) {
-      toast({
-        title: 'Erro',
-        description: 'Salve o aluno primeiro para adicionar dados de saúde',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    setIsSaving(true);
-    try {
-      const result = await createOrUpdateHealthData(data);
-
-      if (result?.error) {
-        toast({
-          title: 'Erro',
-          description: result.error,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      toast({
-        title: 'Sucesso',
-        description: 'Dados de saúde salvos com sucesso!',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-
   if (loading) {
     return (
       <Card>
@@ -170,7 +172,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-6">
           {/* Histórico Médico */}
           <Card>
             <CardHeader>
@@ -447,7 +449,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                         <FormItem>
                           <FormLabel>Detalhes do Acompanhamento</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Profissional, frequência, etc..." {...field} />
+                            <Textarea placeholder="Profissional, frequência..." {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -505,7 +507,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Alucinações</FormLabel>
+                          <FormLabel>Apresenta alucinações</FormLabel>
                         </div>
                       </FormItem>
                     )}
@@ -520,7 +522,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Pill className="h-5 w-5" />
-                Uso de Medicamentos
+                Medicamentos
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -543,13 +545,13 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
               />
 
               {form.watch('uso_medicamentos') && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="descricao_medicamentos"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição dos Medicamentos</FormLabel>
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Medicamentos em Uso</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Liste os medicamentos..." {...field} />
                         </FormControl>
@@ -579,7 +581,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                       <FormItem>
                         <FormLabel>Modo de Uso</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: 2x ao dia, conforme necessário" {...field} />
+                          <Input placeholder="Ex: 1x ao dia, antes de dormir" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -611,7 +613,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Dependência química na família</FormLabel>
+                      <FormLabel>Histórico de dependência química na família</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -623,9 +625,9 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                   name="detalhes_dependencia_familia"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Detalhes da Dependência Familiar</FormLabel>
+                      <FormLabel>Detalhes</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Descreva o caso na família..." {...field} />
+                        <Textarea placeholder="Descreva o histórico familiar..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -648,15 +650,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
               />
             </CardContent>
           </Card>
-
-          <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={isSaving}>
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              <Save className="h-4 w-4 mr-2" />
-              Salvar Dados de Saúde
-            </Button>
-          </div>
-        </form>
+        </div>
       </Form>
     </div>
   );
