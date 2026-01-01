@@ -142,7 +142,9 @@ function StudentFormContent({
       nome_responsavel: student?.nome_responsavel || '',
       parentesco_responsavel: student?.parentesco_responsavel || '',
       data_abertura: student?.data_abertura || '',
-      data_saida: student?.data_saida || ''
+      data_saida: student?.data_saida 
+        ? `${student.data_saida}T${student.hora_saida || '00:00'}` 
+        : ''
     }
   });
 
