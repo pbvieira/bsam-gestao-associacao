@@ -35,7 +35,6 @@ export function useStudents() {
       const { data, error } = await supabase
         .from('students')
         .select('*')
-        .eq('ativo', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
