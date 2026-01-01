@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { studentBasicDataSchema, type StudentBasicDataForm } from '@/lib/student-schemas';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { useStudentFormContext } from '@/contexts/StudentFormContext';
 
 // Estados de filiação que tornam a data de nascimento automaticamente opcional
 const ESTADOS_DATA_OPCIONAL = ['Desconhecido(a)', 'Não declarado(a) no registro'];
@@ -33,13 +30,12 @@ interface FiliationStatusOption {
 }
 
 interface StudentBasicDataTabProps {
-  studentId?: string;
+  studentId?: string | null;
 }
 
 export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { basicDataForm: form, isLoading } = useStudentFormContext();
   const [estados, setEstados] = useState<Estado[]>([]);
   const [cidadesNascimento, setCidadesNascimento] = useState<Cidade[]>([]);
   const [cidadesEndereco, setCidadesEndereco] = useState<Cidade[]>([]);
@@ -48,20 +44,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const [loadingCidadesEndereco, setLoadingCidadesEndereco] = useState(false);
   const [filiationStatus, setFiliationStatus] = useState<FiliationStatusOption[]>([]);
   const [loadingFiliationStatus, setLoadingFiliationStatus] = useState(true);
-
-  const form = useForm<StudentBasicDataForm>({
-    resolver: zodResolver(studentBasicDataSchema),
-    defaultValues: {
-      batizado: 'Não',
-      estuda: false,
-      ha_processos: false,
-      estado_mae: '',
-      estado_pai: '',
-      data_nascimento_mae_desconhecida: false,
-      data_nascimento_pai_desconhecida: false,
-      data_nascimento_conjuge_desconhecida: false,
-    },
-  });
 
   useEffect(() => {
     setLoadingEstados(true);
@@ -153,15 +135,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     }
   }, [form.watch('estado_nascimento')]);
 
-
-  useEffect(() => {
-    if (studentId) {
-      fetchBasicData();
-    } else {
-      setLoading(false);
-    }
-  }, [studentId]);
-
   // Limpar data e checkbox quando estado da mãe muda para automático
   const estadoMae = form.watch('estado_mae');
   useEffect(() => {
@@ -180,122 +153,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     }
   }, [estadoPai]);
 
-  const fetchBasicData = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('student_basic_data')
-        .select('*')
-        .eq('student_id', studentId)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data) {
-        // Remove campos do banco que não fazem parte do schema e trata valores nulos
-        const formData: StudentBasicDataForm = {
-          telefone: data.telefone ?? undefined,
-          endereco: data.endereco ?? undefined,
-          cep: data.cep ?? undefined,
-          numero: data.numero ?? undefined,
-          bairro: data.bairro ?? undefined,
-          cidade: data.cidade ?? undefined,
-          estado: data.estado ?? undefined,
-          estado_civil: data.estado_civil ?? undefined,
-          religiao: data.religiao ?? undefined,
-          batizado: data.batizado ?? 'Não',
-          pis_nis: data.pis_nis ?? undefined,
-          cartao_sus: data.cartao_sus ?? undefined,
-          estado_nascimento: data.estado_nascimento ?? undefined,
-          cidade_nascimento: data.cidade_nascimento ?? undefined,
-          situacao_moradia: data.situacao_moradia ?? undefined,
-          estuda: data.estuda ?? false,
-          escolaridade: data.escolaridade ?? undefined,
-          nome_pai: data.nome_pai ?? undefined,
-          data_nascimento_pai: data.data_nascimento_pai ?? undefined,
-          data_nascimento_pai_desconhecida: data.data_nascimento_pai_desconhecida ?? false,
-          estado_pai: data.estado_pai || '',
-          nome_mae: data.nome_mae ?? undefined,
-          data_nascimento_mae: data.data_nascimento_mae ?? undefined,
-          data_nascimento_mae_desconhecida: data.data_nascimento_mae_desconhecida ?? false,
-          estado_mae: data.estado_mae || '',
-          nome_conjuge: data.nome_conjuge ?? undefined,
-          data_nascimento_conjuge: data.data_nascimento_conjuge ?? undefined,
-          data_nascimento_conjuge_desconhecida: data.data_nascimento_conjuge_desconhecida ?? false,
-          estado_conjuge: data.estado_conjuge ?? undefined,
-          ha_processos: data.ha_processos ?? false,
-          comarca_juridica: data.comarca_juridica ?? undefined,
-          observacoes_juridicas: data.observacoes_juridicas ?? undefined,
-        };
-        form.reset(formData);
-      }
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao carregar dados básicos',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onSubmit = async (data: StudentBasicDataForm) => {
-    if (!studentId) {
-      toast({
-        title: 'Erro',
-        description: 'Salve o aluno primeiro para adicionar dados básicos',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Validação híbrida para data de nascimento
-    const maeAutoOptional = ESTADOS_DATA_OPCIONAL.includes(data.estado_mae || '');
-    const paiAutoOptional = ESTADOS_DATA_OPCIONAL.includes(data.estado_pai || '');
-
-    // Validar data da mãe: obrigatória se não for auto-opcional E não marcou "Não sabe"
-    if (!maeAutoOptional && !data.data_nascimento_mae_desconhecida && !data.data_nascimento_mae) {
-      form.setError('data_nascimento_mae', {
-        message: 'Data de nascimento é obrigatória (ou marque "Não sabe")'
-      });
-      return;
-    }
-
-    // Validar data do pai: obrigatória se não for auto-opcional E não marcou "Não sabe"
-    if (!paiAutoOptional && !data.data_nascimento_pai_desconhecida && !data.data_nascimento_pai) {
-      form.setError('data_nascimento_pai', {
-        message: 'Data de nascimento é obrigatória (ou marque "Não sabe")'
-      });
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from('student_basic_data')
-        .upsert(
-          { ...data, student_id: studentId },
-          { onConflict: 'student_id' }
-        );
-
-      if (error) throw error;
-
-      toast({
-        title: 'Sucesso',
-        description: 'Dados básicos salvos com sucesso!',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao salvar dados básicos',
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardContent className="flex justify-center py-8">
@@ -312,7 +170,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Contato */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contato</h3>
@@ -324,7 +182,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input placeholder="(00) 00000-0000" {...field} />
+                        <Input placeholder="(00) 00000-0000" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -338,7 +196,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>CEP</FormLabel>
                       <FormControl>
-                        <Input placeholder="00000-000" {...field} />
+                        <Input placeholder="00000-000" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -352,7 +210,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem className="md:col-span-2">
                       <FormLabel>Endereço</FormLabel>
                       <FormControl>
-                        <Input placeholder="Rua, Avenida..." {...field} />
+                        <Input placeholder="Rua, Avenida..." {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -366,7 +224,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Número</FormLabel>
                       <FormControl>
-                        <Input placeholder="123" {...field} />
+                        <Input placeholder="123" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -380,7 +238,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Bairro</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nome do bairro" {...field} />
+                        <Input placeholder="Nome do bairro" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -398,7 +256,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                           field.onChange(value);
                           form.setValue('cidade', '');
                         }} 
-                        value={field.value}
+                        value={field.value || ''}
                         disabled={loadingEstados}
                       >
                         <FormControl>
@@ -427,7 +285,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                       <FormLabel>Cidade</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
-                        value={field.value}
+                        value={field.value || ''}
                         disabled={!form.watch('estado') || loadingCidadesEndereco}
                       >
                         <FormControl>
@@ -466,7 +324,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Estado Civil</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
@@ -492,7 +350,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Religião</FormLabel>
                       <FormControl>
-                        <Input placeholder="Religião professada" {...field} />
+                        <Input placeholder="Religião" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -505,7 +363,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Batizado</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || 'Não'}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
@@ -523,94 +381,12 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
 
                 <FormField
                   control={form.control}
-                  name="situacao_moradia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Situação de Moradia</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="residencia_propria">Residência Própria</SelectItem>
-                          <SelectItem value="residencia_alugada">Residência Alugada</SelectItem>
-                          <SelectItem value="mora_com_pais">Mora com os Pais</SelectItem>
-                          <SelectItem value="mora_com_parentes">Mora com os Parentes</SelectItem>
-                          <SelectItem value="casa_passagem">Estava em Casa de Passagem</SelectItem>
-                          <SelectItem value="casa_apoio">Estava em Casa de Apoio</SelectItem>
-                          <SelectItem value="clinica_reabilitacao">Estava em Clínica de Reabilitação</SelectItem>
-                          <SelectItem value="situacao_rua">Situação de Rua</SelectItem>
-                          <SelectItem value="residencia_pastoral">Residência Pastoral</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="estuda"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estuda</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(value === 'true')} 
-                        value={field.value ? 'true' : 'false'}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="true">Sim</SelectItem>
-                          <SelectItem value="false">Não</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="escolaridade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Escolaridade</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="analfabeto">Analfabeto</SelectItem>
-                          <SelectItem value="fundamental_incompleto">Fundamental Incompleto</SelectItem>
-                          <SelectItem value="fundamental_completo">Fundamental Completo</SelectItem>
-                          <SelectItem value="medio_incompleto">Médio Incompleto</SelectItem>
-                          <SelectItem value="medio_completo">Médio Completo</SelectItem>
-                          <SelectItem value="superior_incompleto">Superior Incompleto</SelectItem>
-                          <SelectItem value="superior_completo">Superior Completo</SelectItem>
-                          <SelectItem value="pos_graduacao">Pós-graduação</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="pis_nis"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>PIS/NIS</FormLabel>
                       <FormControl>
-                        <Input placeholder="000.00000.00-0" {...field} />
+                        <Input placeholder="Número PIS/NIS" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -624,7 +400,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Cartão SUS</FormLabel>
                       <FormControl>
-                        <Input placeholder="000 0000 0000 0000" {...field} />
+                        <Input placeholder="Número do Cartão SUS" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -642,13 +418,13 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   name="estado_nascimento"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estado Nascimento</FormLabel>
+                      <FormLabel>Estado de Nascimento</FormLabel>
                       <Select 
                         onValueChange={(value) => {
                           field.onChange(value);
                           form.setValue('cidade_nascimento', '');
                         }} 
-                        value={field.value}
+                        value={field.value || ''}
                         disabled={loadingEstados}
                       >
                         <FormControl>
@@ -674,10 +450,10 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   name="cidade_nascimento"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cidade Nascimento</FormLabel>
+                      <FormLabel>Cidade de Nascimento</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
-                        value={field.value}
+                        value={field.value || ''}
                         disabled={!form.watch('estado_nascimento') || loadingCidadesNascimento}
                       >
                         <FormControl>
@@ -706,96 +482,28 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
               </div>
             </div>
 
-            {/* Filiação */}
+            {/* Moradia */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Filiação</h3>
-              
-              {/* Mãe */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+              <h3 className="text-lg font-medium">Moradia</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="nome_mae"
+                  name="situacao_moradia"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome da Mãe</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome completo da mãe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Checkbox "Não sabe" - visível apenas quando estado não é automático */}
-                {!ESTADOS_DATA_OPCIONAL.includes(form.watch('estado_mae') || '') && (
-                  <FormField
-                    control={form.control}
-                    name="data_nascimento_mae_desconhecida"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2 space-y-0 pb-2">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange} 
-                          />
-                        </FormControl>
-                        <FormLabel className="text-sm font-normal cursor-pointer">Não sabe</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                <FormField
-                  control={form.control}
-                  name="data_nascimento_mae"
-                  render={({ field }) => {
-                    const estadoMaeValue = form.watch('estado_mae');
-                    const naoSabe = form.watch('data_nascimento_mae_desconhecida');
-                    const isAutoOptional = ESTADOS_DATA_OPCIONAL.includes(estadoMaeValue || '');
-                    const isOptional = isAutoOptional || naoSabe;
-                    
-                    return (
-                      <FormItem>
-                        <FormLabel>
-                          Data Nascimento Mãe
-                          {!isOptional && <span className="text-destructive ml-1">*</span>}
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                            disabled={isAutoOptional}
-                            className={isAutoOptional ? 'opacity-50' : ''}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="estado_mae"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado Filiação Mãe</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value || undefined}
-                        disabled={loadingFiliationStatus}
-                      >
+                      <FormLabel>Situação de Moradia</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={loadingFiliationStatus ? "Carregando..." : "Selecione"} />
+                            <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {filiationStatus.map((status) => (
-                            <SelectItem key={status.id} value={status.nome}>
-                              {status.nome}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="propria">Casa Própria</SelectItem>
+                          <SelectItem value="alugada">Alugada</SelectItem>
+                          <SelectItem value="cedida">Cedida</SelectItem>
+                          <SelectItem value="financiada">Financiada</SelectItem>
+                          <SelectItem value="situacao_rua">Situação de Rua</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -803,69 +511,75 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   )}
                 />
               </div>
+            </div>
 
-              {/* Pai */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+            {/* Educação */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Educação</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="nome_pai"
+                  name="estuda"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome do Pai</FormLabel>
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Input placeholder="Nome completo do pai" {...field} />
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Estuda atualmente</FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
 
-                {/* Checkbox "Não sabe" - visível apenas quando estado não é automático */}
-                {!ESTADOS_DATA_OPCIONAL.includes(form.watch('estado_pai') || '') && (
-                  <FormField
-                    control={form.control}
-                    name="data_nascimento_pai_desconhecida"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2 space-y-0 pb-2">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange} 
-                          />
-                        </FormControl>
-                        <FormLabel className="text-sm font-normal cursor-pointer">Não sabe</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                )}
-
                 <FormField
                   control={form.control}
-                  name="data_nascimento_pai"
-                  render={({ field }) => {
-                    const estadoPaiValue = form.watch('estado_pai');
-                    const naoSabe = form.watch('data_nascimento_pai_desconhecida');
-                    const isAutoOptional = ESTADOS_DATA_OPCIONAL.includes(estadoPaiValue || '');
-                    const isOptional = isAutoOptional || naoSabe;
-                    
-                    return (
-                      <FormItem>
-                        <FormLabel>
-                          Data Nascimento Pai
-                          {!isOptional && <span className="text-destructive ml-1">*</span>}
-                        </FormLabel>
+                  name="escolaridade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Escolaridade</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
                         <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                            disabled={isAutoOptional}
-                            className={isAutoOptional ? 'opacity-50' : ''}
-                          />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                        <SelectContent>
+                          <SelectItem value="nao_alfabetizado">Não Alfabetizado</SelectItem>
+                          <SelectItem value="fundamental_incompleto">Fundamental Incompleto</SelectItem>
+                          <SelectItem value="fundamental_completo">Fundamental Completo</SelectItem>
+                          <SelectItem value="medio_incompleto">Médio Incompleto</SelectItem>
+                          <SelectItem value="medio_completo">Médio Completo</SelectItem>
+                          <SelectItem value="superior_incompleto">Superior Incompleto</SelectItem>
+                          <SelectItem value="superior_completo">Superior Completo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Filiação - Pai */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Filiação - Pai</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="nome_pai"
+                  render={({ field }) => (
+                    <FormItem className="lg:col-span-2">
+                      <FormLabel>Nome do Pai</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome completo do pai" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 <FormField
@@ -873,12 +587,8 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   name="estado_pai"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estado Filiação Pai</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value || undefined}
-                        disabled={loadingFiliationStatus}
-                      >
+                      <FormLabel>Estado do Pai</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''} disabled={loadingFiliationStatus}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={loadingFiliationStatus ? "Carregando..." : "Selecione"} />
@@ -896,49 +606,148 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     </FormItem>
                   )}
                 />
-              </div>
 
-              {/* Esposa */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                {!ESTADOS_DATA_OPCIONAL.includes(estadoPai || '') && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="data_nascimento_pai"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data de Nascimento</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="date" 
+                              {...field} 
+                              value={field.value || ''} 
+                              disabled={form.watch('data_nascimento_pai_desconhecida')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="data_nascimento_pai_desconhecida"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Não sabe</FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Filiação - Mãe */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Filiação - Mãe</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
-                  name="nome_conjuge"
+                  name="nome_mae"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome da Esposa</FormLabel>
+                    <FormItem className="lg:col-span-2">
+                      <FormLabel>Nome da Mãe</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nome completo da esposa" {...field} />
+                        <Input placeholder="Nome completo da mãe" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Checkbox "Não sabe" */}
                 <FormField
                   control={form.control}
-                  name="data_nascimento_conjuge_desconhecida"
+                  name="estado_mae"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 pb-2">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value} 
-                          onCheckedChange={field.onChange} 
-                        />
-                      </FormControl>
-                      <FormLabel className="text-sm font-normal cursor-pointer">Não sabe</FormLabel>
+                    <FormItem>
+                      <FormLabel>Estado da Mãe</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''} disabled={loadingFiliationStatus}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={loadingFiliationStatus ? "Carregando..." : "Selecione"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {filiationStatus.map((status) => (
+                            <SelectItem key={status.id} value={status.nome}>
+                              {status.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                {!ESTADOS_DATA_OPCIONAL.includes(estadoMae || '') && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="data_nascimento_mae"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data de Nascimento</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="date" 
+                              {...field} 
+                              value={field.value || ''} 
+                              disabled={form.watch('data_nascimento_mae_desconhecida')}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="data_nascimento_mae_desconhecida"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Não sabe</FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Cônjuge */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Cônjuge</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
-                  name="data_nascimento_conjuge"
+                  name="nome_conjuge"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data Nascimento Esposa</FormLabel>
+                    <FormItem className="lg:col-span-2">
+                      <FormLabel>Nome do Cônjuge</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input placeholder="Nome completo do cônjuge" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -950,19 +759,59 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   name="estado_conjuge"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estado Filiação Esposa</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel>Estado do Cônjuge</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''} disabled={loadingFiliationStatus}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={loadingFiliationStatus ? "Carregando..." : "Selecione"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="presente">Presente</SelectItem>
-                          <SelectItem value="falecida">Falecida</SelectItem>
+                          {filiationStatus.map((status) => (
+                            <SelectItem key={status.id} value={status.nome}>
+                              {status.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="data_nascimento_conjuge"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Nascimento</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          value={field.value || ''} 
+                          disabled={form.watch('data_nascimento_conjuge_desconhecida')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="data_nascimento_conjuge_desconhecida"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Não sabe</FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -972,28 +821,21 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
             {/* Situação Jurídica */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Situação Jurídica</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="ha_processos"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Há Processos</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(value === 'true')} 
-                        value={field.value ? 'true' : 'false'}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="true">Sim</SelectItem>
-                          <SelectItem value="false">Não</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Possui processos judiciais</FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -1003,9 +845,9 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   name="comarca_juridica"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Comarca</FormLabel>
+                      <FormLabel>Comarca Jurídica</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nome da comarca" {...field} />
+                        <Input placeholder="Comarca" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1016,12 +858,13 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   control={form.control}
                   name="observacoes_juridicas"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-3">
+                    <FormItem className="md:col-span-2">
                       <FormLabel>Observações Jurídicas</FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="Processos, medidas judiciais, etc."
                           {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1030,15 +873,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                 />
               </div>
             </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={saving}>
-                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Dados Básicos
-              </Button>
-            </div>
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>

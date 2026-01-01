@@ -1,17 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { studentHeaderSchema, type StudentHeaderForm } from '@/lib/student-schemas';
-import { useStudents } from '@/hooks/use-students';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Loader2, Save, X, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { StudentFormProvider, useStudentFormContext } from '@/contexts/StudentFormContext';
 import { StudentBasicDataTab } from './tabs/student-basic-data-tab';
 import { StudentChildrenTab } from './tabs/student-children-tab';
 import { StudentWorkTab } from './tabs/student-work-tab';
@@ -44,7 +41,7 @@ const PARENTESCO_OPTIONS = [
   "AMIGO(A)"
 ];
 
-const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string => {
+const calculatePermanencia = (dataAbertura?: string | null, dataSaida?: string | null): string => {
   if (!dataAbertura) return '';
   
   const inicio = new Date(dataAbertura);
@@ -76,113 +73,44 @@ const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string
   
   return result;
 };
+
 interface StudentFormProps {
   student?: any;
   onSuccess: () => void;
   onCancel: () => void;
   onRefreshPhoto?: () => void;
 }
-export function StudentForm({
-  student,
-  onSuccess,
-  onCancel,
-  onRefreshPhoto
-}: StudentFormProps) {
-  const {
-    createStudent,
-    updateStudent
-  } = useStudents();
-  const {
-    toast
-  } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('header');
-  const [savedStudentId, setSavedStudentId] = useState<string | null>(student?.id || null);
-  const [isCreationMode, setIsCreationMode] = useState(!student);
-  const form = useForm<StudentHeaderForm>({
-    resolver: zodResolver(studentHeaderSchema),
-    defaultValues: {
-      numero_interno: student?.numero_interno || '',
-      hora_entrada: student?.hora_entrada || '',
-      nome_completo: student?.nome_completo || '',
-      data_nascimento: student?.data_nascimento || '',
-      cpf: student?.cpf || '',
-      rg: student?.rg || '',
-      nome_responsavel: student?.nome_responsavel || '',
-      parentesco_responsavel: student?.parentesco_responsavel || '',
-      data_abertura: student?.data_abertura || '',
-      data_saida: student?.data_saida || ''
-    }
-  });
 
-  // Auto-fill data_abertura when creating new student
-  useEffect(() => {
-    if (!student && !form.getValues('data_abertura')) {
-      const now = new Date();
-      const formatted = now.toISOString().split('T')[0];
-      form.setValue('data_abertura', formatted);
-    }
-  }, [student, form]);
+export function StudentForm(props: StudentFormProps) {
+  return (
+    <StudentFormProvider
+      student={props.student}
+      onSuccess={props.onSuccess}
+      onCancel={props.onCancel}
+    >
+      <StudentFormContent {...props} />
+    </StudentFormProvider>
+  );
+}
+
+function StudentFormContent({ student, onRefreshPhoto }: StudentFormProps) {
+  const {
+    headerForm,
+    studentId,
+    isCreationMode,
+    isSaving,
+    isDirty,
+    saveAll,
+    resetAll,
+  } = useStudentFormContext();
+
+  const [activeTab, setActiveTab] = useState('header');
 
   // Watch for changes to calculate permanencia
-  const dataAbertura = form.watch('data_abertura');
-  const dataSaida = form.watch('data_saida');
+  const dataAbertura = headerForm.watch('data_abertura');
+  const dataSaida = headerForm.watch('data_saida');
   const permanencia = calculatePermanencia(dataAbertura, dataSaida);
-  const onSubmit = async (data: StudentHeaderForm) => {
-    setIsSubmitting(true);
-    try {
-      let result;
-      if (student) {
-        result = await updateStudent(student.id, data);
-      } else {
-        result = await createStudent({
-          nome_completo: data.nome_completo || '',
-          data_nascimento: data.data_nascimento || '',
-          ativo: true,
-          data_abertura: data.data_abertura || new Date().toISOString().split('T')[0],
-          data_saida: data.data_saida ? data.data_saida.split('T')[0] : null,
-          hora_saida: data.data_saida ? data.data_saida.split('T')[1]?.slice(0, 5) : null,
-          numero_interno: data.numero_interno,
-          hora_entrada: data.hora_entrada,
-          cpf: data.cpf,
-          rg: data.rg,
-          nome_responsavel: data.nome_responsavel,
-          parentesco_responsavel: data.parentesco_responsavel
-        });
-      }
-      if (result.error) {
-        toast({
-          title: 'Erro',
-          description: result.error,
-          variant: 'destructive'
-        });
-        return;
-      }
 
-      // If this was a creation, save the new student ID and exit creation mode
-      if (!student && result.data) {
-        setSavedStudentId(result.data.id);
-        setIsCreationMode(false);
-      }
-      toast({
-        title: 'Sucesso',
-        description: student ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso! Agora você pode preencher as outras abas.'
-      });
-
-      // Only navigate away if this was an update, not creation
-      if (student) {
-        onSuccess();
-      }
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado. Tente novamente.',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     // Recarregar foto quando acessar aba de documentos (caso tenha upload novo)
@@ -190,25 +118,39 @@ export function StudentForm({
       onRefreshPhoto();
     }
   };
-  return <div className="space-y-6">
-      {isCreationMode && <Alert>
+
+  return (
+    <div className="space-y-6">
+      {isCreationMode && (
+        <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Preencha primeiro as informações principais do aluno. Após salvar, você poderá acessar as outras abas para completar o cadastro.
           </AlertDescription>
-        </Alert>}
-      
+        </Alert>
+      )}
+
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="header">Registro</TabsTrigger>
-          <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
-          <TabsTrigger value="children">Filhos</TabsTrigger>
-          <TabsTrigger value="work">Trabalho</TabsTrigger>
-          <TabsTrigger value="contacts">Contatos</TabsTrigger>
-          <TabsTrigger value="health">Saúde</TabsTrigger>
-          <TabsTrigger value="annotations">Anotações</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between mb-2">
+          <TabsList className="grid w-full grid-cols-8">
+            <TabsTrigger value="header">Registro</TabsTrigger>
+            <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
+            <TabsTrigger value="children">Filhos</TabsTrigger>
+            <TabsTrigger value="work">Trabalho</TabsTrigger>
+            <TabsTrigger value="contacts">Contatos</TabsTrigger>
+            <TabsTrigger value="health">Saúde</TabsTrigger>
+            <TabsTrigger value="annotations">Anotações</TabsTrigger>
+            <TabsTrigger value="documents">Documentos</TabsTrigger>
+          </TabsList>
+        </div>
+
+        {isDirty && (
+          <div className="mb-4">
+            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+              Alterações pendentes
+            </Badge>
+          </div>
+        )}
 
         <TabsContent value="header" className="space-y-4">
           <Card>
@@ -219,25 +161,31 @@ export function StudentForm({
               )}
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <Form {...headerForm}>
+                <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="numero_interno" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="numero_interno"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Número Interno</FormLabel>
                           <FormControl>
-                            <Input placeholder="Número de controle interno" {...field} />
+                            <Input placeholder="Número de controle interno" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="hora_entrada" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="hora_entrada"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Horário de Entrada</FormLabel>
                           <FormControl>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value || ''}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione o horário de entrada" />
                               </SelectTrigger>
@@ -249,47 +197,65 @@ export function StudentForm({
                             </Select>
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="data_abertura" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="data_abertura"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Data de Abertura</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input type="date" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="nome_completo" render={({
-                    field
-                  }) => <FormItem className="lg:col-span-3">
+                    <FormField
+                      control={headerForm.control}
+                      name="nome_completo"
+                      render={({ field }) => (
+                        <FormItem className="lg:col-span-3">
                           <FormLabel>Nome Completo *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Nome completo do aluno" {...field} />
+                            <Input placeholder="Nome completo do aluno" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="data_nascimento" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="data_nascimento"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Data de Nascimento *</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input type="date" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="data_saida" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="data_saida"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Data e Hora de Saída</FormLabel>
                           <FormControl>
-                            <Input type="datetime-local" {...field} />
+                            <Input type="datetime-local" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormItem>
                       <FormLabel>Permanência</FormLabel>
@@ -302,44 +268,58 @@ export function StudentForm({
                       </FormControl>
                     </FormItem>
 
-                    <FormField control={form.control} name="cpf" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="cpf"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>CPF</FormLabel>
                           <FormControl>
-                            <Input placeholder="000.000.000-00" {...field} />
+                            <Input placeholder="000.000.000-00" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="rg" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="rg"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>RG</FormLabel>
                           <FormControl>
-                            <Input placeholder="00.000.000-0" {...field} />
+                            <Input placeholder="00.000.000-0" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
                     <div></div> {/* Spacer */}
 
-                    <FormField control={form.control} name="nome_responsavel" render={({
-                    field
-                  }) => <FormItem className="lg:col-span-2">
+                    <FormField
+                      control={headerForm.control}
+                      name="nome_responsavel"
+                      render={({ field }) => (
+                        <FormItem className="lg:col-span-2">
                           <FormLabel>Nome do Responsável</FormLabel>
                           <FormControl>
-                            <Input placeholder="Nome da pessoa de referência" {...field} />
+                            <Input placeholder="Nome da pessoa de referência" {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
 
-                    <FormField control={form.control} name="parentesco_responsavel" render={({
-                    field
-                  }) => <FormItem>
+                    <FormField
+                      control={headerForm.control}
+                      name="parentesco_responsavel"
+                      render={({ field }) => (
+                        <FormItem>
                           <FormLabel>Parentesco do Responsável</FormLabel>
                           <FormControl>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value || ''}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione o parentesco" />
                               </SelectTrigger>
@@ -353,53 +333,57 @@ export function StudentForm({
                             </Select>
                           </FormControl>
                           <FormMessage />
-                        </FormItem>} />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-
-                  <div className="flex justify-end gap-3 pt-6">
-                    <Button type="button" variant="outline" onClick={onCancel}>
-                      <X className="h-4 w-4 mr-2" />
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      <Save className="h-4 w-4 mr-2" />
-                      {student ? 'Atualizar' : 'Salvar'}
-                    </Button>
-                  </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="basic" forceMount className={activeTab !== 'basic' ? 'hidden' : ''}>
-          <StudentBasicDataTab studentId={savedStudentId} />
+          <StudentBasicDataTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="children" forceMount className={activeTab !== 'children' ? 'hidden' : ''}>
-          <StudentChildrenTab studentId={savedStudentId} />
+          <StudentChildrenTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="work" forceMount className={activeTab !== 'work' ? 'hidden' : ''}>
-          <StudentWorkTab studentId={savedStudentId} />
+          <StudentWorkTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="contacts" forceMount className={activeTab !== 'contacts' ? 'hidden' : ''}>
-          <StudentContactsTab studentId={savedStudentId} />
+          <StudentContactsTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="health" forceMount className={activeTab !== 'health' ? 'hidden' : ''}>
-          <StudentHealthTab studentId={savedStudentId} />
+          <StudentHealthTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="annotations" forceMount className={activeTab !== 'annotations' ? 'hidden' : ''}>
-          <StudentAnnotationsTab studentId={savedStudentId} />
+          <StudentAnnotationsTab studentId={studentId} />
         </TabsContent>
 
         <TabsContent value="documents" forceMount className={activeTab !== 'documents' ? 'hidden' : ''}>
-          <StudentDocumentsTab studentId={savedStudentId} />
+          <StudentDocumentsTab studentId={studentId} />
         </TabsContent>
       </Tabs>
-    </div>;
+
+      {/* Global action footer */}
+      <div className="sticky bottom-0 bg-background border-t p-4 flex justify-end gap-3 -mx-6 -mb-6 mt-6">
+        <Button type="button" variant="outline" onClick={resetAll}>
+          <X className="h-4 w-4 mr-2" />
+          Cancelar
+        </Button>
+        <Button onClick={saveAll} disabled={isSaving}>
+          {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Save className="h-4 w-4 mr-2" />
+          Salvar
+        </Button>
+      </div>
+    </div>
+  );
 }
