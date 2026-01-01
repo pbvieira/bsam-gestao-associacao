@@ -19,6 +19,7 @@ import { StudentContactsTab } from './tabs/student-contacts-tab';
 import { StudentHealthTab } from './tabs/student-health-tab';
 import { StudentAnnotationsTab } from './tabs/student-annotations-tab';
 import { StudentDocumentsTab } from './tabs/student-documents-tab';
+import { StudentFormProvider, useStudentFormContext } from '@/contexts/StudentFormContext';
 
 const PARENTESCO_OPTIONS = [
   "PAI",
@@ -76,29 +77,37 @@ const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string
   
   return result;
 };
+
 interface StudentFormProps {
   student?: any;
   onSuccess: () => void;
   onCancel: () => void;
   onRefreshPhoto?: () => void;
 }
-export function StudentForm({
+
+export function StudentForm(props: StudentFormProps) {
+  return (
+    <StudentFormProvider initialStudentId={props.student?.id || null}>
+      <StudentFormContent {...props} />
+    </StudentFormProvider>
+  );
+}
+
+function StudentFormContent({
   student,
   onSuccess,
   onCancel,
   onRefreshPhoto
 }: StudentFormProps) {
-  const {
-    createStudent,
-    updateStudent
-  } = useStudents();
-  const {
-    toast
-  } = useToast();
+  const { createStudent, updateStudent } = useStudents();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('header');
   const [savedStudentId, setSavedStudentId] = useState<string | null>(student?.id || null);
   const [isCreationMode, setIsCreationMode] = useState(!student);
+  
+  const { registerHeaderForm, setStudentId, saveAll, isSaving } = useStudentFormContext();
+  
   const form = useForm<StudentHeaderForm>({
     resolver: zodResolver(studentHeaderSchema),
     defaultValues: {
@@ -115,6 +124,11 @@ export function StudentForm({
     }
   });
 
+  // Register header form with context
+  useEffect(() => {
+    registerHeaderForm(form);
+  }, [form, registerHeaderForm]);
+
   // Auto-fill data_abertura when creating new student
   useEffect(() => {
     if (!student && !form.getValues('data_abertura')) {
@@ -128,12 +142,21 @@ export function StudentForm({
   const dataAbertura = form.watch('data_abertura');
   const dataSaida = form.watch('data_saida');
   const permanencia = calculatePermanencia(dataAbertura, dataSaida);
-  const onSubmit = async (data: StudentHeaderForm) => {
-    setIsSubmitting(true);
+  
+  // Save header (student main record)
+  const saveHeader = async (): Promise<{ success: boolean; newStudentId?: string }> => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      return { success: false };
+    }
+    
+    const data = form.getValues();
+    
     try {
       let result;
-      if (student) {
-        result = await updateStudent(student.id, data);
+      if (student || savedStudentId) {
+        const idToUpdate = savedStudentId || student.id;
+        result = await updateStudent(idToUpdate, data);
       } else {
         result = await createStudent({
           nome_completo: data.nome_completo || '',
@@ -150,53 +173,94 @@ export function StudentForm({
           parentesco_responsavel: data.parentesco_responsavel
         });
       }
+      
       if (result.error) {
         toast({
           title: 'Erro',
           description: result.error,
           variant: 'destructive'
         });
-        return;
+        return { success: false };
       }
 
-      // If this was a creation, save the new student ID and exit creation mode
-      if (!student && result.data) {
-        setSavedStudentId(result.data.id);
+      // If this was a creation, save the new student ID
+      if (!student && !savedStudentId && result.data) {
+        const newId = result.data.id;
+        setSavedStudentId(newId);
+        setStudentId(newId);
         setIsCreationMode(false);
+        return { success: true, newStudentId: newId };
       }
-      toast({
-        title: 'Sucesso',
-        description: student ? 'Aluno atualizado com sucesso!' : 'Aluno cadastrado com sucesso! Agora você pode preencher as outras abas.'
-      });
-
-      // Only navigate away if this was an update, not creation
-      if (student) {
-        onSuccess();
-      }
+      
+      return { success: true };
     } catch (error) {
       toast({
         title: 'Erro',
         description: 'Ocorreu um erro inesperado. Tente novamente.',
         variant: 'destructive'
       });
+      return { success: false };
+    }
+  };
+
+  // Global save handler
+  const handleSaveAll = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Save header first (creates student if needed)
+      const headerResult = await saveHeader();
+      if (!headerResult.success) {
+        return;
+      }
+      
+      // 2. If we have a student ID, save all other forms
+      const currentStudentId = headerResult.newStudentId || savedStudentId;
+      if (currentStudentId) {
+        const allSaved = await saveAll();
+        if (allSaved) {
+          toast({
+            title: 'Sucesso',
+            description: 'Todos os dados foram salvos com sucesso!'
+          });
+          onSuccess();
+        }
+      } else {
+        // Just created, show success for header
+        toast({
+          title: 'Sucesso',
+          description: 'Aluno cadastrado com sucesso! Preencha as outras abas e salve novamente.'
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleCancel = () => {
+    onCancel();
+  };
+  
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    // Recarregar foto quando acessar aba de documentos (caso tenha upload novo)
+    // Recarregar foto quando acessar aba de documentos
     if (value === 'documents' && onRefreshPhoto) {
       onRefreshPhoto();
     }
   };
-  return <div className="space-y-6">
-      {isCreationMode && <Alert>
+
+  const globalSaving = isSubmitting || isSaving;
+
+  return (
+    <div className="space-y-6">
+      {isCreationMode && (
+        <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Preencha primeiro as informações principais do aluno. Após salvar, você poderá acessar as outras abas para completar o cadastro.
           </AlertDescription>
-        </Alert>}
+        </Alert>
+      )}
       
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-8">
@@ -220,7 +284,7 @@ export function StudentForm({
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <FormField control={form.control} name="numero_interno" render={({
                     field
@@ -355,19 +419,7 @@ export function StudentForm({
                           <FormMessage />
                         </FormItem>} />
                   </div>
-
-                  <div className="flex justify-end gap-3 pt-6">
-                    <Button type="button" variant="outline" onClick={onCancel}>
-                      <X className="h-4 w-4 mr-2" />
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      <Save className="h-4 w-4 mr-2" />
-                      {student ? 'Atualizar' : 'Salvar'}
-                    </Button>
-                  </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
@@ -401,5 +453,19 @@ export function StudentForm({
           <StudentDocumentsTab studentId={savedStudentId} />
         </TabsContent>
       </Tabs>
-    </div>;
+
+      {/* Global Save/Cancel Footer */}
+      <div className="sticky bottom-0 bg-background border-t py-4 -mx-6 px-6 flex justify-end gap-3">
+        <Button type="button" variant="outline" onClick={handleCancel} disabled={globalSaving}>
+          <X className="h-4 w-4 mr-2" />
+          Cancelar
+        </Button>
+        <Button onClick={handleSaveAll} disabled={globalSaving}>
+          {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Save className="h-4 w-4 mr-2" />
+          Salvar
+        </Button>
+      </div>
+    </div>
+  );
 }

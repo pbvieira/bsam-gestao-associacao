@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { studentBasicDataSchema, type StudentBasicDataForm } from '@/lib/student-schemas';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { useStudentFormContext } from '@/contexts/StudentFormContext';
 
 // Estados de filiação que tornam a data de nascimento automaticamente opcional
 const ESTADOS_DATA_OPCIONAL = ['Desconhecido(a)', 'Não declarado(a) no registro'];
@@ -33,13 +33,13 @@ interface FiliationStatusOption {
 }
 
 interface StudentBasicDataTabProps {
-  studentId?: string;
+  studentId?: string | null;
 }
 
 export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { registerBasicDataForm, registerBasicDataSave } = useStudentFormContext();
   const [estados, setEstados] = useState<Estado[]>([]);
   const [cidadesNascimento, setCidadesNascimento] = useState<Cidade[]>([]);
   const [cidadesEndereco, setCidadesEndereco] = useState<Cidade[]>([]);
@@ -239,68 +239,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     }
   };
 
-  const onSubmit = async (studentData: StudentBasicDataForm) => {
-    if (!studentId) {
-      toast({
-        title: 'Erro',
-        description: 'Salve o aluno primeiro para adicionar dados básicos',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Validação híbrida para data de nascimento
-    const maeAutoOptional = ESTADOS_DATA_OPCIONAL.includes(studentData.estado_mae || '');
-    const paiAutoOptional = ESTADOS_DATA_OPCIONAL.includes(studentData.estado_pai || '');
-
-    // Validar data da mãe: obrigatória se não for auto-opcional E não marcou "Não sabe"
-    if (!maeAutoOptional && !studentData.data_nascimento_mae_desconhecida && !studentData.data_nascimento_mae) {
-      form.setError('data_nascimento_mae', {
-        message: 'Data de nascimento é obrigatória (ou marque "Não sabe")'
-      });
-      return;
-    }
-
-    // Validar data do pai: obrigatória se não for auto-opcional E não marcou "Não sabe"
-    if (!paiAutoOptional && !studentData.data_nascimento_pai_desconhecida && !studentData.data_nascimento_pai) {
-      form.setError('data_nascimento_pai', {
-        message: 'Data de nascimento é obrigatória (ou marque "Não sabe")'
-      });
-      return;
-    }
-
-    setSaving(true);
-    try {
-      // Converter strings vazias para null nos campos de data
-      const cleanedData = {
-        ...studentData,
-        data_nascimento_mae: studentData.data_nascimento_mae === '' ? null : studentData.data_nascimento_mae,
-        data_nascimento_pai: studentData.data_nascimento_pai === '' ? null : studentData.data_nascimento_pai,
-        data_nascimento_conjuge: studentData.data_nascimento_conjuge === '' ? null : studentData.data_nascimento_conjuge,        
-      };
-
-      const { error } = await supabase
-        .from('student_basic_data')
-        .upsert(
-          { ...cleanedData, student_id: studentId },
-          { onConflict: 'student_id' }
-        );
-
-      if (error) throw error;
-
-      toast({
-        title: 'Sucesso',
-        description: 'Dados básicos salvos com sucesso!',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao salvar dados básicos',
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
-    }
   };
 
   if (loading) {
@@ -1049,13 +987,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={saving}>
-                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Dados Básicos
-              </Button>
-            </div>
           </form>
         </Form>
       </CardContent>

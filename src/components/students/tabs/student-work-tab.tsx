@@ -1,16 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useStudentWorkSituation } from '@/hooks/use-student-work-situation';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { useStudentFormContext } from '@/contexts/StudentFormContext';
 
 const workSituationSchema = z.object({
   situacao_trabalhista: z.string().optional(),
@@ -27,13 +26,13 @@ const workSituationSchema = z.object({
 type WorkSituationForm = z.infer<typeof workSituationSchema>;
 
 interface StudentWorkTabProps {
-  studentId?: string;
+  studentId?: string | null;
 }
 
 export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
-  const { workSituation, loading, createOrUpdateWorkSituation } = useStudentWorkSituation(studentId);
+  const { workSituation, loading, createOrUpdateWorkSituation } = useStudentWorkSituation(studentId || undefined);
   const { toast } = useToast();
-  const [isSaving, setIsSaving] = useState(false);
+  const { registerWorkForm, registerWorkSave } = useStudentFormContext();
 
   const form = useForm<WorkSituationForm>({
     resolver: zodResolver(workSituationSchema),
@@ -50,6 +49,51 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
     },
   });
 
+  // Register form with context
+  useEffect(() => {
+    registerWorkForm(form);
+  }, [form, registerWorkForm]);
+
+  // Register save function with context
+  const saveData = useCallback(async (): Promise<boolean> => {
+    if (!studentId) return true; // No student yet, skip
+    
+    const isValid = await form.trigger();
+    if (!isValid) return false;
+    
+    const data = form.getValues();
+    
+    try {
+      const result = await createOrUpdateWorkSituation({
+        ...data,
+        valor_renda: data.valor_renda ? parseFloat(data.valor_renda) : null,
+        renda_per_capita: data.renda_per_capita ? parseFloat(data.renda_per_capita) : null,
+      });
+
+      if (result?.error) {
+        toast({
+          title: 'Erro',
+          description: result.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao salvar situação trabalhista.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  }, [studentId, form, createOrUpdateWorkSituation, toast]);
+
+  useEffect(() => {
+    registerWorkSave(saveData);
+  }, [saveData, registerWorkSave]);
+
   useEffect(() => {
     if (workSituation) {
       form.reset({
@@ -65,49 +109,6 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
       });
     }
   }, [workSituation, form]);
-
-  const onSubmit = async (data: WorkSituationForm) => {
-    if (!studentId) {
-      toast({
-        title: 'Erro',
-        description: 'Salve o aluno primeiro para adicionar dados de trabalho',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    setIsSaving(true);
-    try {
-      const result = await createOrUpdateWorkSituation({
-        ...data,
-        valor_renda: data.valor_renda ? parseFloat(data.valor_renda) : null,
-        renda_per_capita: data.renda_per_capita ? parseFloat(data.renda_per_capita) : null,
-      });
-
-      if (result?.error) {
-        toast({
-          title: 'Erro',
-          description: result.error,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      toast({
-        title: 'Sucesso',
-        description: 'Situação trabalhista salva com sucesso!',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
 
   if (loading) {
     return (
@@ -127,7 +128,7 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Seção: Profissão e Emprego */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Profissão e Emprego</h3>
@@ -299,15 +300,7 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
                 />
               </div>
             </div>
-
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSaving}>
-                {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
-            </div>
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>
