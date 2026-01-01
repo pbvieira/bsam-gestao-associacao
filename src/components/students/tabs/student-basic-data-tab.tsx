@@ -521,16 +521,20 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   control={form.control}
                   name="estuda"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Estuda atualmente</FormLabel>
-                      </div>
+                    <FormItem>
+                      <FormLabel>Estuda atualmente</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Sim">Sim</SelectItem>
+                          <SelectItem value="Não">Não</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -607,45 +611,43 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   )}
                 />
 
-                {!ESTADOS_DATA_OPCIONAL.includes(estadoPai || '') && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="data_nascimento_pai"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Data de Nascimento</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="date" 
-                              {...field} 
-                              value={field.value || ''} 
-                              disabled={form.watch('data_nascimento_pai_desconhecida')}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <FormField
+                  control={form.control}
+                  name="data_nascimento_pai"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Nascimento</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          value={field.value || ''} 
+                          disabled={form.watch('data_nascimento_pai_desconhecida')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="data_nascimento_pai_desconhecida"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Não sabe</FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </>
+                {!ESTADOS_DATA_OPCIONAL.includes(estadoPai || '') && (
+                  <FormField
+                    control={form.control}
+                    name="data_nascimento_pai_desconhecida"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Não sabe</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 )}
               </div>
             </div>
@@ -693,45 +695,43 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   )}
                 />
 
-                {!ESTADOS_DATA_OPCIONAL.includes(estadoMae || '') && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="data_nascimento_mae"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Data de Nascimento</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="date" 
-                              {...field} 
-                              value={field.value || ''} 
-                              disabled={form.watch('data_nascimento_mae_desconhecida')}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <FormField
+                  control={form.control}
+                  name="data_nascimento_mae"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Nascimento</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          {...field} 
+                          value={field.value || ''} 
+                          disabled={form.watch('data_nascimento_mae_desconhecida')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="data_nascimento_mae_desconhecida"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Não sabe</FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </>
+                {!ESTADOS_DATA_OPCIONAL.includes(estadoMae || '') && (
+                  <FormField
+                    control={form.control}
+                    name="data_nascimento_mae_desconhecida"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Não sabe</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 )}
               </div>
             </div>

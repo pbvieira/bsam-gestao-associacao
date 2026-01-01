@@ -31,7 +31,7 @@ export const studentBasicDataSchema = z.object({
   estado_nascimento: z.string().nullish(),
   cidade_nascimento: z.string().nullish(),
   situacao_moradia: z.string().nullish(),
-  estuda: z.boolean().default(false),
+  estuda: z.string().nullish(),
   escolaridade: z.string().nullish(),
   nome_pai: z.string().nullish(),
   data_nascimento_pai: z.string().nullish(),

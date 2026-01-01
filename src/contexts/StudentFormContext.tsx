@@ -127,7 +127,7 @@ export function StudentFormProvider({
     resolver: zodResolver(studentBasicDataSchema),
     defaultValues: {
       batizado: 'Não',
-      estuda: false,
+      estuda: '',
       ha_processos: false,
       estado_mae: '',
       estado_pai: '',
@@ -276,7 +276,7 @@ export function StudentFormProvider({
           estado_nascimento: data.estado_nascimento ?? undefined,
           cidade_nascimento: data.cidade_nascimento ?? undefined,
           situacao_moradia: data.situacao_moradia ?? undefined,
-          estuda: data.estuda ?? false,
+          estuda: data.estuda === true ? 'Sim' : data.estuda === false ? 'Não' : '',
           escolaridade: data.escolaridade ?? undefined,
           nome_pai: data.nome_pai ?? undefined,
           data_nascimento_pai: data.data_nascimento_pai ?? undefined,
@@ -382,9 +382,15 @@ export function StudentFormProvider({
       // 3. Save secondary data in parallel
       const saveBasicData = async () => {
         const basicData = basicDataForm.getValues();
+        const { student_id, estuda, ...restData } = basicData as any;
+        const dataToSave = {
+          ...restData,
+          estuda: estuda === 'Sim' ? true : estuda === 'Não' ? false : null,
+          student_id: currentStudentId,
+        };
         return supabase
           .from('student_basic_data')
-          .upsert({ ...basicData, student_id: currentStudentId }, { onConflict: 'student_id' });
+          .upsert(dataToSave, { onConflict: 'student_id' });
       };
 
       const saveWorkData = async () => {
