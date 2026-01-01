@@ -4,13 +4,19 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { StudentList } from "@/components/students/student-list";
 import { StudentForm } from "@/components/students/student-form";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User, Loader2 } from "lucide-react";
+import { useStudentPhoto } from "@/hooks/use-student-photo";
 
 type ViewMode = 'list' | 'create' | 'edit';
 
 export default function Students() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  
+  // Hook para foto do aluno - usado apenas no modo de edição
+  const { photoUrl, loading: photoLoading, refreshPhoto } = useStudentPhoto(
+    viewMode === 'edit' ? selectedStudent?.id : undefined
+  );
 
   const handleCreateStudent = () => {
     setSelectedStudent(null);
@@ -55,6 +61,23 @@ export default function Students() {
                 {viewMode === 'edit' && 'Edite as informações do assistido'}
               </p>
             </div>
+            
+            {/* Foto do Aluno - exibida no header no modo edição */}
+            {viewMode === 'edit' && (
+              <div className="w-20 h-20 rounded-lg border overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                {photoLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : photoUrl ? (
+                  <img 
+                    src={photoUrl} 
+                    alt="Foto do aluno" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="h-10 w-10 text-muted-foreground" />
+                )}
+              </div>
+            )}
           </div>
           
           {viewMode === 'list' && (
@@ -69,6 +92,7 @@ export default function Students() {
               student={selectedStudent}
               onSuccess={handleBackToList}
               onCancel={handleBackToList}
+              onRefreshPhoto={refreshPhoto}
             />
           )}
         </div>

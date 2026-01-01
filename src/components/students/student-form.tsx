@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { studentHeaderSchema, type StudentHeaderForm } from '@/lib/student-schemas';
 import { useStudents } from '@/hooks/use-students';
-import { useStudentPhoto } from '@/hooks/use-student-photo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, X, AlertCircle, User } from 'lucide-react';
+import { Loader2, Save, X, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StudentBasicDataTab } from './tabs/student-basic-data-tab';
 import { StudentChildrenTab } from './tabs/student-children-tab';
@@ -81,11 +80,13 @@ interface StudentFormProps {
   student?: any;
   onSuccess: () => void;
   onCancel: () => void;
+  onRefreshPhoto?: () => void;
 }
 export function StudentForm({
   student,
   onSuccess,
-  onCancel
+  onCancel,
+  onRefreshPhoto
 }: StudentFormProps) {
   const {
     createStudent,
@@ -98,9 +99,6 @@ export function StudentForm({
   const [activeTab, setActiveTab] = useState('header');
   const [savedStudentId, setSavedStudentId] = useState<string | null>(student?.id || null);
   const [isCreationMode, setIsCreationMode] = useState(!student);
-  
-  // Hook para foto do aluno
-  const { photoUrl, loading: photoLoading, refreshPhoto } = useStudentPhoto(savedStudentId);
   const form = useForm<StudentHeaderForm>({
     resolver: zodResolver(studentHeaderSchema),
     defaultValues: {
@@ -188,8 +186,8 @@ export function StudentForm({
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     // Recarregar foto quando acessar aba de documentos (caso tenha upload novo)
-    if (value === 'documents') {
-      refreshPhoto();
+    if (value === 'documents' && onRefreshPhoto) {
+      onRefreshPhoto();
     }
   };
   return <div className="space-y-6">
@@ -215,29 +213,10 @@ export function StudentForm({
         <TabsContent value="header" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>Informações Principais</CardTitle>
-                  {student?.nome_completo && (
-                    <p className="text-sm text-muted-foreground mt-1">{student.nome_completo}</p>
-                  )}
-                </div>
-                
-                {/* Foto do Aluno */}
-                <div className="w-24 h-24 rounded-lg border overflow-hidden bg-muted flex items-center justify-center shrink-0">
-                  {photoLoading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  ) : photoUrl ? (
-                    <img 
-                      src={photoUrl} 
-                      alt="Foto do aluno" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-12 w-12 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
+              <CardTitle>Informações Principais</CardTitle>
+              {student?.nome_completo && (
+                <p className="text-sm text-muted-foreground">{student.nome_completo}</p>
+              )}
             </CardHeader>
             <CardContent>
               <Form {...form}>
