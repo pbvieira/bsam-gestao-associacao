@@ -223,7 +223,7 @@ function StudentFormContent({
             title: 'Sucesso',
             description: 'Todos os dados foram salvos com sucesso!'
           });
-          onSuccess();
+          // Permanece no formulário após salvar
         }
       } else {
         // Just created, show success for header
