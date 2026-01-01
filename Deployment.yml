@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bsam-frontend
+  labels:
+    app: bsam-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bsam-frontend
+  template:
+    metadata:
+      labels:
+        app: bsam-frontend
+    spec:
+      containers:
+        - name: bsam-frontend-container
+          image: docker.io/pbvieira/bsam-frontend:0.0.5-SNAPSHOT
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: bsam-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: bsam-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bsam-frontend-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: lets-encrypt
+spec:
+  rules:
+    - host: bsam.ddsolucoes.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bsam-frontend-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - bsam.ddsolucoes.com.br
+      secretName: bsam-frontend-tls
