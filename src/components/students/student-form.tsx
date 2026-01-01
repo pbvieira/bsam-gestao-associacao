@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { differenceInDays, differenceInMonths, differenceInYears, isValid, parseISO, addYears, addMonths } from 'date-fns';
 import { studentHeaderSchema, type StudentHeaderForm } from '@/lib/student-schemas';
 import { useStudents } from '@/hooks/use-students';
 import { Button } from '@/components/ui/button';
@@ -46,36 +47,57 @@ const PARENTESCO_OPTIONS = [
 ];
 
 const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string => {
-  if (!dataAbertura) return '';
+  // Validar data de abertura (rejeitar vazio ou undefined)
+  if (!dataAbertura || dataAbertura.trim() === '') return '';
   
-  const inicio = new Date(dataAbertura);
-  const fim = dataSaida ? new Date(dataSaida) : new Date();
+  const inicio = parseISO(dataAbertura);
+  if (!isValid(inicio)) return '';
   
-  const diffMs = fim.getTime() - inicio.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  if (diffDays < 0) return 'Data inválida';
-  if (diffDays === 0) return 'Hoje';
-  if (diffDays === 1) return '1 dia';
-  if (diffDays < 30) return `${diffDays} dias`;
-  
-  if (diffDays < 365) {
-    const meses = Math.floor(diffDays / 30);
-    const dias = diffDays % 30;
-    if (dias === 0) return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
-    return `${meses} ${meses === 1 ? 'mês' : 'meses'} e ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+  // Usar data atual APENAS se data_saida estiver vazia ou undefined
+  let fim: Date;
+  if (dataSaida && dataSaida.trim() !== '') {
+    // Tratar datetime-local (formato "2024-01-15T10:30")
+    const dataParte = dataSaida.split('T')[0];
+    const dataSaidaParsed = parseISO(dataParte);
+    fim = isValid(dataSaidaParsed) ? dataSaidaParsed : new Date();
+  } else {
+    fim = new Date(); // Sem data de saída = usa data atual
   }
   
-  const anos = Math.floor(diffDays / 365);
-  const restoDias = diffDays % 365;
-  const meses = Math.floor(restoDias / 30);
-  const dias = restoDias % 30;
+  const totalDias = differenceInDays(fim, inicio);
   
-  let result = `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
-  if (meses > 0) result += `, ${meses} ${meses === 1 ? 'mês' : 'meses'}`;
-  if (dias > 0) result += ` e ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+  if (totalDias < 0) return 'Data inválida';
+  if (totalDias === 0) return 'Hoje';
+  if (totalDias === 1) return '1 dia';
+  if (totalDias < 30) return `${totalDias} dias`;
   
-  return result;
+  // Calcular usando date-fns para precisão de calendário real
+  const anos = differenceInYears(fim, inicio);
+  const mesesTotais = differenceInMonths(fim, inicio);
+  const meses = mesesTotais % 12;
+  
+  // Calcular dias restantes após anos e meses completos
+  let dataAposMeses = addYears(inicio, anos);
+  dataAposMeses = addMonths(dataAposMeses, meses);
+  const diasRestantes = differenceInDays(fim, dataAposMeses);
+  
+  let result = '';
+  
+  if (anos > 0) {
+    result = `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+  }
+  
+  if (meses > 0) {
+    if (result) result += ', ';
+    result += `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+  }
+  
+  if (diasRestantes > 0) {
+    if (result) result += ' e ';
+    result += `${diasRestantes} ${diasRestantes === 1 ? 'dia' : 'dias'}`;
+  }
+  
+  return result || 'Hoje';
 };
 
 interface StudentFormProps {
