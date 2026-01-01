@@ -57,6 +57,8 @@ export function useStudentWorkSituation(studentId?: string) {
       const workData = {
         student_id: studentId,
         ...data,
+        // Converter string vazia para null em campos de data
+        data_admissao: data.data_admissao === '' ? null : data.data_admissao,
       };
 
       let result;
