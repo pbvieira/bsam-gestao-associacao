@@ -85,10 +85,11 @@ export function useStudents() {
 
   const updateStudent = async (id: string, studentData: Partial<Student>) => {
     try {
-      // Converter strings vazias para null nos campos de data
+      // Converter strings vazias para null nos campos de data/hora
       const cleanedData = {
         ...studentData,
         data_saida: studentData.data_saida === '' ? null : studentData.data_saida,
+        hora_saida: studentData.hora_saida === '' ? null : studentData.hora_saida,
       };
 
       const { data, error } = await supabase
