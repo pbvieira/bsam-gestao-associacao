@@ -180,7 +180,13 @@ function StudentFormContent({
       let result;
       if (student || savedStudentId) {
         const idToUpdate = savedStudentId || student.id;
-        result = await updateStudent(idToUpdate, data);
+        // Extrair data e hora do campo datetime-local
+        const updateData = {
+          ...data,
+          data_saida: data.data_saida ? data.data_saida.split('T')[0] : null,
+          hora_saida: data.data_saida ? data.data_saida.split('T')[1]?.slice(0, 5) : null,
+        };
+        result = await updateStudent(idToUpdate, updateData);
       } else {
         result = await createStudent({
           nome_completo: data.nome_completo || '',
