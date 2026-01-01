@@ -63,6 +63,59 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     },
   });
 
+  // Register form with context
+  useEffect(() => {
+    registerBasicDataForm(form);
+  }, [form, registerBasicDataForm]);
+
+  // Register save function with context
+  const saveData = useCallback(async (): Promise<boolean> => {
+    if (!studentId) return true;
+    
+    const studentData = form.getValues();
+    
+    const maeAutoOptional = ESTADOS_DATA_OPCIONAL.includes(studentData.estado_mae || '');
+    const paiAutoOptional = ESTADOS_DATA_OPCIONAL.includes(studentData.estado_pai || '');
+
+    if (!maeAutoOptional && !studentData.data_nascimento_mae_desconhecida && !studentData.data_nascimento_mae) {
+      return false;
+    }
+
+    if (!paiAutoOptional && !studentData.data_nascimento_pai_desconhecida && !studentData.data_nascimento_pai) {
+      return false;
+    }
+
+    try {
+      const cleanedData = {
+        ...studentData,
+        data_nascimento_mae: studentData.data_nascimento_mae === '' ? null : studentData.data_nascimento_mae,
+        data_nascimento_pai: studentData.data_nascimento_pai === '' ? null : studentData.data_nascimento_pai,
+        data_nascimento_conjuge: studentData.data_nascimento_conjuge === '' ? null : studentData.data_nascimento_conjuge,        
+      };
+
+      const { error } = await supabase
+        .from('student_basic_data')
+        .upsert(
+          { ...cleanedData, student_id: studentId },
+          { onConflict: 'student_id' }
+        );
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao salvar dados básicos',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  }, [studentId, form, toast]);
+
+  useEffect(() => {
+    registerBasicDataSave(saveData);
+  }, [saveData, registerBasicDataSave]);
+
   useEffect(() => {
     setLoadingEstados(true);
     fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
@@ -239,8 +292,6 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     }
   };
 
-  };
-
   if (loading) {
     return (
       <Card>
@@ -258,7 +309,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Contato */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contato</h3>
@@ -987,7 +1038,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
               </div>
             </div>
 
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>
