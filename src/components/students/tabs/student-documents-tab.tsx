@@ -110,6 +110,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
                     <SelectValue placeholder="Categoria..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="foto_aluno">Foto do Aluno</SelectItem>
                     <SelectItem value="documentos_pessoais">Documentos Pessoais</SelectItem>
                     <SelectItem value="comprovantes">Comprovantes</SelectItem>
                     <SelectItem value="laudos">Laudos</SelectItem>
