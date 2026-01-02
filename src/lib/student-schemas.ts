@@ -12,6 +12,7 @@ export const studentHeaderSchema = z.object({
   parentesco_responsavel: z.string().nullish(),
   data_abertura: z.string().nullish(),
   data_saida: z.string().nullish(),
+  nao_possui_documentos: z.boolean().default(false),
 });
 
 // Basic data schema
