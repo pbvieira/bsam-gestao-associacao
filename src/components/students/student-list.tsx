@@ -1,40 +1,17 @@
-import { useState } from 'react';
-import { useStudents } from '@/hooks/use-students';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  UserCheck, 
-  UserX, 
-  Calendar,
-  Phone,
-  Filter,
-  Trash2
-} from 'lucide-react';
-import { format, differenceInYears } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useState } from "react";
+import { useStudents } from "@/hooks/use-students";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, Edit, UserCheck, UserX, Calendar, Phone, Filter, Trash2 } from "lucide-react";
+import { format, differenceInYears } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface StudentListProps {
   onCreateStudent: () => void;
@@ -45,34 +22,36 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
   const { students, loading, deactivateStudent, deleteStudent } = useStudents();
   const { canAccess } = useAuth();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('nome_completo');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("nome_completo");
 
-  const canCreate = canAccess('students');
-  const canUpdate = canAccess('students');
-  const canDelete = canAccess('students');
+  const canCreate = canAccess("students");
+  const canUpdate = canAccess("students");
+  const canDelete = canAccess("students");
 
   const filteredStudents = students
-    .filter(student => {
+    .filter((student) => {
       // Search filter
-      const searchMatch = searchTerm === '' || 
+      const searchMatch =
+        searchTerm === "" ||
         student.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.codigo_cadastro.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.cpf?.includes(searchTerm) ||
         student.numero_interno?.includes(searchTerm);
-      
+
       // Status filter
-      const statusMatch = statusFilter === 'all' || 
-        (statusFilter === 'active' && student.ativo) ||
-        (statusFilter === 'inactive' && !student.ativo);
-      
+      const statusMatch =
+        statusFilter === "all" ||
+        (statusFilter === "active" && student.ativo) ||
+        (statusFilter === "inactive" && !student.ativo);
+
       return searchMatch && statusMatch;
     })
     .sort((a, b) => {
       const aValue = a[sortBy as keyof typeof a];
       const bValue = b[sortBy as keyof typeof b];
-      
+
       if (aValue < bValue) return -1;
       if (aValue > bValue) return 1;
       return 0;
@@ -87,7 +66,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
     const start = new Date(startDate);
     const years = differenceInYears(end, start);
     const months = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44)) % 12;
-    
+
     if (years > 0) {
       return `${years}a ${months}m`;
     }
@@ -95,7 +74,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
   };
 
   const handleDeactivate = async (studentId: string) => {
-    if (confirm('Tem certeza que deseja desativar este aluno?')) {
+    if (confirm("Tem certeza que deseja desativar este aluno?")) {
       const result = await deactivateStudent(studentId);
       if (result.error) {
         toast({
@@ -115,22 +94,22 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
   const handlePermanentDelete = async (studentId: string, studentName: string) => {
     const firstConfirm = confirm(
       `⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n` +
-      `Você está prestes a EXCLUIR PERMANENTEMENTE o aluno:\n` +
-      `${studentName}\n\n` +
-      `Todos os dados associados a este aluno serão removidos do sistema, incluindo:\n` +
-      `- Dados básicos e complementares\n` +
-      `- Anotações e histórico\n` +
-      `- Documentos anexados\n` +
-      `- Contatos de emergência\n` +
-      `- Informações de saúde e trabalho\n\n` +
-      `Deseja continuar?`
+        `Você está prestes a EXCLUIR PERMANENTEMENTE o aluno:\n` +
+        `${studentName}\n\n` +
+        `Todos os dados associados a este aluno serão removidos do sistema, incluindo:\n` +
+        `- Dados básicos e complementares\n` +
+        `- Anotações e histórico\n` +
+        `- Documentos anexados\n` +
+        `- Contatos de emergência\n` +
+        `- Informações de saúde e trabalho\n\n` +
+        `Deseja continuar?`,
     );
 
     if (!firstConfirm) return;
 
     const secondConfirm = confirm(
       `Digite "EXCLUIR" para confirmar a exclusão permanente do aluno ${studentName}.\n\n` +
-      `Esta é sua última chance de cancelar!`
+        `Esta é sua última chance de cancelar!`,
     );
 
     if (!secondConfirm) return;
@@ -184,12 +163,12 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
               <UserCheck className="h-4 w-4 text-primary" />
               <div>
                 <p className="text-sm font-medium">Total Ativos</p>
-                <p className="text-2xl font-bold">{students.filter(s => s.ativo).length}</p>
+                <p className="text-2xl font-bold">{students.filter((s) => s.ativo).length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -197,27 +176,29 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
               <div>
                 <p className="text-sm font-medium">Este Mês</p>
                 <p className="text-2xl font-bold">
-                  {students.filter(s => 
-                    format(new Date(s.data_abertura), 'yyyy-MM') === format(new Date(), 'yyyy-MM')
-                  ).length}
+                  {
+                    students.filter(
+                      (s) => format(new Date(s.data_abertura), "yyyy-MM") === format(new Date(), "yyyy-MM"),
+                    ).length
+                  }
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <UserX className="h-4 w-4 text-orange-500" />
               <div>
                 <p className="text-sm font-medium">Inativos</p>
-                <p className="text-2xl font-bold">{students.filter(s => !s.ativo).length}</p>
+                <p className="text-2xl font-bold">{students.filter((s) => !s.ativo).length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -237,15 +218,9 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Lista de Alunos</CardTitle>
-              <CardDescription>
-                Gestão completa dos assistidos da associação
-              </CardDescription>
+              <CardDescription>Gestão completa dos assistidos da associação</CardDescription>
             </div>
-            <Button
-              disabled={!canCreate}
-              onClick={onCreateStudent}
-              className="gap-2"
-            >
+            <Button disabled={!canCreate} onClick={onCreateStudent} className="gap-2">
               <Plus className="h-4 w-4" />
               Novo Aluno
             </Button>
@@ -261,7 +236,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                 className="pl-10"
               />
             </div>
-            
+
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filtrar por status" />
@@ -293,17 +268,12 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
               <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">Nenhum aluno encontrado</h3>
               <p className="text-muted-foreground mb-4">
-                {searchTerm || statusFilter !== 'all' 
-                  ? 'Tente ajustar os filtros de busca.' 
-                  : 'Comece cadastrando o primeiro aluno.'
-                }
+                {searchTerm || statusFilter !== "all"
+                  ? "Tente ajustar os filtros de busca."
+                  : "Comece cadastrando o primeiro aluno."}
               </p>
-              {!searchTerm && statusFilter === 'all' && (
-                <Button
-                  disabled={!canCreate}
-                  onClick={onCreateStudent}
-                  className="gap-2"
-                >
+              {!searchTerm && statusFilter === "all" && (
+                <Button disabled={!canCreate} onClick={onCreateStudent} className="gap-2">
                   <Plus className="h-4 w-4" />
                   Cadastrar Primeiro Aluno
                 </Button>
@@ -327,41 +297,27 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                 <TableBody>
                   {filteredStudents.map((student) => (
                     <TableRow key={student.id} className="hover:bg-muted/50">
-                      <TableCell className="font-mono text-sm">
-                        {student.codigo_cadastro}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {student.nome_completo}
-                      </TableCell>
+                      <TableCell className="font-mono text-sm">{student.codigo_cadastro}</TableCell>
+                      <TableCell className="font-medium">{student.nome_completo}</TableCell>
+                      <TableCell>{calculateAge(student.data_nascimento)} anos</TableCell>
+                      <TableCell>{format(new Date(student.data_nascimento), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                       <TableCell>
-                        {calculateAge(student.data_nascimento)} anos
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(student.data_nascimento), 'dd/MM/yyyy', { locale: ptBR })}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(student.data_abertura), 'dd/MM/yyyy', { locale: ptBR })}
+                        {format(new Date(student.data_abertura), "dd/MM/yyyy", { locale: ptBR })}
                         {student.hora_entrada && (
-                          <div className="text-xs text-muted-foreground">
-                            {student.hora_entrada}
-                          </div>
+                          <div className="text-xs text-muted-foreground">{student.hora_entrada}</div>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={student.ativo ? 'default' : 'secondary'}>
-                          {student.ativo ? 'Ativo' : 'Inativo'}
+                        <Badge variant={student.ativo ? "default" : "secondary"}>
+                          {student.ativo ? "Ativo" : "Inativo"}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {student.nome_responsavel ? (
                           <div>
-                            <div className="font-medium text-sm">
-                              {student.nome_responsavel}
-                            </div>
+                            <div className="font-medium text-sm">{student.nome_responsavel}</div>
                             {student.parentesco_responsavel && (
-                              <div className="text-xs text-muted-foreground">
-                                {student.parentesco_responsavel}
-                              </div>
+                              <div className="text-xs text-muted-foreground">{student.parentesco_responsavel}</div>
                             )}
                           </div>
                         ) : (
@@ -380,7 +336,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             <Edit className="h-3 w-3" />
                             Editar
                           </Button>
-                          
+
                           {student.ativo && (
                             <Button
                               variant="ghost"
@@ -394,7 +350,9 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             </Button>
                           )}
 
-                          {{ /* 
+                          {
+                            {
+                              /* 
                           <Button
                             variant="ghost"
                             size="sm"
@@ -404,8 +362,10 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                           >
                             <Trash2 className="h-3 w-3" />
                             Excluir
-                          */}}
                           </Button>
+                          */
+                            }
+                          }
                         </div>
                       </TableCell>
                     </TableRow>
@@ -418,8 +378,8 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
           {filteredStudents && filteredStudents.length > 0 && (
             <div className="flex items-center justify-between pt-4">
               <p className="text-sm text-muted-foreground">
-                Mostrando {filteredStudents.length} aluno{filteredStudents.length !== 1 ? 's' : ''}
-                {statusFilter !== 'all' && ` (${statusFilter === 'active' ? 'ativos' : 'inativos'})`}
+                Mostrando {filteredStudents.length} aluno{filteredStudents.length !== 1 ? "s" : ""}
+                {statusFilter !== "all" && ` (${statusFilter === "active" ? "ativos" : "inativos"})`}
               </p>
             </div>
           )}
