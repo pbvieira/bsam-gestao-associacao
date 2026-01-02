@@ -58,9 +58,9 @@ serve(async (req) => {
     console.log('🔥 create-user: Permissão verificada, role:', profile.role);
 
     // Obter dados do body
-    const { email, password, full_name, role, active = true } = await req.json()
+    const { email, password, full_name, role, active = true, area_id = null, setor_id = null } = await req.json()
 
-    console.log('🔥 create-user: Criando usuário', { email, full_name, role, active });
+    console.log('🔥 create-user: Criando usuário', { email, full_name, role, active, area_id, setor_id });
 
     // Criar usuário usando Admin API (NÃO faz login automático)
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -80,10 +80,15 @@ serve(async (req) => {
 
     console.log('🔥 create-user: Usuário criado com sucesso', newUser.user.id);
 
-    // Atualizar o perfil com o role e status corretos (garantia extra)
+    // Atualizar o perfil com o role, status, area e setor corretos (garantia extra)
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({ role, active })
+      .update({ 
+        role, 
+        active,
+        area_id: area_id || null,
+        setor_id: setor_id || null
+      })
       .eq('user_id', newUser.user.id)
 
     if (updateError) {
