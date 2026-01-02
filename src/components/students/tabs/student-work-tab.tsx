@@ -11,6 +11,7 @@ import { useStudentWorkSituation } from '@/hooks/use-student-work-situation';
 import { useStudentIncome } from '@/hooks/use-student-income';
 import { useStudentBenefits } from '@/hooks/use-student-benefits';
 import { useBenefitTypes } from '@/hooks/use-benefit-types';
+import { useIncomeTypes } from '@/hooks/use-income-types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
@@ -31,15 +32,6 @@ interface StudentWorkTabProps {
   studentId?: string | null;
 }
 
-// Income types
-const INCOME_TYPES = [
-  { value: 'salario', label: 'Salário' },
-  { value: 'autonomo', label: 'Renda Autônoma' },
-  { value: 'aposentadoria', label: 'Aposentadoria' },
-  { value: 'pensao_alimenticia', label: 'Pensão Alimentícia' },
-  { value: 'aluguel', label: 'Aluguel' },
-  { value: 'outros', label: 'Outros' },
-];
 
 
 // New income form state
@@ -61,12 +53,14 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
   const { incomeList, loading: incomeLoading, totalIncome, addIncome, deleteIncome } = useStudentIncome(studentId || undefined);
   const { benefitsList, loading: benefitsLoading, totalBenefits, addBenefit, deleteBenefit } = useStudentBenefits(studentId || undefined);
   const { benefitTypes, fetchBenefitTypes } = useBenefitTypes();
+  const { incomeTypes, fetchIncomeTypes } = useIncomeTypes();
   const { toast } = useToast();
   const { registerWorkForm, registerWorkSave } = useStudentFormContext();
 
   useEffect(() => {
     fetchBenefitTypes();
-  }, [fetchBenefitTypes]);
+    fetchIncomeTypes();
+  }, [fetchBenefitTypes, fetchIncomeTypes]);
 
   // New income form
   const [newIncome, setNewIncome] = useState<NewIncomeForm>({ tipo_renda: '', descricao: '', valor: '' });
@@ -419,7 +413,7 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
                 >
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2">
                     <span className="font-medium">
-                      {INCOME_TYPES.find(t => t.value === income.tipo_renda)?.label || income.tipo_renda}
+                      {incomeTypes.find(t => t.nome === income.tipo_renda)?.nome || income.tipo_renda}
                     </span>
                     <span className="text-muted-foreground">{income.descricao || '-'}</span>
                     <span className="font-semibold text-primary">{formatCurrency(income.valor)}</span>
@@ -451,9 +445,9 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {INCOME_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
+                    {incomeTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.nome}>
+                        {type.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
