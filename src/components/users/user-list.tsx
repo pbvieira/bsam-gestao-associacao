@@ -22,6 +22,11 @@ import { UserForm } from './user-form';
 import { UserCredentialsDialog } from './user-credentials-dialog';
 import { useToast } from '@/hooks/use-toast';
 
+interface UserWithAreaSetor extends UserProfile {
+  areas?: { nome: string } | null;
+  setores?: { nome: string } | null;
+}
+
 const getRoleBadgeVariant = (role: string) => {
   switch (role) {
     case 'administrador':
@@ -73,7 +78,11 @@ export function UserList() {
     queryFn: async () => {
       let query = supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          areas:area_id(nome),
+          setores:setor_id(nome)
+        `)
         .order('created_at', { ascending: false });
 
       if (searchTerm) {
@@ -82,7 +91,7 @@ export function UserList() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as UserProfile[];
+      return data as UserWithAreaSetor[];
     },
     meta: {
       onError: (error: unknown) => handleError(error, 'database'),
@@ -107,17 +116,40 @@ export function UserList() {
     fetchAdminCount();
   }, [users]); // Atualizar quando os dados mudarem
 
-  const handleEdit = (user: UserProfile) => {
-    setSelectedUser(user);
+  const handleEdit = (user: UserWithAreaSetor) => {
+    // Converter para UserProfile para o form
+    const userProfile: UserProfile = {
+      id: user.id,
+      user_id: user.user_id,
+      full_name: user.full_name,
+      role: user.role,
+      active: user.active,
+      area_id: user.area_id,
+      setor_id: user.setor_id,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+    setSelectedUser(userProfile);
     setShowUserForm(true);
   };
 
-  const handleCredentials = (user: UserProfile) => {
-    setSelectedUser(user);
+  const handleCredentials = (user: UserWithAreaSetor) => {
+    const userProfile: UserProfile = {
+      id: user.id,
+      user_id: user.user_id,
+      full_name: user.full_name,
+      role: user.role,
+      active: user.active,
+      area_id: user.area_id,
+      setor_id: user.setor_id,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+    setSelectedUser(userProfile);
     setShowCredentials(true);
   };
 
-  const handleDeactivate = async (user: UserProfile) => {
+  const handleDeactivate = async (user: UserWithAreaSetor) => {
     try {
       // Verificar se é administrador e se é o último
       if (user.role === 'administrador') {
@@ -166,7 +198,7 @@ export function UserList() {
     }
   };
 
-  const handlePermanentDelete = async (user: UserProfile) => {
+  const handlePermanentDelete = async (user: UserWithAreaSetor) => {
     try {
       const firstConfirm = confirm(
         `⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n` +
@@ -299,82 +331,92 @@ export function UserList() {
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Função</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Data de Cadastro</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">
-                      {user.full_name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {getRoleLabel(user.role)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.active ? 'default' : 'secondary'}>
-                        {user.active ? 'Ativo' : 'Inativo'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.created_at).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center gap-1 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={!canUpdate}
-                          onClick={() => handleCredentials(user)}
-                        >
-                          <KeyRound className="h-4 w-4" />
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={!canUpdate}
-                          onClick={() => handleEdit(user)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        
-                        {user.active && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Função</TableHead>
+                    <TableHead>Área</TableHead>
+                    <TableHead>Setor</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Data de Cadastro</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">
+                        {user.full_name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleBadgeVariant(user.role)}>
+                          {getRoleLabel(user.role)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.areas?.nome || '-'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.setores?.nome || '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.active ? 'default' : 'secondary'}>
+                          {user.active ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center gap-1 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canUpdate}
+                            onClick={() => handleCredentials(user)}
+                          >
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canUpdate}
+                            onClick={() => handleEdit(user)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          
+                          {user.active && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1) || user.user_id === profile?.user_id}
+                              onClick={() => handleDeactivate(user)}
+                              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                            >
+                              <UserX className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
                           <Button
                             variant="ghost"
                             size="sm"
                             disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1) || user.user_id === profile?.user_id}
-                            onClick={() => handleDeactivate(user)}
-                            className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                            onClick={() => handlePermanentDelete(user)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           >
-                            <UserX className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        )}
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={!canDelete || (user.role === 'administrador' && adminCount <= 1) || user.user_id === profile?.user_id}
-                          onClick={() => handlePermanentDelete(user)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

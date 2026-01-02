@@ -10,6 +10,8 @@ export interface UserProfile {
   full_name: string;
   role: UserRole;
   active: boolean;
+  area_id: string | null;
+  setor_id: string | null;
   created_at: string;
   updated_at: string;
 }

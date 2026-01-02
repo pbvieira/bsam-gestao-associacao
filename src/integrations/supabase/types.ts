@@ -628,32 +628,53 @@ export type Database = {
       profiles: {
         Row: {
           active: boolean
+          area_id: string | null
           created_at: string
           full_name: string
           id: string
           role: Database["public"]["Enums"]["user_role"]
+          setor_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           active?: boolean
+          area_id?: string | null
           created_at?: string
           full_name: string
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          setor_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           active?: boolean
+          area_id?: string | null
           created_at?: string
           full_name?: string
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          setor_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_order_items: {
         Row: {

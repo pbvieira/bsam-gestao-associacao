@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile, UserRole } from '@/hooks/use-auth';
 import { useErrorHandler } from '@/hooks/use-error-handler';
+import { useAreas } from '@/hooks/use-areas';
+import { useSetores } from '@/hooks/use-setores';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,8 @@ const newUserSchema = z.object({
   email: z.string().email('Email inválido'),
   role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor', 'administrador'] as const),
   active: z.boolean(),
+  area_id: z.string().optional(),
+  setor_id: z.string().optional(),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -47,9 +51,11 @@ const newUserSchema = z.object({
 // Schema para edição de usuários existentes
 const editUserSchema = z.object({
   full_name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().optional(), // Email não é validado na edição
+  email: z.string().optional(),
   role: z.enum(['aluno', 'auxiliar', 'coordenador', 'diretor', 'administrador'] as const),
   active: z.boolean(),
+  area_id: z.string().optional(),
+  setor_id: z.string().optional(),
   password: z.string().optional(),
   confirmPassword: z.string().optional(),
 });
@@ -64,7 +70,8 @@ interface UserFormProps {
 export function UserForm({ user, onClose }: UserFormProps) {
   const [loading, setLoading] = useState(false);
   const { handleError, handleSuccess } = useErrorHandler();
-
+  const { areas } = useAreas();
+  
   // Escolher o schema baseado se é edição ou criação
   const schema = user ? editUserSchema : newUserSchema;
 
@@ -72,13 +79,32 @@ export function UserForm({ user, onClose }: UserFormProps) {
     resolver: zodResolver(schema),
     defaultValues: {
       full_name: user?.full_name || '',
-      email: user ? undefined : '', // Undefined para edição, string vazia para criação
+      email: user ? undefined : '',
       role: user?.role || 'aluno',
       active: user?.active ?? true,
+      area_id: user?.area_id || '',
+      setor_id: user?.setor_id || '',
       password: '',
       confirmPassword: '',
     },
   });
+
+  const selectedAreaId = form.watch('area_id');
+  const { setores } = useSetores(selectedAreaId || undefined);
+
+  // Limpar setor quando área muda
+  useEffect(() => {
+    const currentSetor = form.getValues('setor_id');
+    if (currentSetor && selectedAreaId) {
+      // Verificar se o setor pertence à área selecionada
+      const setorPertenceArea = setores?.some(s => s.id === currentSetor);
+      if (!setorPertenceArea) {
+        form.setValue('setor_id', '');
+      }
+    } else if (!selectedAreaId) {
+      form.setValue('setor_id', '');
+    }
+  }, [selectedAreaId, setores, form]);
 
   const onSubmit = async (data: UserFormData) => {
     console.log('🔥 UserForm: onSubmit iniciado', { data, user: user?.id });
@@ -92,6 +118,8 @@ export function UserForm({ user, onClose }: UserFormProps) {
             full_name: data.full_name,
             role: data.role,
             active: data.active,
+            area_id: data.area_id || null,
+            setor_id: data.setor_id || null,
           }
         });
 
@@ -102,6 +130,8 @@ export function UserForm({ user, onClose }: UserFormProps) {
             full_name: data.full_name,
             role: data.role,
             active: data.active,
+            area_id: data.area_id || null,
+            setor_id: data.setor_id || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', user.id)
@@ -148,7 +178,9 @@ export function UserForm({ user, onClose }: UserFormProps) {
             password: data.password,
             full_name: data.full_name,
             role: data.role,
-            active: data.active
+            active: data.active,
+            area_id: data.area_id || null,
+            setor_id: data.setor_id || null,
           }
         });
 
@@ -197,9 +229,12 @@ export function UserForm({ user, onClose }: UserFormProps) {
     }
   };
 
+  const activeAreas = areas?.filter(a => a.ativo) || [];
+  const activeSetores = setores?.filter(s => s.ativo) || [];
+
   return (
     <Dialog open onOpenChange={() => onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {user ? 'Editar Usuário' : 'Novo Usuário'}
@@ -260,18 +295,76 @@ export function UserForm({ user, onClose }: UserFormProps) {
                         <SelectValue placeholder="Selecione uma função" />
                       </SelectTrigger>
                     </FormControl>
-                        <SelectContent>
-                          <SelectItem value="aluno">Aluno</SelectItem>
-                          <SelectItem value="auxiliar">Auxiliar</SelectItem>
-                          <SelectItem value="coordenador">Coordenador</SelectItem>
-                          <SelectItem value="diretor">Diretor</SelectItem>
-                          <SelectItem value="administrador">Administrador</SelectItem>
-                        </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="aluno">Aluno</SelectItem>
+                      <SelectItem value="auxiliar">Auxiliar</SelectItem>
+                      <SelectItem value="coordenador">Coordenador</SelectItem>
+                      <SelectItem value="diretor">Diretor</SelectItem>
+                      <SelectItem value="administrador">Administrador</SelectItem>
+                    </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="area_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Área</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma área (opcional)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {activeAreas.map((area) => (
+                        <SelectItem key={area.id} value={area.id}>
+                          {area.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {selectedAreaId && activeSetores.length > 0 && (
+              <FormField
+                control={form.control}
+                name="setor_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Setor</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um setor (opcional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {activeSetores.map((setor) => (
+                          <SelectItem key={setor.id} value={setor.id}>
+                            {setor.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {!user && (
               <>
