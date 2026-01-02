@@ -20,6 +20,10 @@ import RoleManagement from "./pages/RoleManagement";
 import AnnotationCategories from "./pages/AnnotationCategories";
 import InventoryCategories from "./pages/InventoryCategories";
 import FiliationStatus from "./pages/FiliationStatus";
+import IncomeTypes from "./pages/IncomeTypes";
+import BenefitTypes from "./pages/BenefitTypes";
+import CashBookEntryCategories from "./pages/CashBookEntryCategories";
+import CashBookExitCategories from "./pages/CashBookExitCategories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -119,6 +123,26 @@ const App = () => {
           <Route path="/estado-filiacao" element={
             <UnifiedRoute module="students">
               <FiliationStatus />
+            </UnifiedRoute>
+          } />
+          <Route path="/tipos-renda" element={
+            <UnifiedRoute module="students">
+              <IncomeTypes />
+            </UnifiedRoute>
+          } />
+          <Route path="/tipos-beneficio" element={
+            <UnifiedRoute module="students">
+              <BenefitTypes />
+            </UnifiedRoute>
+          } />
+          <Route path="/categorias-entrada" element={
+            <UnifiedRoute module="students">
+              <CashBookEntryCategories />
+            </UnifiedRoute>
+          } />
+          <Route path="/categorias-saida" element={
+            <UnifiedRoute module="students">
+              <CashBookExitCategories />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
