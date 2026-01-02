@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2, Wallet, Gift, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2, Wallet, Gift, TrendingUp, TrendingDown, Building2 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -96,6 +96,11 @@ const auxiliaryTablesItems = [{
   name: "Categorias de Saída",
   href: "/categorias-saida",
   icon: TrendingDown,
+  module: "students"
+}, {
+  name: "Áreas e Setores",
+  href: "/areas-setores",
+  icon: Building2,
   module: "students"
 }];
 export function AppSidebar() {
