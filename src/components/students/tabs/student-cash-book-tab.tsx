@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,22 +35,15 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import {
   useStudentCashBook,
-  ENTRADA_CATEGORIES,
-  SAIDA_CATEGORIES,
   type CashBookTransaction,
 } from '@/hooks/use-student-cash-book';
+import { useCashBookEntryCategories } from '@/hooks/use-cash-book-entry-categories';
+import { useCashBookExitCategories } from '@/hooks/use-cash-book-exit-categories';
 import { CashBookTransactionDialog } from './cash-book-transaction-dialog';
 
 interface StudentCashBookTabProps {
   studentId: string | null;
 }
-
-const ALL_CATEGORIES = [...ENTRADA_CATEGORIES, ...SAIDA_CATEGORIES];
-
-const getCategoryLabel = (value: string) => {
-  const cat = ALL_CATEGORIES.find((c) => c.value === value);
-  return cat?.label || value;
-};
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -72,11 +65,26 @@ export function StudentCashBookTab({ studentId }: StudentCashBookTabProps) {
     deleteTransaction,
   } = useStudentCashBook(studentId || undefined);
 
+  const { categories: entryCategories, fetchCategories: fetchEntryCategories } = useCashBookEntryCategories();
+  const { categories: exitCategories, fetchCategories: fetchExitCategories } = useCashBookExitCategories();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<CashBookTransaction | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filterTipo, setFilterTipo] = useState<string>('todos');
   const [filterCategoria, setFilterCategoria] = useState<string>('todas');
+
+  useEffect(() => {
+    fetchEntryCategories();
+    fetchExitCategories();
+  }, [fetchEntryCategories, fetchExitCategories]);
+
+  const allCategories = useMemo(() => [...entryCategories, ...exitCategories], [entryCategories, exitCategories]);
+
+  const getCategoryLabel = (value: string) => {
+    const cat = allCategories.find((c) => c.nome === value);
+    return cat?.nome || value;
+  };
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
@@ -242,9 +250,9 @@ export function StudentCashBookTab({ studentId }: StudentCashBookTabProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas</SelectItem>
-                {ALL_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
+                {allCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.nome}>
+                    {cat.nome}
                   </SelectItem>
                 ))}
               </SelectContent>
