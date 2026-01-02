@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MainLayout } from '@/components/layout/main-layout';
 import { PageLayout } from '@/components/layout/page-layout';
 import { useAreas, Area, AreaFormData } from '@/hooks/use-areas';
 import { useSetores, Setor, SetorFormData } from '@/hooks/use-setores';
@@ -153,17 +154,20 @@ export default function AreasSetores() {
 
   if (areasLoading || setoresLoading) {
     return (
-      <PageLayout title="Áreas e Setores" subtitle="Carregando...">
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 w-full" />
-          ))}
-        </div>
-      </PageLayout>
+      <MainLayout>
+        <PageLayout title="Áreas e Setores" subtitle="Carregando...">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        </PageLayout>
+      </MainLayout>
     );
   }
 
   return (
+    <MainLayout>
     <PageLayout
       title="Áreas e Setores"
       subtitle="Gerencie as áreas e setores da instituição"
@@ -452,5 +456,6 @@ export default function AreasSetores() {
         </AlertDialogContent>
       </AlertDialog>
     </PageLayout>
+    </MainLayout>
   );
 }
