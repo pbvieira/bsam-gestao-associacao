@@ -35,19 +35,20 @@ export function UnifiedRoute({
     }
   }, [isInitialized, user, profile, location.pathname, module, action, canAccess]);
 
-  // Loading state - incluindo carregamento de permissões e profile
-  if (loading || !isInitialized || (user && !profile) || (user && permissionsLoading && module)) {
+  // Loading state - só mostrar loading na primeira carga
+  // Não desmontar children durante re-verificações se já temos perfil carregado
+  const isFirstLoad = !isInitialized || loading;
+  const needsProfile = user && !profile;
+  
+  if (isFirstLoad || needsProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="space-y-4 p-6 text-center">
           <Skeleton className="h-8 w-1/4 mx-auto" />
           <Skeleton className="h-4 w-1/2 mx-auto" />
           <Skeleton className="h-32 w-full" />
-          {user && !profile && (
+          {needsProfile && (
             <p className="text-sm text-muted-foreground">Carregando perfil...</p>
-          )}
-          {permissionsLoading && (
-            <p className="text-sm text-muted-foreground">Verificando permissões...</p>
           )}
         </div>
       </div>
