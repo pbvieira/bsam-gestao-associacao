@@ -4,12 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { differenceInDays, differenceInMonths, differenceInYears, isValid, parseISO, addYears, addMonths } from 'date-fns';
 import { studentHeaderSchema, type StudentHeaderForm, PARENTESCO_OPTIONS } from '@/lib/student-schemas';
 import { useStudents } from '@/hooks/use-students';
+import { useTasks } from '@/hooks/use-tasks';
+import { useAuth } from '@/hooks/use-auth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, X, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -99,11 +103,14 @@ function StudentFormContent({
   onRefreshPhoto
 }: StudentFormProps) {
   const { createStudent, updateStudent } = useStudents();
+  const { createTask } = useTasks();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('header');
   const [savedStudentId, setSavedStudentId] = useState<string | null>(student?.id || null);
   const [isCreationMode, setIsCreationMode] = useState(!student);
+  const [wasNewStudent, setWasNewStudent] = useState(!student);
   
   const { registerHeaderForm, setStudentId, saveAll, isSaving } = useStudentFormContext();
   
@@ -121,7 +128,8 @@ function StudentFormContent({
       data_abertura: student?.data_abertura || '',
       data_saida: student?.data_saida 
         ? `${student.data_saida}T${student.hora_saida || '00:00'}` 
-        : ''
+        : '',
+      nao_possui_documentos: student?.nao_possui_documentos || false
     }
   });
 
@@ -177,7 +185,8 @@ function StudentFormContent({
           cpf: data.cpf,
           rg: data.rg,
           nome_responsavel: data.nome_responsavel,
-          parentesco_responsavel: data.parentesco_responsavel
+          parentesco_responsavel: data.parentesco_responsavel,
+          nao_possui_documentos: data.nao_possui_documentos
         });
       }
       
@@ -210,6 +219,38 @@ function StudentFormContent({
     }
   };
 
+  // Function to create task for missing documents
+  const createDocumentationTask = async (studentName: string) => {
+    if (!user?.id) return;
+    
+    try {
+      // Find "Atendimento Social" sector
+      const { data: setorData } = await supabase
+        .from('setores')
+        .select('id')
+        .ilike('nome', '%Atendimento Social%')
+        .limit(1)
+        .single();
+      
+      await createTask({
+        titulo: `Providenciar documentação do aluno ${studentName}`,
+        descricao: 'O aluno foi cadastrado sem documentação. Necessário providenciar RG, CPF e demais documentos.',
+        prioridade: 'alta',
+        status: 'pendente',
+        created_by: user.id,
+        assigned_to: user.id,
+        setor_id: setorData?.id || undefined,
+      });
+      
+      toast({
+        title: 'Tarefa criada',
+        description: 'Uma tarefa foi criada para providenciar a documentação do aluno.'
+      });
+    } catch (error) {
+      console.error('Error creating documentation task:', error);
+    }
+  };
+
   // Global save handler
   const handleSaveAll = async () => {
     setIsSubmitting(true);
@@ -221,7 +262,14 @@ function StudentFormContent({
         return;
       }
       
-      // 2. If we have a student ID, save all other forms
+      // 2. Check if we need to create a documentation task (only for new students)
+      const formData = form.getValues();
+      if (wasNewStudent && headerResult.newStudentId && formData.nao_possui_documentos) {
+        await createDocumentationTask(formData.nome_completo);
+        setWasNewStudent(false); // Prevent creating task again on subsequent saves
+      }
+      
+      // 3. If we have a student ID, save all other forms
       const currentStudentId = headerResult.newStudentId || savedStudentId;
       if (currentStudentId) {
         const allSaved = await saveAll();
@@ -394,7 +442,23 @@ function StudentFormContent({
                           <FormMessage />
                         </FormItem>} />
 
-                    <div></div> {/* Spacer */}
+                    <FormField 
+                      control={form.control} 
+                      name="nao_possui_documentos" 
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-6">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal cursor-pointer">
+                            Não possui documentos
+                          </FormLabel>
+                        </FormItem>
+                      )} 
+                    />
 
                     <FormField control={form.control} name="nome_responsavel" render={({
                     field

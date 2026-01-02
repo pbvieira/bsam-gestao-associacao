@@ -16,6 +16,7 @@ export interface Task {
   data_conclusao?: string;
   created_by: string;
   assigned_to: string;
+  setor_id?: string;
   estimated_hours?: number;
   actual_hours?: number;
   parent_task_id?: string;
@@ -26,6 +27,9 @@ export interface Task {
   };
   assigned_to_profile?: {
     full_name: string;
+  };
+  setor?: {
+    nome: string;
   };
 }
 
@@ -117,7 +121,8 @@ export function useTasks() {
         .select(`
           *,
           created_by_profile:profiles!tasks_created_by_fkey(full_name),
-          assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name)
+          assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name),
+          setor:setores(nome)
         `)
         .order('created_at', { ascending: false });
 

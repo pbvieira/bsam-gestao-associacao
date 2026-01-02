@@ -18,6 +18,7 @@ export interface Student {
   nome_responsavel: string | null;
   parentesco_responsavel: string | null;
   ativo: boolean;
+  nao_possui_documentos: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -63,6 +64,7 @@ export function useStudents() {
     hora_saida?: string | null;
     nome_responsavel?: string | null;
     parentesco_responsavel?: string | null;
+    nao_possui_documentos?: boolean;
   }) => {
     try {
       const { data, error } = await supabase

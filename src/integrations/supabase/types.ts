@@ -1473,6 +1473,7 @@ export type Database = {
           hora_entrada: string | null
           hora_saida: string | null
           id: string
+          nao_possui_documentos: boolean | null
           nome_completo: string
           nome_responsavel: string | null
           numero_interno: string | null
@@ -1492,6 +1493,7 @@ export type Database = {
           hora_entrada?: string | null
           hora_saida?: string | null
           id?: string
+          nao_possui_documentos?: boolean | null
           nome_completo: string
           nome_responsavel?: string | null
           numero_interno?: string | null
@@ -1511,6 +1513,7 @@ export type Database = {
           hora_entrada?: string | null
           hora_saida?: string | null
           id?: string
+          nao_possui_documentos?: boolean | null
           nome_completo?: string
           nome_responsavel?: string | null
           numero_interno?: string | null
@@ -1695,6 +1698,7 @@ export type Database = {
           id: string
           parent_task_id: string | null
           prioridade: Database["public"]["Enums"]["task_priority"]
+          setor_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           titulo: string
           updated_at: string
@@ -1712,6 +1716,7 @@ export type Database = {
           id?: string
           parent_task_id?: string | null
           prioridade?: Database["public"]["Enums"]["task_priority"]
+          setor_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           titulo: string
           updated_at?: string
@@ -1729,6 +1734,7 @@ export type Database = {
           id?: string
           parent_task_id?: string | null
           prioridade?: Database["public"]["Enums"]["task_priority"]
+          setor_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           titulo?: string
           updated_at?: string
@@ -1753,6 +1759,13 @@ export type Database = {
             columns: ["parent_task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
             referencedColumns: ["id"]
           },
         ]
