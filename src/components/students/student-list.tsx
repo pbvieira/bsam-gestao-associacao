@@ -350,9 +350,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             </Button>
                           )}
 
-                          {
-                            {
-                              /* 
+                          {/* 
                           <Button
                             variant="ghost"
                             size="sm"
@@ -363,9 +361,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             <Trash2 className="h-3 w-3" />
                             Excluir
                           </Button>
-                          */
-                            }
-                          }
+                          */}
                         </div>
                       </TableCell>
                     </TableRow>
