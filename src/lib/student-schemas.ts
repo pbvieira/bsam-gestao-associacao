@@ -127,3 +127,28 @@ export type StudentWorkSituationForm = z.infer<typeof studentWorkSituationSchema
 export type EmergencyContactForm = z.infer<typeof emergencyContactSchema>;
 export type StudentHealthDataForm = z.infer<typeof studentHealthDataSchema>;
 export type StudentAnnotationForm = z.infer<typeof studentAnnotationSchema>;
+
+// Parentesco options
+export const PARENTESCO_OPTIONS = [
+  "PAI",
+  "MÃE",
+  "AVÔ",
+  "AVÓ",
+  "IRMÃO(A)",
+  "TIO(A)",
+  "PASTOR",
+  "ASSISTENTE SOCIAL",
+  "ENCAMINHADO AD SEDE",
+  "ESPOSA",
+  "MADRINHA",
+  "PADRINHO",
+  "SOBRINHO(A)",
+  "ENTEADO(A)",
+  "FILHO(A)",
+  "GENRO",
+  "SOGRO(A)",
+  "DESCONHECIDO",
+  "PADRASTO",
+  "MADASTRA",
+  "AMIGO(A)"
+];

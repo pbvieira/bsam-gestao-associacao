@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { differenceInDays, differenceInMonths, differenceInYears, isValid, parseISO, addYears, addMonths } from 'date-fns';
-import { studentHeaderSchema, type StudentHeaderForm } from '@/lib/student-schemas';
+import { studentHeaderSchema, type StudentHeaderForm, PARENTESCO_OPTIONS } from '@/lib/student-schemas';
 import { useStudents } from '@/hooks/use-students';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,30 +22,6 @@ import { StudentCashBookTab } from './tabs/student-cash-book-tab';
 import { StudentAnnotationsTab } from './tabs/student-annotations-tab';
 import { StudentDocumentsTab } from './tabs/student-documents-tab';
 import { StudentFormProvider, useStudentFormContext } from '@/contexts/StudentFormContext';
-
-const PARENTESCO_OPTIONS = [
-  "PAI",
-  "MÃE",
-  "AVÔ",
-  "AVÓ",
-  "IRMÃO(A)",
-  "TIO(A)",
-  "PASTOR",
-  "ASSISTENTE SOCIAL",
-  "ENCAMINHADO AD SEDE",
-  "ESPOSA",
-  "MADRINHA",
-  "PADRINHO",
-  "SOBRINHO(A)",
-  "ENTEADO(A)",
-  "FILHO(A)",
-  "GENRO",
-  "SOGRO(A)",
-  "DESCONHECIDO",
-  "PADRASTO",
-  "MADASTRA",
-  "AMIGO(A)"
-];
 
 const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string => {
   // Validar data de abertura (rejeitar vazio ou undefined)
