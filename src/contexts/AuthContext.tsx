@@ -202,17 +202,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('🔄 Auth state changed:', event);
+        
+        // Ignorar eventos de refresh que não mudam o usuário
+        if (event === 'TOKEN_REFRESHED' && session?.user?.id === user?.id) {
+          console.log('ℹ️ Token refreshed, skipping profile reload');
+          setSession(session);
+          return;
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Fetch profile immediately to avoid race condition
-          fetchUserProfile(session.user.id).catch(error => {
-            console.error('❌ Failed to fetch profile after auth change:', error);
-          });
+          // Só buscar perfil se for um novo usuário ou se ainda não temos perfil
+          if (!profile || profile.user_id !== session.user.id) {
+            setTimeout(() => {
+              fetchUserProfile(session.user.id).catch(error => {
+                console.error('❌ Failed to fetch profile after auth change:', error);
+              });
+            }, 0);
+          }
         } else {
           setProfile(null);
           setAccessibleModules([]);
