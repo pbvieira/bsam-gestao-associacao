@@ -18,6 +18,7 @@ import { StudentChildrenTab } from './tabs/student-children-tab';
 import { StudentWorkTab } from './tabs/student-work-tab';
 import { StudentContactsTab } from './tabs/student-contacts-tab';
 import { StudentHealthTab } from './tabs/student-health-tab';
+import { StudentCashBookTab } from './tabs/student-cash-book-tab';
 import { StudentAnnotationsTab } from './tabs/student-annotations-tab';
 import { StudentDocumentsTab } from './tabs/student-documents-tab';
 import { StudentFormProvider, useStudentFormContext } from '@/contexts/StudentFormContext';
@@ -293,13 +294,14 @@ function StudentFormContent({
       )}
       
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="header">Registro</TabsTrigger>
           <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
           <TabsTrigger value="children">Filhos</TabsTrigger>
           <TabsTrigger value="work">Trabalho</TabsTrigger>
           <TabsTrigger value="contacts">Contatos</TabsTrigger>
           <TabsTrigger value="health">Saúde</TabsTrigger>
+          <TabsTrigger value="cashbook">Financeiro</TabsTrigger>
           <TabsTrigger value="annotations">Anotações</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
@@ -473,6 +475,10 @@ function StudentFormContent({
 
         <TabsContent value="health" forceMount className={activeTab !== 'health' ? 'hidden' : ''}>
           <StudentHealthTab studentId={savedStudentId} />
+        </TabsContent>
+
+        <TabsContent value="cashbook" forceMount className={activeTab !== 'cashbook' ? 'hidden' : ''}>
+          <StudentCashBookTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="annotations" forceMount className={activeTab !== 'annotations' ? 'hidden' : ''}>

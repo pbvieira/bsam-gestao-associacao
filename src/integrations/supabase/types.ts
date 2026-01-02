@@ -834,6 +834,53 @@ export type Database = {
           },
         ]
       }
+      student_cash_book: {
+        Row: {
+          categoria: string
+          created_at: string | null
+          created_by: string
+          data_movimento: string
+          descricao: string | null
+          id: string
+          student_id: string
+          tipo_movimento: string
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          created_at?: string | null
+          created_by: string
+          data_movimento?: string
+          descricao?: string | null
+          id?: string
+          student_id: string
+          tipo_movimento: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string | null
+          created_by?: string
+          data_movimento?: string
+          descricao?: string | null
+          id?: string
+          student_id?: string
+          tipo_movimento?: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_cash_book_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_children: {
         Row: {
           convive_filhos: boolean | null
