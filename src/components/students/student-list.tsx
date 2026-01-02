@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useStudents } from '@/hooks/use-students';
-import { useSystemSettings } from '@/hooks/use-system-settings';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,15 +26,14 @@ import {
   Search, 
   Plus, 
   Edit, 
-  Home,
-  LogIn,
-  LogOut,
-  DoorOpen,
-  Trash2,
-  UserCheck,
-  UserX
+  UserCheck, 
+  UserX, 
+  Calendar,
+  Phone,
+  Filter,
+  Trash2
 } from 'lucide-react';
-import { format, differenceInYears, isSameMonth } from 'date-fns';
+import { format, differenceInYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface StudentListProps {
@@ -45,7 +43,6 @@ interface StudentListProps {
 
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
   const { students, loading, deactivateStudent, deleteStudent } = useStudents();
-  const { settings, getTotalVagas } = useSystemSettings();
   const { canAccess } = useAuth();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,18 +52,6 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
   const canCreate = canAccess('students');
   const canUpdate = canAccess('students');
   const canDelete = canAccess('students');
-
-  // Estatísticas
-  const currentDate = new Date();
-  const totalVagas = getTotalVagas();
-  const hospedados = students.filter(s => !s.data_saida).length;
-  const entradasEsteMes = students.filter(s => 
-    !s.data_saida && isSameMonth(new Date(s.data_abertura), currentDate)
-  ).length;
-  const saidasEsteMes = students.filter(s => 
-    s.data_saida && isSameMonth(new Date(s.data_saida), currentDate)
-  ).length;
-  const vagasDisponiveis = Math.max(0, totalVagas - hospedados);
 
   const filteredStudents = students
     .filter(student => {
@@ -195,13 +180,11 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Home className="h-5 w-5 text-primary" />
-              </div>
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-primary" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Hospedados</p>
-                <p className="text-2xl font-bold">{hospedados}</p>
+                <p className="text-sm font-medium">Total Ativos</p>
+                <p className="text-2xl font-bold">{students.filter(s => s.ativo).length}</p>
               </div>
             </div>
           </CardContent>
@@ -209,46 +192,39 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
         
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <LogIn className="h-5 w-5 text-green-600" />
-              </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-blue-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Entradas (mês)</p>
-                <p className="text-2xl font-bold">{entradasEsteMes}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <LogOut className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Saídas (mês)</p>
-                <p className="text-2xl font-bold">{saidasEsteMes}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <DoorOpen className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Vagas Livres</p>
+                <p className="text-sm font-medium">Este Mês</p>
                 <p className="text-2xl font-bold">
-                  {totalVagas > 0 ? vagasDisponiveis : '-'}
+                  {students.filter(s => 
+                    format(new Date(s.data_abertura), 'yyyy-MM') === format(new Date(), 'yyyy-MM')
+                  ).length}
                 </p>
-                {totalVagas > 0 && (
-                  <p className="text-xs text-muted-foreground">de {totalVagas} vagas</p>
-                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <UserX className="h-4 w-4 text-orange-500" />
+              <div>
+                <p className="text-sm font-medium">Inativos</p>
+                <p className="text-2xl font-bold">{students.filter(s => !s.ativo).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-green-500" />
+              <div>
+                <p className="text-sm font-medium">Resultados</p>
+                <p className="text-2xl font-bold">{filteredStudents.length}</p>
               </div>
             </div>
           </CardContent>
@@ -417,7 +393,8 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                               Desativar
                             </Button>
                           )}
-                          
+
+                          {{ /* 
                           <Button
                             variant="ghost"
                             size="sm"
@@ -427,6 +404,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                           >
                             <Trash2 className="h-3 w-3" />
                             Excluir
+                          */}}
                           </Button>
                         </div>
                       </TableCell>
