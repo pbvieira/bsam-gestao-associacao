@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
+import { compressImage } from '@/lib/image-compression';
 
 export interface StudentDocument {
   id: string;
@@ -50,13 +51,28 @@ export function useStudentDocuments(studentId?: string) {
     if (!studentId || !user) return { error: 'Dados insuficientes' };
 
     try {
-      const fileName = nome_arquivo || file.name;
+      // Comprimir imagem se for JPEG
+      let fileToUpload = file;
+      if (file.type.match(/image\/(jpeg|jpg)/i)) {
+        try {
+          fileToUpload = await compressImage(file, {
+            maxWidth: 1920,
+            maxHeight: 1920,
+            quality: 0.8
+          });
+        } catch (compressionError) {
+          console.warn('Erro na compressão, usando arquivo original:', compressionError);
+          fileToUpload = file;
+        }
+      }
+
+      const fileName = nome_arquivo || fileToUpload.name;
       const filePath = `${studentId}/${Date.now()}-${fileName}`;
       
       // Upload file to storage
       const { error: uploadError } = await supabase.storage
         .from('student-documents')
-        .upload(filePath, file, {
+        .upload(filePath, fileToUpload, {
           cacheControl: '3600',
           upsert: false
         });
@@ -71,8 +87,8 @@ export function useStudentDocuments(studentId?: string) {
           tipo_documento,
           nome_arquivo: fileName,
           caminho_arquivo: filePath,
-          tamanho_arquivo: file.size,
-          mime_type: file.type,
+          tamanho_arquivo: fileToUpload.size,
+          mime_type: fileToUpload.type,
           uploaded_by: user.id
         }])
         .select()
