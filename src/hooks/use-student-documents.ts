@@ -51,9 +51,9 @@ export function useStudentDocuments(studentId?: string) {
     if (!studentId || !user) return { error: 'Dados insuficientes' };
 
     try {
-      // Comprimir imagem se for JPEG
+      // Comprimir imagem se for JPEG, PNG ou WebP
       let fileToUpload = file;
-      if (file.type.match(/image\/(jpeg|jpg)/i)) {
+      if (file.type.match(/image\/(jpeg|jpg|png|webp)/i)) {
         try {
           fileToUpload = await compressImage(file, {
             maxWidth: 1920,

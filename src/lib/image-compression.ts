@@ -4,31 +4,63 @@ export interface CompressionOptions {
   quality?: number;
 }
 
+type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/webp';
+
+function getOutputMimeType(file: File): SupportedImageType | null {
+  const type = file.type.toLowerCase();
+  
+  if (type.match(/image\/(jpeg|jpg)/i)) return 'image/jpeg';
+  if (type === 'image/png') return 'image/png';
+  if (type === 'image/webp') return 'image/webp';
+  
+  return null;
+}
+
+function getDefaultQuality(type: SupportedImageType): number {
+  switch (type) {
+    case 'image/png': return 1.0; // PNG é lossless
+    case 'image/jpeg':
+    case 'image/webp':
+    default: return 0.8;
+  }
+}
+
 export async function compressImage(
   file: File,
   options: CompressionOptions = {}
 ): Promise<File> {
-  const { maxWidth = 1920, maxHeight = 1920, quality = 0.8 } = options;
+  const { maxWidth = 1920, maxHeight = 1920 } = options;
 
-  // Verificar se é JPEG
-  if (!file.type.match(/image\/(jpeg|jpg)/i)) {
-    return file;
+  const outputType = getOutputMimeType(file);
+  if (!outputType) {
+    return file; // Tipo não suportado, retorna original
   }
+
+  const quality = options.quality ?? getDefaultQuality(outputType);
 
   return new Promise((resolve, reject) => {
     const img = new Image();
     
     img.onload = () => {
-      // Calcular novas dimensões mantendo proporção
       let { width, height } = img;
 
-      if (width > maxWidth || height > maxHeight) {
+      // Verificar se precisa redimensionar
+      const needsResize = width > maxWidth || height > maxHeight;
+      
+      // Para PNG sem redimensionamento, retorna original
+      // (PNG lossless não ganha muito com recompressão)
+      if (!needsResize && outputType === 'image/png') {
+        URL.revokeObjectURL(img.src);
+        resolve(file);
+        return;
+      }
+
+      if (needsResize) {
         const ratio = Math.min(maxWidth / width, maxHeight / height);
         width = Math.round(width * ratio);
         height = Math.round(height * ratio);
       }
 
-      // Criar canvas e desenhar imagem redimensionada
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
@@ -40,9 +72,10 @@ export async function compressImage(
         return;
       }
 
+      // Limpar canvas para preservar transparência (PNG/WebP)
+      ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Converter para blob com compressão
       canvas.toBlob(
         (blob) => {
           URL.revokeObjectURL(img.src);
@@ -52,19 +85,19 @@ export async function compressImage(
             return;
           }
 
-          // Criar novo File com o blob comprimido
           const compressedFile = new File([blob], file.name, {
-            type: 'image/jpeg',
+            type: outputType,
             lastModified: Date.now(),
           });
 
+          const reduction = Math.round((1 - compressedFile.size / file.size) * 100);
           console.log(
-            `Imagem comprimida: ${(file.size / 1024).toFixed(1)}KB → ${(compressedFile.size / 1024).toFixed(1)}KB (${Math.round((1 - compressedFile.size / file.size) * 100)}% redução)`
+            `Imagem ${outputType.split('/')[1].toUpperCase()} comprimida: ${(file.size / 1024).toFixed(1)}KB → ${(compressedFile.size / 1024).toFixed(1)}KB (${reduction}% redução)`
           );
           
           resolve(compressedFile);
         },
-        'image/jpeg',
+        outputType,
         quality
       );
     };
