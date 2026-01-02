@@ -6,10 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Plus } from 'lucide-react';
 import { StudentEmergencyContact } from '@/hooks/use-student-emergency-contacts';
+import { PARENTESCO_OPTIONS } from '@/lib/student-schemas';
 
 const contactSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
@@ -128,9 +130,20 @@ export function ContactDialog({ contact, onSave, trigger }: ContactDialogProps) 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Parentesco</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: Pai, Mãe, Irmão, Amigo" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o parentesco" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PARENTESCO_OPTIONS.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
