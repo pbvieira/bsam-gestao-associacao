@@ -30,11 +30,9 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { 
-  ENTRADA_CATEGORIES, 
-  SAIDA_CATEGORIES,
-  type CashBookTransaction 
-} from '@/hooks/use-student-cash-book';
+import { type CashBookTransaction } from '@/hooks/use-student-cash-book';
+import { useCashBookEntryCategories } from '@/hooks/use-cash-book-entry-categories';
+import { useCashBookExitCategories } from '@/hooks/use-cash-book-exit-categories';
 
 const transactionSchema = z.object({
   tipo_movimento: z.enum(['entrada', 'saida']),
@@ -60,6 +58,8 @@ export function CashBookTransactionDialog({
   onSave,
 }: CashBookTransactionDialogProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const { categories: entryCategories, fetchCategories: fetchEntryCategories } = useCashBookEntryCategories();
+  const { categories: exitCategories, fetchCategories: fetchExitCategories } = useCashBookExitCategories();
   
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -73,7 +73,12 @@ export function CashBookTransactionDialog({
   });
 
   const tipoMovimento = form.watch('tipo_movimento');
-  const categories = tipoMovimento === 'entrada' ? ENTRADA_CATEGORIES : SAIDA_CATEGORIES;
+  const categories = tipoMovimento === 'entrada' ? entryCategories : exitCategories;
+
+  useEffect(() => {
+    fetchEntryCategories();
+    fetchExitCategories();
+  }, [fetchEntryCategories, fetchExitCategories]);
 
   useEffect(() => {
     if (open) {
@@ -172,8 +177,8 @@ export function CashBookTransactionDialog({
                     </FormControl>
                     <SelectContent>
                       {categories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
+                        <SelectItem key={cat.id} value={cat.nome}>
+                          {cat.nome}
                         </SelectItem>
                       ))}
                     </SelectContent>

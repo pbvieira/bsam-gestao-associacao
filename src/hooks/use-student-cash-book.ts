@@ -15,25 +15,6 @@ export interface CashBookTransaction {
   updated_at: string;
 }
 
-export const ENTRADA_CATEGORIES = [
-  { value: 'familia', label: 'Família' },
-  { value: 'trabalho', label: 'Trabalho' },
-  { value: 'beneficio', label: 'Benefício' },
-  { value: 'doacao', label: 'Doação' },
-  { value: 'outros_entrada', label: 'Outros' },
-];
-
-export const SAIDA_CATEGORIES = [
-  { value: 'pessoal', label: 'Pessoal' },
-  { value: 'transporte', label: 'Transporte' },
-  { value: 'saude', label: 'Saúde' },
-  { value: 'alimentacao', label: 'Alimentação' },
-  { value: 'documentos', label: 'Documentos' },
-  { value: 'comunicacao', label: 'Comunicação' },
-  { value: 'lazer', label: 'Lazer' },
-  { value: 'outros_saida', label: 'Outros' },
-];
-
 export function useStudentCashBook(studentId?: string) {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<CashBookTransaction[]>([]);
