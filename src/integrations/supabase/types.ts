@@ -799,6 +799,41 @@ export type Database = {
           },
         ]
       }
+      student_benefits_list: {
+        Row: {
+          created_at: string | null
+          descricao: string | null
+          id: string
+          student_id: string
+          tipo_beneficio: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          student_id: string
+          tipo_beneficio: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          student_id?: string
+          tipo_beneficio?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_benefits_list_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_children: {
         Row: {
           convive_filhos: boolean | null
@@ -1058,6 +1093,41 @@ export type Database = {
           },
         ]
       }
+      student_income_list: {
+        Row: {
+          created_at: string | null
+          descricao: string | null
+          id: string
+          student_id: string
+          tipo_renda: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          student_id: string
+          tipo_renda: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          student_id?: string
+          tipo_renda?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_income_list_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_work_situation: {
         Row: {
           contato_empresa: string | null
@@ -1067,6 +1137,7 @@ export type Database = {
           funcao: string | null
           id: string
           profissao: string | null
+          quantidade_pessoas_residencia: number | null
           renda_per_capita: number | null
           situacao_trabalhista: string | null
           student_id: string
@@ -1082,6 +1153,7 @@ export type Database = {
           funcao?: string | null
           id?: string
           profissao?: string | null
+          quantidade_pessoas_residencia?: number | null
           renda_per_capita?: number | null
           situacao_trabalhista?: string | null
           student_id: string
@@ -1097,6 +1169,7 @@ export type Database = {
           funcao?: string | null
           id?: string
           profissao?: string | null
+          quantidade_pessoas_residencia?: number | null
           renda_per_capita?: number | null
           situacao_trabalhista?: string | null
           student_id?: string

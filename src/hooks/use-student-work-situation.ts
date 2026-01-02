@@ -14,6 +14,7 @@ export interface StudentWorkSituation {
   tipo_renda: string | null;
   valor_renda: number | null;
   renda_per_capita: number | null;
+  quantidade_pessoas_residencia: number | null;
   created_at: string;
   updated_at: string;
 }
