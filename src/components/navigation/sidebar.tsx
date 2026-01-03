@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2, Wallet, Gift, TrendingUp, TrendingDown, Building2, Briefcase, Pill } from "lucide-react";
+import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2, Wallet, Gift, TrendingUp, TrendingDown, Building2, Briefcase, Pill, Syringe } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -111,6 +111,11 @@ const auxiliaryTablesItems = [{
   name: "Tipos de Uso Medicamentos",
   href: "/tipos-uso-medicamentos",
   icon: Pill,
+  module: "students"
+}, {
+  name: "Tipos de Vacinas",
+  href: "/tipos-vacinas",
+  icon: Syringe,
   module: "students"
 }];
 export function AppSidebar() {

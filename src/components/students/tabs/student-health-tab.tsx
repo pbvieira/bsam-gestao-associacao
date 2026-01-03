@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Heart, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Calendar } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
 import { MedicationDialog } from './medication-dialog';
+import { StudentVaccinesSection } from './student-vaccines-section';
 
 const healthDataSchema = z.object({
   // Testes médicos
@@ -353,24 +354,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="vacinacao_atualizada"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Vacinação atualizada</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="tratamento_odontologico"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0">
@@ -688,6 +671,9 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
               }
             }}
           />
+
+          {/* Vacinas */}
+          <StudentVaccinesSection studentId={studentId} />
 
           {/* Histórico Familiar */}
           <Card>
