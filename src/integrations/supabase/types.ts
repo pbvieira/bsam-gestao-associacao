@@ -1571,6 +1571,54 @@ export type Database = {
           },
         ]
       }
+      student_vaccines: {
+        Row: {
+          created_at: string
+          data_vacinacao: string | null
+          id: string
+          observacoes: string | null
+          student_id: string
+          tomou: boolean
+          updated_at: string
+          vaccine_type_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_vacinacao?: string | null
+          id?: string
+          observacoes?: string | null
+          student_id: string
+          tomou: boolean
+          updated_at?: string
+          vaccine_type_id: string
+        }
+        Update: {
+          created_at?: string
+          data_vacinacao?: string | null
+          id?: string
+          observacoes?: string | null
+          student_id?: string
+          tomou?: boolean
+          updated_at?: string
+          vaccine_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_vaccines_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_vaccines_vaccine_type_id_fkey"
+            columns: ["vaccine_type_id"]
+            isOneToOne: false
+            referencedRelation: "vaccine_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_work_situation: {
         Row: {
           contato_empresa: string | null
@@ -1944,6 +1992,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vaccine_types: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          descricao: string | null
+          id: string
+          informacao_adicional: string | null
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          informacao_adicional?: string | null
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          informacao_adicional?: string | null
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       work_situations: {
         Row: {
