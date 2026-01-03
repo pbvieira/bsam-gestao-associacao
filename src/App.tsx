@@ -25,6 +25,7 @@ import BenefitTypes from "./pages/BenefitTypes";
 import CashBookEntryCategories from "./pages/CashBookEntryCategories";
 import CashBookExitCategories from "./pages/CashBookExitCategories";
 import AreasSetores from "./pages/AreasSetores";
+import WorkSituations from "./pages/WorkSituations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -149,6 +150,11 @@ const App = () => {
           <Route path="/areas-setores" element={
             <UnifiedRoute module="students">
               <AreasSetores />
+            </UnifiedRoute>
+          } />
+          <Route path="/situacoes-trabalhistas" element={
+            <UnifiedRoute module="students">
+              <WorkSituations />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
