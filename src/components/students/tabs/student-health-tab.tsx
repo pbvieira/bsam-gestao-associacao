@@ -18,7 +18,7 @@ import { useStudentMedications, StudentMedication, MedicationInput, ScheduleInpu
 import { useStudentHospitalizations, HOSPITALIZATION_TYPES, StudentHospitalization } from '@/hooks/use-student-hospitalizations';
 import { useStudentMedicalRecords, MEDICAL_RECORD_TYPES, StudentMedicalRecord } from '@/hooks/use-student-medical-records';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Heart, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Calendar, Building2, FileText, Stethoscope, CalendarClock } from 'lucide-react';
+import { Loader2, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Calendar, Building2, FileText, Stethoscope, CalendarClock } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
 import { MedicationDialog } from './medication-dialog';
 import { HospitalizationDialog } from './hospitalization-dialog';
@@ -28,14 +28,7 @@ import { StudentDiseasesSection } from './student-diseases-section';
 import { StudentDisabilitiesSection } from './student-disabilities-section';
 
 const healthDataSchema = z.object({
-  // Testes médicos
-  teste_covid: z.string().optional(),
-  resultado_covid: z.string().optional(),
-  data_teste_covid: z.string().optional(),
-  teste_ist: z.string().optional(),
-  resultado_ist: z.string().optional(),
-  data_teste_ist: z.string().optional(),
-  // Tratamentos (campos de deficiência removidos - agora usa tabela auxiliar)
+  // Tratamentos
   vacinacao_atualizada: z.boolean().default(false),
   tratamento_odontologico: z.boolean().default(false),
   observacoes_odontologicas: z.string().optional(),
@@ -83,12 +76,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
   const form = useForm<HealthDataForm>({
     resolver: zodResolver(healthDataSchema),
     defaultValues: {
-      teste_covid: '',
-      resultado_covid: '',
-      data_teste_covid: '',
-      teste_ist: '',
-      resultado_ist: '',
-      data_teste_ist: '',
       vacinacao_atualizada: false,
       tratamento_odontologico: false,
       observacoes_odontologicas: '',
@@ -152,12 +139,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
   useEffect(() => {
     if (healthData) {
       form.reset({
-        teste_covid: healthData.teste_covid || '',
-        resultado_covid: healthData.resultado_covid || '',
-        data_teste_covid: healthData.data_teste_covid || '',
-        teste_ist: healthData.teste_ist || '',
-        resultado_ist: healthData.resultado_ist || '',
-        data_teste_ist: healthData.data_teste_ist || '',
         vacinacao_atualizada: healthData.vacinacao_atualizada || false,
         tratamento_odontologico: healthData.tratamento_odontologico || false,
         observacoes_odontologicas: healthData.observacoes_odontologicas || '',
@@ -201,144 +182,10 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
     <div className="space-y-6">
       <Form {...form}>
         <div className="space-y-6">
-          {/* Histórico Médico */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                Histórico de Saúde
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="teste_covid"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teste COVID-19</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sim">Sim</SelectItem>
-                          <SelectItem value="nao">Não</SelectItem>
-                          <SelectItem value="nao_informado">Não informado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="resultado_covid"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Resultado COVID-19</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="positivo">Positivo</SelectItem>
-                          <SelectItem value="negativo">Negativo</SelectItem>
-                          <SelectItem value="inconclusivo">Inconclusivo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="data_teste_covid"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data do Teste COVID</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="teste_ist"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teste IST</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sim">Sim</SelectItem>
-                          <SelectItem value="nao">Não</SelectItem>
-                          <SelectItem value="nao_informado">Não informado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="resultado_ist"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Resultado IST</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="positivo">Positivo</SelectItem>
-                          <SelectItem value="negativo">Negativo</SelectItem>
-                          <SelectItem value="inconclusivo">Inconclusivo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="data_teste_ist"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data do Teste IST</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-            </CardContent>
-          </Card>
-
-          {/* Doenças - Nova seção dinâmica */}
+          {/* Doenças - Seção dinâmica */}
           <StudentDiseasesSection studentId={studentId || undefined} />
 
-          {/* Deficiências - Nova seção dinâmica */}
+          {/* Deficiências - Seção dinâmica */}
           <StudentDisabilitiesSection studentId={studentId || undefined} />
 
           {/* Histórico de Internações */}
