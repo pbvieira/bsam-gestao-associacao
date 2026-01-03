@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, X, AlertCircle, Printer, ChevronDown, FileText, Image } from 'lucide-react';
+import { Loader2, Save, X, AlertCircle, Printer, ChevronDown, FileText, Image, FileSignature } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -558,6 +558,10 @@ function StudentFormContent({
                 <DropdownMenuItem onClick={() => window.open(`/alunos/${savedStudentId}/autorizacao-imagem`, '_blank')}>
                   <Image className="h-4 w-4 mr-2" />
                   Autorização de Imagem
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.open(`/alunos/${savedStudentId}/integracao-voluntaria`, '_blank')}>
+                  <FileSignature className="h-4 w-4 mr-2" />
+                  Declaração de Integração Voluntária
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
