@@ -182,147 +182,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
     <div className="space-y-6">
       <Form {...form}>
         <div className="space-y-6">
-          {/* Doenças - Seção dinâmica */}
-          <StudentDiseasesSection studentId={studentId || undefined} />
-
-          {/* Deficiências - Seção dinâmica */}
-          <StudentDisabilitiesSection studentId={studentId || undefined} />
-
-          {/* Histórico de Internações */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Histórico de Internações
-                </CardTitle>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    setEditingHospitalization(null);
-                    setHospitalizationDialogOpen(true);
-                  }}
-                  disabled={!studentId}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Nova Internação
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!studentId && (
-                <p className="text-sm text-muted-foreground">
-                  Salve o aluno primeiro para registrar internações.
-                </p>
-              )}
-
-              {studentId && loadingHosp && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Carregando internações...</span>
-                </div>
-              )}
-
-              {studentId && !loadingHosp && hospitalizations.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhuma internação registrada.
-                </p>
-              )}
-
-              {studentId && !loadingHosp && hospitalizations.length > 0 && (
-                <div className="space-y-3">
-                  {/* Estatísticas */}
-                  <div className="flex gap-4 text-sm text-muted-foreground pb-2 border-b">
-                    <span>Total: <strong className="text-foreground">{hospitalizations.length}</strong></span>
-                    <span>Internado atualmente: <strong className="text-foreground">
-                      {hospitalizations.filter(h => !h.data_saida).length > 0 ? 'Sim' : 'Não'}
-                    </strong></span>
-                  </div>
-
-                  {hospitalizations.map((hosp) => {
-                    const isCurrentlyHospitalized = !hosp.data_saida;
-                    
-                    return (
-                      <div 
-                        key={hosp.id} 
-                        className={`border rounded-lg p-4 ${isCurrentlyHospitalized ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20' : ''}`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-2">
-                              <Badge variant="secondary">
-                                {getHospitalizationTypeLabel(hosp.tipo_internacao)}
-                              </Badge>
-                              {isCurrentlyHospitalized && (
-                                <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200">
-                                  🏥 Internado
-                                </Badge>
-                              )}
-                              <span className="text-sm text-muted-foreground">
-                                {format(new Date(hosp.data_entrada), 'dd/MM/yyyy', { locale: ptBR })}
-                                {hosp.data_saida && ` - ${format(new Date(hosp.data_saida), 'dd/MM/yyyy', { locale: ptBR })}`}
-                              </span>
-                            </div>
-                            
-                            {hosp.local && (
-                              <p className="text-sm font-medium">{hosp.local}</p>
-                            )}
-                            
-                            <p className="text-sm text-muted-foreground mt-1">
-                              <strong>Motivo:</strong> {hosp.motivo}
-                            </p>
-                            
-                            {hosp.diagnostico && (
-                              <p className="text-sm text-muted-foreground">
-                                <strong>Diagnóstico:</strong> {hosp.diagnostico}
-                              </p>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingHospitalization(hosp);
-                                setHospitalizationDialogOpen(true);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={async () => {
-                                if (confirm('Excluir este registro de internação?')) {
-                                  await deleteHospitalization(hosp.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <HospitalizationDialog
-            open={hospitalizationDialogOpen}
-            onOpenChange={setHospitalizationDialogOpen}
-            hospitalization={editingHospitalization}
-            onSave={createHospitalization}
-            onUpdate={updateHospitalization}
-          />
-
           {/* Prontuário Médico */}
           <Card>
             <CardHeader className="pb-3">
@@ -476,111 +335,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
             onSave={createMedicalRecord}
             onUpdate={updateMedicalRecord}
           />
-
-          {/* Saúde Mental */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                Saúde Mental
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="acompanhamento_psicologico"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Acompanhamento psicológico</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch('acompanhamento_psicologico') && (
-                    <FormField
-                      control={form.control}
-                      name="detalhes_acompanhamento"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Detalhes do Acompanhamento</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Profissional, frequência..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="tentativa_suicidio"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Histórico de tentativa de suicídio</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="historico_surtos"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Histórico de surtos</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="alucinacoes"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Apresenta alucinações</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Medicamentos */}
           <Card>
@@ -747,6 +501,252 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
 
           {/* Vacinas */}
           <StudentVaccinesSection studentId={studentId} />
+
+          {/* Doenças - Seção dinâmica */}
+          <StudentDiseasesSection studentId={studentId || undefined} />
+
+          {/* Deficiências - Seção dinâmica */}
+          <StudentDisabilitiesSection studentId={studentId || undefined} />
+
+          {/* Histórico de Internações */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Histórico de Internações
+                </CardTitle>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setEditingHospitalization(null);
+                    setHospitalizationDialogOpen(true);
+                  }}
+                  disabled={!studentId}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Nova Internação
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!studentId && (
+                <p className="text-sm text-muted-foreground">
+                  Salve o aluno primeiro para registrar internações.
+                </p>
+              )}
+
+              {studentId && loadingHosp && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Carregando internações...</span>
+                </div>
+              )}
+
+              {studentId && !loadingHosp && hospitalizations.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nenhuma internação registrada.
+                </p>
+              )}
+
+              {studentId && !loadingHosp && hospitalizations.length > 0 && (
+                <div className="space-y-3">
+                  {/* Estatísticas */}
+                  <div className="flex gap-4 text-sm text-muted-foreground pb-2 border-b">
+                    <span>Total: <strong className="text-foreground">{hospitalizations.length}</strong></span>
+                    <span>Internado atualmente: <strong className="text-foreground">
+                      {hospitalizations.filter(h => !h.data_saida).length > 0 ? 'Sim' : 'Não'}
+                    </strong></span>
+                  </div>
+
+                  {hospitalizations.map((hosp) => {
+                    const isCurrentlyHospitalized = !hosp.data_saida;
+                    
+                    return (
+                      <div 
+                        key={hosp.id} 
+                        className={`border rounded-lg p-4 ${isCurrentlyHospitalized ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-2">
+                              <Badge variant="secondary">
+                                {getHospitalizationTypeLabel(hosp.tipo_internacao)}
+                              </Badge>
+                              {isCurrentlyHospitalized && (
+                                <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200">
+                                  🏥 Internado
+                                </Badge>
+                              )}
+                              <span className="text-sm text-muted-foreground">
+                                {format(new Date(hosp.data_entrada), 'dd/MM/yyyy', { locale: ptBR })}
+                                {hosp.data_saida && ` - ${format(new Date(hosp.data_saida), 'dd/MM/yyyy', { locale: ptBR })}`}
+                              </span>
+                            </div>
+                            
+                            {hosp.local && (
+                              <p className="text-sm font-medium">{hosp.local}</p>
+                            )}
+                            
+                            <p className="text-sm text-muted-foreground mt-1">
+                              <strong>Motivo:</strong> {hosp.motivo}
+                            </p>
+                            
+                            {hosp.diagnostico && (
+                              <p className="text-sm text-muted-foreground">
+                                <strong>Diagnóstico:</strong> {hosp.diagnostico}
+                              </p>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditingHospitalization(hosp);
+                                setHospitalizationDialogOpen(true);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                if (confirm('Excluir este registro de internação?')) {
+                                  await deleteHospitalization(hosp.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <HospitalizationDialog
+            open={hospitalizationDialogOpen}
+            onOpenChange={setHospitalizationDialogOpen}
+            hospitalization={editingHospitalization}
+            onSave={createHospitalization}
+            onUpdate={updateHospitalization}
+          />
+
+          {/* Saúde Mental */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Saúde Mental
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="acompanhamento_psicologico"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Acompanhamento psicológico</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch('acompanhamento_psicologico') && (
+                    <FormField
+                      control={form.control}
+                      name="detalhes_acompanhamento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Detalhes do Acompanhamento</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Profissional, frequência..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="tentativa_suicidio"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Histórico de tentativa de suicídio</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="historico_surtos"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Histórico de surtos</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="alucinacoes"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Apresenta alucinações</FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Histórico Familiar */}
           <Card>
