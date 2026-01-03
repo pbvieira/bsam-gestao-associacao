@@ -563,6 +563,10 @@ function StudentFormContent({
                   <FileSignature className="h-4 w-4 mr-2" />
                   Declaração de Integração Voluntária
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.open(`/alunos/${savedStudentId}/participacao-socializacao`, '_blank')}>
+                  <FileSignature className="h-4 w-4 mr-2" />
+                  Declaração de Participação na Socialização
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

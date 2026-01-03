@@ -14,6 +14,7 @@ import Students from "./pages/Students";
 import StudentPrint from "./pages/StudentPrint";
 import StudentImageAuthorization from "./pages/StudentImageAuthorization";
 import StudentVoluntaryIntegration from "./pages/StudentVoluntaryIntegration";
+import StudentSocializationParticipation from "./pages/StudentSocializationParticipation";
 import Users from "./pages/Users";
 import Inventory from "./pages/Inventory";
 import Suppliers from "./pages/Suppliers";
@@ -102,6 +103,11 @@ const App = () => {
           <Route path="/alunos/:id/integracao-voluntaria" element={
             <UnifiedRoute module="students">
               <StudentVoluntaryIntegration />
+            </UnifiedRoute>
+          } />
+          <Route path="/alunos/:id/participacao-socializacao" element={
+            <UnifiedRoute module="students">
+              <StudentSocializationParticipation />
             </UnifiedRoute>
           } />
           <Route path="/usuarios" element={
