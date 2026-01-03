@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Tasks from "./pages/Tasks";
 import Calendar from "./pages/Calendar";
 import Students from "./pages/Students";
+import StudentPrint from "./pages/StudentPrint";
 import Users from "./pages/Users";
 import Inventory from "./pages/Inventory";
 import Suppliers from "./pages/Suppliers";
@@ -84,6 +85,11 @@ const App = () => {
           <Route path="/alunos" element={
             <UnifiedRoute module="students">
               <Students />
+            </UnifiedRoute>
+          } />
+          <Route path="/alunos/:id/imprimir" element={
+            <UnifiedRoute module="students">
+              <StudentPrint />
             </UnifiedRoute>
           } />
           <Route path="/usuarios" element={
