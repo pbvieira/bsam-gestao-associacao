@@ -12,6 +12,7 @@ import Tasks from "./pages/Tasks";
 import Calendar from "./pages/Calendar";
 import Students from "./pages/Students";
 import StudentPrint from "./pages/StudentPrint";
+import StudentImageAuthorization from "./pages/StudentImageAuthorization";
 import Users from "./pages/Users";
 import Inventory from "./pages/Inventory";
 import Suppliers from "./pages/Suppliers";
@@ -90,6 +91,11 @@ const App = () => {
           <Route path="/alunos/:id/imprimir" element={
             <UnifiedRoute module="students">
               <StudentPrint />
+            </UnifiedRoute>
+          } />
+          <Route path="/alunos/:id/autorizacao-imagem" element={
+            <UnifiedRoute module="students">
+              <StudentImageAuthorization />
             </UnifiedRoute>
           } />
           <Route path="/usuarios" element={
