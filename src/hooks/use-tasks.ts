@@ -30,6 +30,11 @@ export interface Task {
   };
   setor?: {
     nome: string;
+    area_id: string;
+    area?: {
+      id: string;
+      nome: string;
+    };
   };
 }
 
@@ -93,7 +98,8 @@ export function useTasks() {
         .select(`
           *,
           created_by_profile:profiles!tasks_created_by_fkey(full_name),
-          assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name)
+          assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name),
+          setor:setores(nome, area_id, area:areas(id, nome))
         `)
         .eq('id', id)
         .maybeSingle();
@@ -122,7 +128,7 @@ export function useTasks() {
           *,
           created_by_profile:profiles!tasks_created_by_fkey(full_name),
           assigned_to_profile:profiles!tasks_assigned_to_fkey(full_name),
-          setor:setores(nome)
+          setor:setores(nome, area_id, area:areas(id, nome))
         `)
         .order('created_at', { ascending: false });
 

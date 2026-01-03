@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { useTasks, Task, TaskPriority, TaskStatus } from "@/hooks/use-tasks";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useAreas } from "@/hooks/use-areas";
+import { useSetores } from "@/hooks/use-setores";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TaskFormProps {
@@ -29,6 +31,9 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
   const { createTask, updateTask, fetchTaskById } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { areas } = useAreas();
+  const [selectedAreaId, setSelectedAreaId] = useState<string>('');
+  const { setores } = useSetores(selectedAreaId || undefined);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
@@ -43,6 +48,7 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
     data_vencimento: null as Date | null,
     assigned_to: '',
     estimated_hours: '',
+    setor_id: '',
   });
 
   const isEdit = !!taskId;
@@ -79,6 +85,10 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
           if (task) {
             console.log('Task data loaded for editing:', task);
             setCurrentTask(task);
+            // Se a tarefa tem setor, preencher área e setor
+            if (task.setor?.area_id) {
+              setSelectedAreaId(task.setor.area_id);
+            }
             setFormData({
               titulo: task.titulo,
               descricao: task.descricao || '',
@@ -88,6 +98,7 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
               data_vencimento: task.data_vencimento ? new Date(task.data_vencimento) : null,
               assigned_to: task.assigned_to,
               estimated_hours: task.estimated_hours?.toString() || '',
+              setor_id: task.setor_id || '',
             });
           } else {
             console.error('Task not found for ID:', taskId);
@@ -157,6 +168,7 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
         data_vencimento: formData.data_vencimento?.toISOString() || null,
         assigned_to: formData.assigned_to,
         estimated_hours: formData.estimated_hours ? Number(formData.estimated_hours) : null,
+        setor_id: formData.setor_id || null,
         created_by: user.id,
       };
 
@@ -243,6 +255,44 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Área</Label>
+          <Select 
+            value={selectedAreaId} 
+            onValueChange={(value) => {
+              setSelectedAreaId(value);
+              setFormData(prev => ({ ...prev, setor_id: '' }));
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione a área" />
+            </SelectTrigger>
+            <SelectContent>
+              {areas?.filter(a => a.ativo).map((area) => (
+                <SelectItem key={area.id} value={area.id}>{area.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Setor</Label>
+          <Select 
+            value={formData.setor_id} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, setor_id: value }))}
+            disabled={!selectedAreaId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={selectedAreaId ? "Selecione o setor" : "Selecione uma área primeiro"} />
+            </SelectTrigger>
+            <SelectContent>
+              {setores?.filter(s => s.ativo).map((setor) => (
+                <SelectItem key={setor.id} value={setor.id}>{setor.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="space-y-2">
           <Label>Prioridade</Label>
           <Select 
