@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,10 +8,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useStudentHealthData } from '@/hooks/use-student-health-data';
+import { useStudentMedications, StudentMedication, MedicationInput, ScheduleInput } from '@/hooks/use-student-medications';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Heart, Brain, Pill, Users } from 'lucide-react';
+import { Loader2, Heart, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Calendar } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
+import { MedicationDialog } from './medication-dialog';
 
 const healthDataSchema = z.object({
   // Testes médicos
@@ -53,8 +58,12 @@ interface StudentHealthTabProps {
 
 export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
   const { healthData, loading, createOrUpdateHealthData } = useStudentHealthData(studentId || undefined);
+  const { medications, loading: loadingMeds, createMedication, updateMedication, deleteMedication, toggleMedicationStatus } = useStudentMedications(studentId || undefined);
   const { toast } = useToast();
   const { registerHealthForm, registerHealthSave } = useStudentFormContext();
+  
+  const [medicationDialogOpen, setMedicationDialogOpen] = useState(false);
+  const [editingMedication, setEditingMedication] = useState<StudentMedication | null>(null);
 
   const form = useForm<HealthDataForm>({
     resolver: zodResolver(healthDataSchema),
@@ -519,11 +528,26 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
 
           {/* Medicamentos */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Pill className="h-5 w-5" />
-                Medicamentos
-              </CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Pill className="h-5 w-5" />
+                  Medicamentos
+                </CardTitle>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setEditingMedication(null);
+                    setMedicationDialogOpen(true);
+                  }}
+                  disabled={!studentId}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Novo Medicamento
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
@@ -545,52 +569,127 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
               />
 
               {form.watch('uso_medicamentos') && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="descricao_medicamentos"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Medicamentos em Uso</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Liste os medicamentos..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-4">
+                  {!studentId && (
+                    <p className="text-sm text-muted-foreground">
+                      Salve o aluno primeiro para cadastrar medicamentos.
+                    </p>
+                  )}
 
-                  <FormField
-                    control={form.control}
-                    name="tempo_uso_medicamentos"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tempo de Uso</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: 2 anos, 6 meses" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {studentId && loadingMeds && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Carregando medicamentos...</span>
+                    </div>
+                  )}
 
-                  <FormField
-                    control={form.control}
-                    name="modo_uso_medicamentos"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Modo de Uso</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: 1x ao dia, antes de dormir" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {studentId && !loadingMeds && medications.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Nenhum medicamento cadastrado. Clique em "Novo Medicamento" para adicionar.
+                    </p>
+                  )}
+
+                  {studentId && !loadingMeds && medications.length > 0 && (
+                    <div className="space-y-3">
+                      {medications.map((med) => (
+                        <div 
+                          key={med.id} 
+                          className={`border rounded-lg p-4 ${!med.ativo ? 'opacity-60 bg-muted/50' : ''}`}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="font-semibold">{med.nome_medicamento}</h4>
+                                {med.dosagem && (
+                                  <Badge variant="outline">{med.dosagem}</Badge>
+                                )}
+                                {med.tipo_uso && (
+                                  <Badge 
+                                    variant="secondary"
+                                    style={{ backgroundColor: `${med.tipo_uso.cor}20`, color: med.tipo_uso.cor }}
+                                  >
+                                    {med.tipo_uso.nome}
+                                  </Badge>
+                                )}
+                                {!med.ativo && (
+                                  <Badge variant="destructive">Inativo</Badge>
+                                )}
+                              </div>
+                              {med.principio_ativo && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Princípio ativo: {med.principio_ativo}
+                                </p>
+                              )}
+                              {med.schedules && med.schedules.length > 0 && (
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  {med.schedules.map((sched, idx) => (
+                                    <div key={idx} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{sched.horario.slice(0, 5)}</span>
+                                      {sched.gerar_evento && (
+                                        <Calendar className="h-3 w-3 text-primary ml-1" />
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={med.ativo}
+                                onCheckedChange={(checked) => toggleMedicationStatus(med.id, checked)}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingMedication(med);
+                                  setMedicationDialogOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={async () => {
+                                  if (confirm('Excluir este medicamento?')) {
+                                    const result = await deleteMedication(med.id);
+                                    if (result.error) {
+                                      toast({ title: 'Erro', description: result.error, variant: 'destructive' });
+                                    } else {
+                                      toast({ title: 'Medicamento excluído' });
+                                    }
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
           </Card>
+
+          <MedicationDialog
+            open={medicationDialogOpen}
+            onOpenChange={setMedicationDialogOpen}
+            medication={editingMedication}
+            onSave={async (data: MedicationInput, schedules: ScheduleInput[]) => {
+              if (editingMedication) {
+                return await updateMedication(editingMedication.id, data, schedules);
+              } else {
+                return await createMedication(data, schedules);
+              }
+            }}
+          />
 
           {/* Histórico Familiar */}
           <Card>

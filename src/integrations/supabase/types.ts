@@ -559,6 +559,106 @@ export type Database = {
           },
         ]
       }
+      medication_schedules: {
+        Row: {
+          ativo: boolean
+          calendar_event_id: string | null
+          created_at: string
+          dias_semana: string[] | null
+          frequencia: string
+          gerar_evento: boolean
+          horario: string
+          id: string
+          instrucoes: string | null
+          medication_id: string
+          setor_responsavel_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          calendar_event_id?: string | null
+          created_at?: string
+          dias_semana?: string[] | null
+          frequencia?: string
+          gerar_evento?: boolean
+          horario: string
+          id?: string
+          instrucoes?: string | null
+          medication_id: string
+          setor_responsavel_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          calendar_event_id?: string | null
+          created_at?: string
+          dias_semana?: string[] | null
+          frequencia?: string
+          gerar_evento?: boolean
+          horario?: string
+          id?: string
+          instrucoes?: string | null
+          medication_id?: string
+          setor_responsavel_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_schedules_calendar_event_id_fkey"
+            columns: ["calendar_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_schedules_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "student_medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_schedules_setor_responsavel_id_fkey"
+            columns: ["setor_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medication_usage_types: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           created_at: string
@@ -1398,6 +1498,75 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_medications: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          created_by: string
+          data_fim: string | null
+          data_inicio: string | null
+          dosagem: string | null
+          forma_farmaceutica: string | null
+          id: string
+          nome_medicamento: string
+          observacoes: string | null
+          prescrito_por: string | null
+          principio_ativo: string | null
+          student_id: string
+          tipo_uso_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          created_by: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          dosagem?: string | null
+          forma_farmaceutica?: string | null
+          id?: string
+          nome_medicamento: string
+          observacoes?: string | null
+          prescrito_por?: string | null
+          principio_ativo?: string | null
+          student_id: string
+          tipo_uso_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string
+          data_fim?: string | null
+          data_inicio?: string | null
+          dosagem?: string | null
+          forma_farmaceutica?: string | null
+          id?: string
+          nome_medicamento?: string
+          observacoes?: string | null
+          prescrito_por?: string | null
+          principio_ativo?: string | null
+          student_id?: string
+          tipo_uso_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_medications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_medications_tipo_uso_id_fkey"
+            columns: ["tipo_uso_id"]
+            isOneToOne: false
+            referencedRelation: "medication_usage_types"
             referencedColumns: ["id"]
           },
         ]
