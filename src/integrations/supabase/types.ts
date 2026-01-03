@@ -1467,6 +1467,62 @@ export type Database = {
           },
         ]
       }
+      student_hospitalizations: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_entrada: string
+          data_saida: string | null
+          diagnostico: string | null
+          id: string
+          local: string | null
+          medico_responsavel: string | null
+          motivo: string
+          observacoes: string | null
+          student_id: string
+          tipo_internacao: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_entrada: string
+          data_saida?: string | null
+          diagnostico?: string | null
+          id?: string
+          local?: string | null
+          medico_responsavel?: string | null
+          motivo: string
+          observacoes?: string | null
+          student_id: string
+          tipo_internacao: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_entrada?: string
+          data_saida?: string | null
+          diagnostico?: string | null
+          id?: string
+          local?: string | null
+          medico_responsavel?: string | null
+          motivo?: string
+          observacoes?: string | null
+          student_id?: string
+          tipo_internacao?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_hospitalizations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_income_list: {
         Row: {
           created_at: string | null
@@ -1495,6 +1551,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "student_income_list_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_medical_records: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_atendimento: string
+          data_retorno: string | null
+          diagnostico: string | null
+          especialidade: string | null
+          id: string
+          local: string | null
+          motivo: string | null
+          observacoes: string | null
+          prescricao: string | null
+          profissional: string | null
+          student_id: string
+          tipo_atendimento: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_atendimento: string
+          data_retorno?: string | null
+          diagnostico?: string | null
+          especialidade?: string | null
+          id?: string
+          local?: string | null
+          motivo?: string | null
+          observacoes?: string | null
+          prescricao?: string | null
+          profissional?: string | null
+          student_id: string
+          tipo_atendimento: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_atendimento?: string
+          data_retorno?: string | null
+          diagnostico?: string | null
+          especialidade?: string | null
+          id?: string
+          local?: string | null
+          motivo?: string | null
+          observacoes?: string | null
+          prescricao?: string | null
+          profissional?: string | null
+          student_id?: string
+          tipo_atendimento?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_medical_records_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
