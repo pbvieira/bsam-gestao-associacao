@@ -85,6 +85,11 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
 
   const [schedules, setSchedules] = useState<ScheduleInput[]>([]);
 
+  // Check if selected type is "Contínuo"
+  const selectedType = types.find(t => t.id === formData.tipo_uso_id);
+  const isContinuousType = selectedType?.nome?.toLowerCase().includes('contínuo') || 
+                           selectedType?.nome?.toLowerCase().includes('continuo');
+
   useEffect(() => {
     if (medication) {
       setFormData({
@@ -123,6 +128,13 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
       setSchedules([]);
     }
   }, [medication, open]);
+
+  // Clear data_fim when type changes to continuous
+  useEffect(() => {
+    if (isContinuousType && formData.data_fim) {
+      setFormData(prev => ({ ...prev, data_fim: '' }));
+    }
+  }, [isContinuousType]);
 
   const addSchedule = () => {
     setSchedules([...schedules, {
@@ -273,12 +285,18 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
             </div>
             <div>
               <Label htmlFor="data_fim">Data Fim</Label>
-              <Input
-                id="data_fim"
-                type="date"
-                value={formData.data_fim}
-                onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
-              />
+              {isContinuousType ? (
+                <div className="flex items-center h-10 px-3 text-sm text-muted-foreground bg-muted rounded-md border">
+                  Uso contínuo - sem data de término
+                </div>
+              ) : (
+                <Input
+                  id="data_fim"
+                  type="date"
+                  value={formData.data_fim}
+                  onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
+                />
+              )}
             </div>
             <div className="col-span-2">
               <Label htmlFor="observacoes">Observações</Label>

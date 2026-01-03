@@ -550,129 +550,127 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="uso_medicamentos"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox 
-                        checked={field.value} 
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Faz uso de medicamentos</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
+              {!studentId && (
+                <p className="text-sm text-muted-foreground">
+                  Salve o aluno primeiro para cadastrar medicamentos.
+                </p>
+              )}
 
-              {form.watch('uso_medicamentos') && (
-                <div className="space-y-4">
-                  {!studentId && (
-                    <p className="text-sm text-muted-foreground">
-                      Salve o aluno primeiro para cadastrar medicamentos.
-                    </p>
-                  )}
+              {studentId && loadingMeds && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Carregando medicamentos...</span>
+                </div>
+              )}
 
-                  {studentId && loadingMeds && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Carregando medicamentos...</span>
-                    </div>
-                  )}
+              {studentId && !loadingMeds && medications.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nenhum medicamento cadastrado. Clique em "Novo Medicamento" para adicionar.
+                </p>
+              )}
 
-                  {studentId && !loadingMeds && medications.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Nenhum medicamento cadastrado. Clique em "Novo Medicamento" para adicionar.
-                    </p>
-                  )}
-
-                  {studentId && !loadingMeds && medications.length > 0 && (
-                    <div className="space-y-3">
-                      {medications.map((med) => (
-                        <div 
-                          key={med.id} 
-                          className={`border rounded-lg p-4 ${!med.ativo ? 'opacity-60 bg-muted/50' : ''}`}
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h4 className="font-semibold">{med.nome_medicamento}</h4>
-                                {med.dosagem && (
-                                  <Badge variant="outline">{med.dosagem}</Badge>
-                                )}
-                                {med.tipo_uso && (
-                                  <Badge 
-                                    variant="secondary"
-                                    style={{ backgroundColor: `${med.tipo_uso.cor}20`, color: med.tipo_uso.cor }}
-                                  >
-                                    {med.tipo_uso.nome}
-                                  </Badge>
-                                )}
-                                {!med.ativo && (
-                                  <Badge variant="destructive">Inativo</Badge>
-                                )}
+              {studentId && !loadingMeds && medications.length > 0 && (
+                <div className="space-y-3">
+                  {medications.map((med) => {
+                    const isExpired = med.data_fim && new Date(med.data_fim) < new Date();
+                    const isContinuous = !med.data_fim;
+                    
+                    return (
+                      <div 
+                        key={med.id} 
+                        className={`border rounded-lg p-4 ${!med.ativo ? 'opacity-60 bg-muted/50' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-semibold">{med.nome_medicamento}</h4>
+                              {med.dosagem && (
+                                <Badge variant="outline">{med.dosagem}</Badge>
+                              )}
+                              {med.tipo_uso && (
+                                <Badge 
+                                  variant="secondary"
+                                  style={{ backgroundColor: `${med.tipo_uso.cor}20`, color: med.tipo_uso.cor }}
+                                >
+                                  {med.tipo_uso.nome}
+                                </Badge>
+                              )}
+                              {isContinuous && med.ativo && (
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-200">
+                                  🔄 Contínuo
+                                </Badge>
+                              )}
+                              {!isContinuous && med.ativo && !isExpired && med.data_fim && (
+                                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">
+                                  📅 Até {new Date(med.data_fim).toLocaleDateString('pt-BR')}
+                                </Badge>
+                              )}
+                              {isExpired && med.ativo && (
+                                <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200">
+                                  ⚠️ Vencido
+                                </Badge>
+                              )}
+                              {!med.ativo && (
+                                <Badge variant="destructive">Inativo</Badge>
+                              )}
+                            </div>
+                            {med.principio_ativo && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Princípio ativo: {med.principio_ativo}
+                              </p>
+                            )}
+                            {med.schedules && med.schedules.length > 0 && (
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                {med.schedules.map((sched, idx) => (
+                                  <div key={idx} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
+                                    <Clock className="h-3 w-3" />
+                                    <span>{sched.horario.slice(0, 5)}</span>
+                                    {sched.gerar_evento && (
+                                      <Calendar className="h-3 w-3 text-primary ml-1" />
+                                    )}
+                                  </div>
+                                ))}
                               </div>
-                              {med.principio_ativo && (
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Princípio ativo: {med.principio_ativo}
-                                </p>
-                              )}
-                              {med.schedules && med.schedules.length > 0 && (
-                                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                  {med.schedules.map((sched, idx) => (
-                                    <div key={idx} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
-                                      <Clock className="h-3 w-3" />
-                                      <span>{sched.horario.slice(0, 5)}</span>
-                                      {sched.gerar_evento && (
-                                        <Calendar className="h-3 w-3 text-primary ml-1" />
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={med.ativo}
-                                onCheckedChange={(checked) => toggleMedicationStatus(med.id, checked)}
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setEditingMedication(med);
-                                  setMedicationDialogOpen(true);
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={async () => {
-                                  if (confirm('Excluir este medicamento?')) {
-                                    const result = await deleteMedication(med.id);
-                                    if (result.error) {
-                                      toast({ title: 'Erro', description: result.error, variant: 'destructive' });
-                                    } else {
-                                      toast({ title: 'Medicamento excluído' });
-                                    }
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={med.ativo}
+                              onCheckedChange={(checked) => toggleMedicationStatus(med.id, checked)}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setEditingMedication(med);
+                                setMedicationDialogOpen(true);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                if (confirm('Excluir este medicamento?')) {
+                                  const result = await deleteMedication(med.id);
+                                  if (result.error) {
+                                    toast({ title: 'Erro', description: result.error, variant: 'destructive' });
+                                  } else {
+                                    toast({ title: 'Medicamento excluído' });
                                   }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
