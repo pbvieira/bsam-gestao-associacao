@@ -20,6 +20,8 @@ export interface Task {
   estimated_hours?: number;
   actual_hours?: number;
   parent_task_id?: string;
+  reference_type?: string | null;
+  reference_id?: string | null;
   created_at: string;
   updated_at: string;
   created_by_profile?: {
@@ -322,6 +324,32 @@ export function useTasks() {
     fetchTasks();
   }, []);
 
+  const checkTaskExists = async (
+    referenceType: string,
+    referenceId: string,
+    situacao: string
+  ): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('reference_type', referenceType)
+        .eq('reference_id', referenceId)
+        .ilike('descricao', `%${situacao}%`)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking task existence:', error);
+        return false;
+      }
+
+      return !!data;
+    } catch (err) {
+      console.error('Error checking task existence:', err);
+      return false;
+    }
+  };
+
   return {
     tasks,
     loading,
@@ -333,5 +361,6 @@ export function useTasks() {
     addComment,
     refetch: fetchTasks,
     fetchTaskById,
+    checkTaskExists,
   };
 }

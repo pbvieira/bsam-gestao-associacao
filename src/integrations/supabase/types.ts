@@ -1698,6 +1698,8 @@ export type Database = {
           id: string
           parent_task_id: string | null
           prioridade: Database["public"]["Enums"]["task_priority"]
+          reference_id: string | null
+          reference_type: string | null
           setor_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           titulo: string
@@ -1716,6 +1718,8 @@ export type Database = {
           id?: string
           parent_task_id?: string | null
           prioridade?: Database["public"]["Enums"]["task_priority"]
+          reference_id?: string | null
+          reference_type?: string | null
           setor_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           titulo: string
@@ -1734,6 +1738,8 @@ export type Database = {
           id?: string
           parent_task_id?: string | null
           prioridade?: Database["public"]["Enums"]["task_priority"]
+          reference_id?: string | null
+          reference_type?: string | null
           setor_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           titulo?: string
@@ -1776,9 +1782,13 @@ export type Database = {
           cor: string
           created_at: string
           descricao: string | null
+          gerar_tarefa: boolean
           id: string
           nome: string
           ordem: number
+          prioridade_tarefa: string | null
+          setor_tarefa_id: string | null
+          texto_tarefa: string | null
           updated_at: string
         }
         Insert: {
@@ -1786,9 +1796,13 @@ export type Database = {
           cor?: string
           created_at?: string
           descricao?: string | null
+          gerar_tarefa?: boolean
           id?: string
           nome: string
           ordem?: number
+          prioridade_tarefa?: string | null
+          setor_tarefa_id?: string | null
+          texto_tarefa?: string | null
           updated_at?: string
         }
         Update: {
@@ -1796,12 +1810,24 @@ export type Database = {
           cor?: string
           created_at?: string
           descricao?: string | null
+          gerar_tarefa?: boolean
           id?: string
           nome?: string
           ordem?: number
+          prioridade_tarefa?: string | null
+          setor_tarefa_id?: string | null
+          texto_tarefa?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "work_situations_setor_tarefa_id_fkey"
+            columns: ["setor_tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
