@@ -24,6 +24,8 @@ import { MedicationDialog } from './medication-dialog';
 import { HospitalizationDialog } from './hospitalization-dialog';
 import { MedicalRecordDialog } from './medical-record-dialog';
 import { StudentVaccinesSection } from './student-vaccines-section';
+import { StudentDiseasesSection } from './student-diseases-section';
+import { StudentDisabilitiesSection } from './student-disabilities-section';
 
 const healthDataSchema = z.object({
   // Testes médicos
@@ -33,9 +35,7 @@ const healthDataSchema = z.object({
   teste_ist: z.string().optional(),
   resultado_ist: z.string().optional(),
   data_teste_ist: z.string().optional(),
-  // Deficiência e tratamentos
-  tem_deficiencia: z.boolean().default(false),
-  tipo_deficiencia: z.string().optional(),
+  // Tratamentos (campos de deficiência removidos - agora usa tabela auxiliar)
   vacinacao_atualizada: z.boolean().default(false),
   tratamento_odontologico: z.boolean().default(false),
   observacoes_odontologicas: z.string().optional(),
@@ -89,8 +89,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
       teste_ist: '',
       resultado_ist: '',
       data_teste_ist: '',
-      tem_deficiencia: false,
-      tipo_deficiencia: '',
       vacinacao_atualizada: false,
       tratamento_odontologico: false,
       observacoes_odontologicas: '',
@@ -160,8 +158,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
         teste_ist: healthData.teste_ist || '',
         resultado_ist: healthData.resultado_ist || '',
         data_teste_ist: healthData.data_teste_ist || '',
-        tem_deficiencia: healthData.tem_deficiencia || false,
-        tipo_deficiencia: healthData.tipo_deficiencia || '',
         vacinacao_atualizada: healthData.vacinacao_atualizada || false,
         tratamento_odontologico: healthData.tratamento_odontologico || false,
         observacoes_odontologicas: healthData.observacoes_odontologicas || '',
@@ -210,7 +206,7 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Heart className="h-5 w-5" />
-                Histórico Médico
+                Histórico de Saúde
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -336,45 +332,14 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="tem_deficiencia"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Possui deficiência</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch('tem_deficiencia') && (
-                    <FormField
-                      control={form.control}
-                      name="tipo_deficiencia"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Deficiência</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Descreva o tipo de deficiência" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-              </div>
             </CardContent>
           </Card>
+
+          {/* Doenças - Nova seção dinâmica */}
+          <StudentDiseasesSection studentId={studentId || undefined} />
+
+          {/* Deficiências - Nova seção dinâmica */}
+          <StudentDisabilitiesSection studentId={studentId || undefined} />
 
           {/* Histórico de Internações */}
           <Card>

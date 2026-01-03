@@ -249,6 +249,78 @@ export type Database = {
         }
         Relationships: []
       }
+      disability_types: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          descricao: string | null
+          id: string
+          informacao_adicional: string | null
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          informacao_adicional?: string | null
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          informacao_adicional?: string | null
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      disease_types: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          descricao: string | null
+          id: string
+          informacao_adicional: string | null
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          informacao_adicional?: string | null
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          informacao_adicional?: string | null
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_participants: {
         Row: {
           created_at: string
@@ -1274,6 +1346,102 @@ export type Database = {
             columns: ["student_children_id"]
             isOneToOne: false
             referencedRelation: "student_children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_disabilities: {
+        Row: {
+          created_at: string
+          data_diagnostico: string | null
+          disability_type_id: string
+          id: string
+          observacoes: string | null
+          possui: boolean
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_diagnostico?: string | null
+          disability_type_id: string
+          id?: string
+          observacoes?: string | null
+          possui: boolean
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_diagnostico?: string | null
+          disability_type_id?: string
+          id?: string
+          observacoes?: string | null
+          possui?: boolean
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_disabilities_disability_type_id_fkey"
+            columns: ["disability_type_id"]
+            isOneToOne: false
+            referencedRelation: "disability_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_disabilities_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_diseases: {
+        Row: {
+          created_at: string
+          data_diagnostico: string | null
+          disease_type_id: string
+          id: string
+          observacoes: string | null
+          possui: boolean
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_diagnostico?: string | null
+          disease_type_id: string
+          id?: string
+          observacoes?: string | null
+          possui: boolean
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_diagnostico?: string | null
+          disease_type_id?: string
+          id?: string
+          observacoes?: string | null
+          possui?: boolean
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_diseases_disease_type_id_fkey"
+            columns: ["disease_type_id"]
+            isOneToOne: false
+            referencedRelation: "disease_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_diseases_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]
