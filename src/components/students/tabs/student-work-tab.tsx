@@ -12,6 +12,7 @@ import { useStudentIncome } from '@/hooks/use-student-income';
 import { useStudentBenefits } from '@/hooks/use-student-benefits';
 import { useBenefitTypes } from '@/hooks/use-benefit-types';
 import { useIncomeTypes } from '@/hooks/use-income-types';
+import { useWorkSituations } from '@/hooks/use-work-situations';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
@@ -54,13 +55,15 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
   const { benefitsList, loading: benefitsLoading, totalBenefits, addBenefit, deleteBenefit } = useStudentBenefits(studentId || undefined);
   const { benefitTypes, fetchBenefitTypes } = useBenefitTypes();
   const { incomeTypes, fetchIncomeTypes } = useIncomeTypes();
+  const { workSituations, fetchWorkSituations } = useWorkSituations();
   const { toast } = useToast();
   const { registerWorkForm, registerWorkSave } = useStudentFormContext();
 
   useEffect(() => {
     fetchBenefitTypes();
     fetchIncomeTypes();
-  }, [fetchBenefitTypes, fetchIncomeTypes]);
+    fetchWorkSituations();
+  }, [fetchBenefitTypes, fetchIncomeTypes, fetchWorkSituations]);
 
   // New income form
   const [newIncome, setNewIncome] = useState<NewIncomeForm>({ tipo_renda: '', descricao: '', valor: '' });
@@ -295,12 +298,11 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="empregado">Empregado</SelectItem>
-                        <SelectItem value="desempregado">Desempregado</SelectItem>
-                        <SelectItem value="autonomo">Autônomo</SelectItem>
-                        <SelectItem value="aposentado">Aposentado</SelectItem>
-                        <SelectItem value="estudante">Estudante</SelectItem>
-                        <SelectItem value="beneficio">Recebe Benefício</SelectItem>
+                        {workSituations.map((situation) => (
+                          <SelectItem key={situation.id} value={situation.nome}>
+                            {situation.nome}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

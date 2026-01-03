@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2, Wallet, Gift, TrendingUp, TrendingDown, Building2 } from "lucide-react";
+import { Users, FileText, Package, BarChart3, Home, User, ShoppingCart, Warehouse, BookOpen, LogOut, CheckSquare, Calendar, Shield, Tag, ChevronDown, Table2, Wallet, Gift, TrendingUp, TrendingDown, Building2, Briefcase } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -101,6 +101,11 @@ const auxiliaryTablesItems = [{
   name: "Áreas e Setores",
   href: "/areas-setores",
   icon: Building2,
+  module: "students"
+}, {
+  name: "Situações Trabalhistas",
+  href: "/situacoes-trabalhistas",
+  icon: Briefcase,
   module: "students"
 }];
 export function AppSidebar() {
