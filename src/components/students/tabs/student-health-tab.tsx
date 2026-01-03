@@ -350,42 +350,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                     />
                   )}
                 </div>
-
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="tratamento_odontologico"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Em tratamento odontológico</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch('tratamento_odontologico') && (
-                    <FormField
-                      control={form.control}
-                      name="observacoes_odontologicas"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Observações Odontológicas</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Detalhes do tratamento..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
               </div>
             </CardContent>
           </Card>
