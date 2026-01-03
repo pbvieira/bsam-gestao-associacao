@@ -28,6 +28,8 @@ import AreasSetores from "./pages/AreasSetores";
 import WorkSituations from "./pages/WorkSituations";
 import MedicationUsageTypes from "./pages/MedicationUsageTypes";
 import VaccineTypes from "./pages/VaccineTypes";
+import DiseaseTypes from "./pages/DiseaseTypes";
+import DisabilityTypes from "./pages/DisabilityTypes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -167,6 +169,16 @@ const App = () => {
           <Route path="/tipos-vacinas" element={
             <UnifiedRoute module="students">
               <VaccineTypes />
+            </UnifiedRoute>
+          } />
+          <Route path="/tipos-doencas" element={
+            <UnifiedRoute module="students">
+              <DiseaseTypes />
+            </UnifiedRoute>
+          } />
+          <Route path="/tipos-deficiencias" element={
+            <UnifiedRoute module="students">
+              <DisabilityTypes />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
