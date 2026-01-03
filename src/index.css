@@ -165,3 +165,104 @@ Todas as cores devem ser HSL para consistência com o sistema de design
     }
   }
 }
+
+/* Print Styles */
+@layer components {
+  .print-container {
+    @apply text-foreground;
+  }
+
+  .section-title {
+    @apply text-lg font-bold uppercase tracking-wide border-b-2 border-primary pb-1 mb-4 text-primary;
+  }
+
+  .subsection-title {
+    @apply text-sm font-semibold uppercase tracking-wide text-muted-foreground mt-4 mb-2;
+  }
+
+  .print-field {
+    @apply text-sm py-1;
+  }
+
+  .print-table {
+    @apply w-full text-sm border-collapse;
+  }
+
+  .print-table th {
+    @apply text-left font-semibold py-2 px-2 bg-muted border-b border-border;
+  }
+
+  .print-table td {
+    @apply py-2 px-2 border-b border-border;
+  }
+
+  .print-table tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .page-break-before {
+    page-break-before: always;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .print-container {
+    background: white !important;
+    color: black !important;
+  }
+
+  .section-title {
+    color: #1a365d !important;
+    border-color: #1a365d !important;
+    font-size: 14pt;
+  }
+
+  .subsection-title {
+    color: #4a5568 !important;
+    font-size: 11pt;
+  }
+
+  .print-field {
+    font-size: 10pt;
+    color: black !important;
+  }
+
+  .print-table {
+    font-size: 9pt;
+  }
+
+  .print-table th {
+    background: #e2e8f0 !important;
+    color: black !important;
+  }
+
+  .print-table td {
+    color: black !important;
+  }
+
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  /* Hide non-printable elements */
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Fix for avoiding page breaks inside elements */
+  .print-section {
+    page-break-inside: avoid;
+  }
+}

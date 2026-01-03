@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, X, AlertCircle } from 'lucide-react';
+import { Loader2, Save, X, AlertCircle, Printer } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StudentBasicDataTab } from './tabs/student-basic-data-tab';
 import { StudentChildrenTab } from './tabs/student-children-tab';
@@ -531,16 +531,31 @@ function StudentFormContent({
       </Tabs>
 
       {/* Global Save/Cancel Footer */}
-      <div className="sticky bottom-0 bg-background border-t py-4 -mx-6 px-6 flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={handleCancel} disabled={globalSaving}>
-          <X className="h-4 w-4 mr-2" />
-          Cancelar
-        </Button>
-        <Button onClick={handleSaveAll} disabled={globalSaving}>
-          {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          <Save className="h-4 w-4 mr-2" />
-          Salvar
-        </Button>
+      <div className="sticky bottom-0 bg-background border-t py-4 -mx-6 px-6 flex justify-between">
+        <div>
+          {savedStudentId && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => window.open(`/alunos/${savedStudentId}/imprimir`, '_blank')}
+              disabled={globalSaving}
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Imprimir Ficha
+            </Button>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={handleCancel} disabled={globalSaving}>
+            <X className="h-4 w-4 mr-2" />
+            Cancelar
+          </Button>
+          <Button onClick={handleSaveAll} disabled={globalSaving}>
+            {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Save className="h-4 w-4 mr-2" />
+            Salvar
+          </Button>
+        </div>
       </div>
     </div>
   );
