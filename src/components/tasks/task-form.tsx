@@ -328,7 +328,9 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
             </Select>
           </div>
         )}
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Horas Estimadas</Label>
           <Input
@@ -340,9 +342,7 @@ export function TaskForm({ taskId, onSuccess }: TaskFormProps) {
             placeholder="0"
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Responsável *</Label>
           <Select 
