@@ -180,17 +180,19 @@ export function StudentPrintView({ studentId }: StudentPrintViewProps) {
     : 0;
 
   return (
-    <div className="print-container bg-background min-h-screen">
+    <div className="min-h-screen bg-muted/30 py-8 print:bg-white print:py-0">
       {/* Print Button - Hidden when printing */}
-      <div className="print:hidden fixed top-4 right-4 z-50">
-        <Button onClick={handlePrint} className="gap-2">
-          <Printer className="h-4 w-4" />
-          Imprimir
-        </Button>
-      </div>
+      <Button
+        onClick={handlePrint}
+        className="fixed bottom-4 right-4 print:hidden z-50"
+        size="lg"
+      >
+        <Printer className="mr-2 h-5 w-5" />
+        Imprimir
+      </Button>
 
       {/* Print Content */}
-      <div className="max-w-4xl mx-auto p-8 print:p-4 print:max-w-none">
+      <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg print:p-4 print:max-w-none print:shadow-none">
         {/* Header */}
         <header className="text-center border-b-2 border-foreground pb-4 mb-6">
           <h1 className="text-2xl font-bold uppercase tracking-wide">Ficha Cadastral do Assistido</h1>
