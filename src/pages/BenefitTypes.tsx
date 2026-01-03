@@ -1,24 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
-import { PageLayout } from '@/components/layout/page-layout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 import { useBenefitTypes, BenefitType, BenefitTypeFormData } from '@/hooks/use-benefit-types';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Plus, Edit, Trash2, Gift } from 'lucide-react';
 
-const BenefitTypes = () => {
+const colorPresets = [
+  '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6',
+  '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6b7280',
+];
+
+export default function BenefitTypes() {
   const { allBenefitTypes, isLoading, fetchAllBenefitTypes, createBenefitType, updateBenefitType, deleteBenefitType, toggleBenefitTypeStatus } = useBenefitTypes();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<BenefitType | null>(null);
   const [formData, setFormData] = useState<BenefitTypeFormData>({ nome: '', descricao: '', cor: '#6366f1', ordem: 0 });
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchAllBenefitTypes();
@@ -36,101 +42,227 @@ const BenefitTypes = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.nome.trim()) return;
-    const success = selectedItem
-      ? await updateBenefitType(selectedItem.id, formData)
-      : await createBenefitType(formData);
-    if (success) setIsDialogOpen(false);
-  };
-
-  const handleDelete = async () => {
-    if (selectedItem) {
-      await deleteBenefitType(selectedItem.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedItem(null);
+    if (!formData.nome.trim()) {
+      toast({ title: 'Erro', description: 'O nome é obrigatório.', variant: 'destructive' });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      if (selectedItem) {
+        await updateBenefitType(selectedItem.id, formData);
+        toast({ title: 'Sucesso', description: 'Tipo de benefício atualizado com sucesso!' });
+      } else {
+        await createBenefitType(formData);
+        toast({ title: 'Sucesso', description: 'Tipo de benefício criado com sucesso!' });
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({ title: 'Erro', description: 'Ocorreu um erro ao salvar.', variant: 'destructive' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
+  const handleDelete = async (id: string) => {
+    await deleteBenefitType(id);
+    toast({ title: 'Sucesso', description: 'Tipo de benefício removido com sucesso!' });
+  };
+
+  const handleToggleStatus = async (id: string, newStatus: boolean) => {
+    await toggleBenefitTypeStatus(id, newStatus);
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="text-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Carregando tipos de benefício...</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
-      <PageLayout
-        title="Tipos de Benefício"
-        subtitle="Gerencie os tipos de benefício disponíveis para cadastro de alunos"
-        actionButton={
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Tipos de Benefício</h1>
+            <p className="text-muted-foreground">
+              Gerencie os tipos de benefício disponíveis para cadastro de alunos
+            </p>
+          </div>
           <Button onClick={() => handleOpenDialog()}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Tipo
           </Button>
-        }
-      >
-        <div className="space-y-4">
-          {isLoading ? (
-            <Card><CardContent className="p-6 text-center text-muted-foreground">Carregando...</CardContent></Card>
-          ) : allBenefitTypes.length === 0 ? (
-            <Card><CardContent className="p-6 text-center text-muted-foreground">Nenhum tipo de benefício cadastrado</CardContent></Card>
-          ) : (
-            allBenefitTypes.map((item) => (
-              <Card key={item.id} className={!item.ativo ? 'opacity-60' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.cor }} />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{item.nome}</span>
-                          <Badge variant={item.ativo ? 'default' : 'secondary'}>{item.ativo ? 'Ativo' : 'Inativo'}</Badge>
-                          <Badge variant="outline">Ordem: {item.ordem}</Badge>
-                        </div>
-                        {item.descricao && <p className="text-sm text-muted-foreground mt-1">{item.descricao}</p>}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch checked={item.ativo} onCheckedChange={(checked) => toggleBenefitTypeStatus(item.id, checked)} />
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(item)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedItem(item); setIsDeleteDialogOpen(true); }}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
         </div>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gift className="h-5 w-5" />
+              Tipos de Benefício ({allBenefitTypes.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {allBenefitTypes.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">Nenhum tipo de benefício encontrado</p>
+                <p className="text-sm mb-4">Crie o primeiro tipo para começar</p>
+                <Button onClick={() => handleOpenDialog()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Tipo
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {allBenefitTypes.map((item) => (
+                  <div
+                    key={item.id}
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: item.cor }}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{item.nome}</h3>
+                            <Badge variant={item.ativo ? 'default' : 'secondary'}>
+                              {item.ativo ? 'Ativo' : 'Inativo'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Ordem: {item.ordem}
+                            </Badge>
+                          </div>
+                          {item.descricao && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.descricao}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={item.ativo}
+                          onCheckedChange={(checked) => handleToggleStatus(item.id, checked)}
+                        />
+                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(item)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remover tipo de benefício</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja remover o tipo "{item.nome}"? 
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(item.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Remover
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>{selectedItem ? 'Editar Tipo de Benefício' : 'Novo Tipo de Benefício'}</DialogTitle>
+              <DialogTitle>
+                {selectedItem ? 'Editar Tipo de Benefício' : 'Novo Tipo de Benefício'}
+              </DialogTitle>
             </DialogHeader>
+            
             <div className="space-y-4">
-              <div><Label>Nome *</Label><Input value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} placeholder="Nome do tipo de benefício" /></div>
-              <div><Label>Descrição</Label><Textarea value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} placeholder="Descrição opcional" /></div>
+              <div className="space-y-2">
+                <Label>Nome *</Label>
+                <Input 
+                  value={formData.nome} 
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })} 
+                  placeholder="Nome do tipo de benefício" 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Textarea 
+                  value={formData.descricao} 
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} 
+                  placeholder="Descrição opcional" 
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Cor</Label><Input type="color" value={formData.cor} onChange={(e) => setFormData({ ...formData, cor: e.target.value })} className="h-10 cursor-pointer" /></div>
-                <div><Label>Ordem</Label><Input type="number" value={formData.ordem} onChange={(e) => setFormData({ ...formData, ordem: parseInt(e.target.value) || 0 })} /></div>
+                <div className="space-y-2">
+                  <Label>Cor</Label>
+                  <div className="space-y-2">
+                    <Input 
+                      type="color" 
+                      value={formData.cor} 
+                      onChange={(e) => setFormData({ ...formData, cor: e.target.value })} 
+                    />
+                    <div className="flex flex-wrap gap-1">
+                      {colorPresets.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          className="w-6 h-6 rounded border-2 border-border hover:border-primary"
+                          style={{ backgroundColor: color }}
+                          onClick={() => setFormData({ ...formData, cor: color })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Ordem</Label>
+                  <Input 
+                    type="number" 
+                    value={formData.ordem} 
+                    onChange={(e) => setFormData({ ...formData, ordem: parseInt(e.target.value) || 0 })} 
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {selectedItem ? 'Atualizar' : 'Criar'}
+                </Button>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={handleSave} disabled={!formData.nome.trim()}>Salvar</Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
-
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-              <AlertDialogDescription>Tem certeza que deseja excluir o tipo "{selectedItem?.nome}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </PageLayout>
+      </div>
     </MainLayout>
   );
-};
-
-export default BenefitTypes;
+}

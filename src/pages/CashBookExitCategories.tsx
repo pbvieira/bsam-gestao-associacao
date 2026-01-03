@@ -1,24 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
-import { PageLayout } from '@/components/layout/page-layout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 import { useCashBookExitCategories, CashBookExitCategory, CashBookExitCategoryFormData } from '@/hooks/use-cash-book-exit-categories';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Plus, Edit, Trash2, ArrowUpCircle } from 'lucide-react';
 
-const CashBookExitCategories = () => {
+const colorPresets = [
+  '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6',
+  '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6b7280',
+];
+
+export default function CashBookExitCategories() {
   const { allCategories, isLoading, fetchAllCategories, createCategory, updateCategory, deleteCategory, toggleCategoryStatus } = useCashBookExitCategories();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CashBookExitCategory | null>(null);
   const [formData, setFormData] = useState<CashBookExitCategoryFormData>({ nome: '', descricao: '', cor: '#ef4444', ordem: 0 });
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchAllCategories();
@@ -36,101 +42,227 @@ const CashBookExitCategories = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.nome.trim()) return;
-    const success = selectedItem
-      ? await updateCategory(selectedItem.id, formData)
-      : await createCategory(formData);
-    if (success) setIsDialogOpen(false);
-  };
-
-  const handleDelete = async () => {
-    if (selectedItem) {
-      await deleteCategory(selectedItem.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedItem(null);
+    if (!formData.nome.trim()) {
+      toast({ title: 'Erro', description: 'O nome é obrigatório.', variant: 'destructive' });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      if (selectedItem) {
+        await updateCategory(selectedItem.id, formData);
+        toast({ title: 'Sucesso', description: 'Categoria atualizada com sucesso!' });
+      } else {
+        await createCategory(formData);
+        toast({ title: 'Sucesso', description: 'Categoria criada com sucesso!' });
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({ title: 'Erro', description: 'Ocorreu um erro ao salvar.', variant: 'destructive' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
+  const handleDelete = async (id: string) => {
+    await deleteCategory(id);
+    toast({ title: 'Sucesso', description: 'Categoria removida com sucesso!' });
+  };
+
+  const handleToggleStatus = async (id: string, newStatus: boolean) => {
+    await toggleCategoryStatus(id, newStatus);
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="text-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Carregando categorias...</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
-      <PageLayout
-        title="Categorias de Saída"
-        subtitle="Gerencie as categorias de saída do livro caixa dos alunos"
-        actionButton={
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Categorias de Saída</h1>
+            <p className="text-muted-foreground">
+              Gerencie as categorias de saída do livro caixa dos alunos
+            </p>
+          </div>
           <Button onClick={() => handleOpenDialog()}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Categoria
           </Button>
-        }
-      >
-        <div className="space-y-4">
-          {isLoading ? (
-            <Card><CardContent className="p-6 text-center text-muted-foreground">Carregando...</CardContent></Card>
-          ) : allCategories.length === 0 ? (
-            <Card><CardContent className="p-6 text-center text-muted-foreground">Nenhuma categoria de saída cadastrada</CardContent></Card>
-          ) : (
-            allCategories.map((item) => (
-              <Card key={item.id} className={!item.ativo ? 'opacity-60' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.cor }} />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{item.nome}</span>
-                          <Badge variant={item.ativo ? 'default' : 'secondary'}>{item.ativo ? 'Ativo' : 'Inativo'}</Badge>
-                          <Badge variant="outline">Ordem: {item.ordem}</Badge>
-                        </div>
-                        {item.descricao && <p className="text-sm text-muted-foreground mt-1">{item.descricao}</p>}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch checked={item.ativo} onCheckedChange={(checked) => toggleCategoryStatus(item.id, checked)} />
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(item)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedItem(item); setIsDeleteDialogOpen(true); }}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
         </div>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowUpCircle className="h-5 w-5" />
+              Categorias ({allCategories.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {allCategories.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <ArrowUpCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">Nenhuma categoria encontrada</p>
+                <p className="text-sm mb-4">Crie a primeira categoria para começar</p>
+                <Button onClick={() => handleOpenDialog()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Categoria
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {allCategories.map((item) => (
+                  <div
+                    key={item.id}
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: item.cor }}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{item.nome}</h3>
+                            <Badge variant={item.ativo ? 'default' : 'secondary'}>
+                              {item.ativo ? 'Ativa' : 'Inativa'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Ordem: {item.ordem}
+                            </Badge>
+                          </div>
+                          {item.descricao && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.descricao}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={item.ativo}
+                          onCheckedChange={(checked) => handleToggleStatus(item.id, checked)}
+                        />
+                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(item)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remover categoria</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja remover a categoria "{item.nome}"? 
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(item.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Remover
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>{selectedItem ? 'Editar Categoria de Saída' : 'Nova Categoria de Saída'}</DialogTitle>
+              <DialogTitle>
+                {selectedItem ? 'Editar Categoria de Saída' : 'Nova Categoria de Saída'}
+              </DialogTitle>
             </DialogHeader>
+            
             <div className="space-y-4">
-              <div><Label>Nome *</Label><Input value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} placeholder="Nome da categoria" /></div>
-              <div><Label>Descrição</Label><Textarea value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} placeholder="Descrição opcional" /></div>
+              <div className="space-y-2">
+                <Label>Nome *</Label>
+                <Input 
+                  value={formData.nome} 
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })} 
+                  placeholder="Nome da categoria" 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Textarea 
+                  value={formData.descricao} 
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} 
+                  placeholder="Descrição opcional" 
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Cor</Label><Input type="color" value={formData.cor} onChange={(e) => setFormData({ ...formData, cor: e.target.value })} className="h-10 cursor-pointer" /></div>
-                <div><Label>Ordem</Label><Input type="number" value={formData.ordem} onChange={(e) => setFormData({ ...formData, ordem: parseInt(e.target.value) || 0 })} /></div>
+                <div className="space-y-2">
+                  <Label>Cor</Label>
+                  <div className="space-y-2">
+                    <Input 
+                      type="color" 
+                      value={formData.cor} 
+                      onChange={(e) => setFormData({ ...formData, cor: e.target.value })} 
+                    />
+                    <div className="flex flex-wrap gap-1">
+                      {colorPresets.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          className="w-6 h-6 rounded border-2 border-border hover:border-primary"
+                          style={{ backgroundColor: color }}
+                          onClick={() => setFormData({ ...formData, cor: color })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Ordem</Label>
+                  <Input 
+                    type="number" 
+                    value={formData.ordem} 
+                    onChange={(e) => setFormData({ ...formData, ordem: parseInt(e.target.value) || 0 })} 
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {selectedItem ? 'Atualizar' : 'Criar'}
+                </Button>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={handleSave} disabled={!formData.nome.trim()}>Salvar</Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
-
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-              <AlertDialogDescription>Tem certeza que deseja excluir a categoria "{selectedItem?.nome}"? Esta ação não pode ser desfeita.</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </PageLayout>
+      </div>
     </MainLayout>
   );
-};
-
-export default CashBookExitCategories;
+}
