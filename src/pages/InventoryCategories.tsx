@@ -1,218 +1,96 @@
-import { useState } from "react";
-import { MainLayout } from "@/components/layout/main-layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Edit, Trash2, Tag } from "lucide-react";
-import { useInventoryCategories } from "@/hooks/use-inventory-categories";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-
-const categorySchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
-  descricao: z.string().optional(),
-  cor: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor inválida"),
-  ordem: z.number().int().min(0, "Ordem deve ser positiva"),
-  ativo: z.boolean(),
-});
-
-type CategoryForm = z.infer<typeof categorySchema>;
+import { useState, useEffect } from 'react';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
+import { useInventoryCategories } from '@/hooks/use-inventory-categories';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Plus, Edit, Trash2, Package } from 'lucide-react';
 
 const colorPresets = [
-  "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16",
-  "#22c55e", "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9",
-  "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef",
-  "#ec4899", "#f43f5e", "#6b7280"
+  '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6',
+  '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6b7280',
 ];
 
-interface CategoryDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  category?: any;
-  onSave: (data: CategoryForm) => Promise<void>;
+interface CategoryFormData {
+  nome: string;
+  descricao: string;
+  cor: string;
+  ordem: number;
+  ativo: boolean;
 }
-
-const CategoryDialog = ({ open, onOpenChange, category, onSave }: CategoryDialogProps) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<CategoryForm>({
-    resolver: zodResolver(categorySchema),
-    defaultValues: category ? {
-      nome: category.nome,
-      descricao: category.descricao || "",
-      cor: category.cor,
-      ordem: category.ordem,
-      ativo: category.ativo,
-    } : {
-      nome: "",
-      descricao: "",
-      cor: "#6366f1",
-      ordem: 0,
-      ativo: true,
-    },
-  });
-
-  const selectedColor = watch("cor");
-  const isActive = watch("ativo");
-
-  const onSubmit = async (data: CategoryForm) => {
-    await onSave(data);
-    reset();
-    onOpenChange(false);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{category ? "Editar" : "Nova"} Categoria</DialogTitle>
-          <DialogDescription>
-            {category ? "Atualize" : "Crie uma nova"} categoria para organizar os itens do inventário.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nome">Nome *</Label>
-            <Input
-              id="nome"
-              {...register("nome")}
-              placeholder="Ex: Eletrônicos"
-            />
-            {errors.nome && (
-              <p className="text-sm text-destructive">{errors.nome.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
-            <Textarea
-              id="descricao"
-              {...register("descricao")}
-              placeholder="Descrição opcional da categoria"
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Cor</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="color"
-                {...register("cor")}
-                className="w-20 h-10"
-              />
-              <Input
-                type="text"
-                value={selectedColor}
-                onChange={(e) => setValue("cor", e.target.value)}
-                placeholder="#6366f1"
-                className="flex-1"
-              />
-            </div>
-            <div className="grid grid-cols-9 gap-2 mt-2">
-              {colorPresets.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setValue("cor", color)}
-                  className="w-8 h-8 rounded border-2 hover:scale-110 transition-transform"
-                  style={{
-                    backgroundColor: color,
-                    borderColor: selectedColor === color ? "hsl(var(--primary))" : "transparent",
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="ordem">Ordem de Exibição</Label>
-            <Input
-              id="ordem"
-              type="number"
-              {...register("ordem", { valueAsNumber: true })}
-              placeholder="0"
-            />
-            {errors.ordem && (
-              <p className="text-sm text-destructive">{errors.ordem.message}</p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="ativo">Categoria Ativa</Label>
-            <Switch
-              id="ativo"
-              checked={isActive}
-              onCheckedChange={(checked) => setValue("ativo", checked)}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit">
-              {category ? "Atualizar" : "Criar"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 export default function InventoryCategories() {
   const { categories, loading, fetchAllCategories, createCategory, updateCategory, deleteCategory, toggleCategoryStatus } = useInventoryCategories();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [formData, setFormData] = useState<CategoryFormData>({ nome: '', descricao: '', cor: '#6366f1', ordem: 0, ativo: true });
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
-  const handleOpenDialog = (category?: any) => {
-    setSelectedCategory(category || null);
-    setDialogOpen(true);
-  };
-
-  const handleSaveCategory = async (data: CategoryForm) => {
-    if (selectedCategory) {
-      await updateCategory(selectedCategory.id, data);
-    } else {
-      await createCategory({
-        nome: data.nome,
-        descricao: data.descricao || null,
-        cor: data.cor,
-        ordem: data.ordem,
-        ativo: data.ativo,
-      });
-    }
-  };
-
-  const handleDeleteClick = (categoryId: string) => {
-    setCategoryToDelete(categoryId);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (categoryToDelete) {
-      await deleteCategory(categoryToDelete);
-      setDeleteDialogOpen(false);
-      setCategoryToDelete(null);
-    }
-  };
-
-  useState(() => {
+  useEffect(() => {
     fetchAllCategories();
-  });
+  }, []);
+
+  const handleOpenDialog = (item?: any) => {
+    if (item) {
+      setSelectedItem(item);
+      setFormData({ nome: item.nome, descricao: item.descricao || '', cor: item.cor, ordem: item.ordem, ativo: item.ativo });
+    } else {
+      setSelectedItem(null);
+      setFormData({ nome: '', descricao: '', cor: '#6366f1', ordem: categories.length, ativo: true });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.nome.trim()) {
+      toast({ title: 'Erro', description: 'O nome é obrigatório.', variant: 'destructive' });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      if (selectedItem) {
+        await updateCategory(selectedItem.id, formData);
+        toast({ title: 'Sucesso', description: 'Categoria atualizada com sucesso!' });
+      } else {
+        await createCategory({
+          nome: formData.nome,
+          descricao: formData.descricao || null,
+          cor: formData.cor,
+          ordem: formData.ordem,
+          ativo: formData.ativo,
+        });
+        toast({ title: 'Sucesso', description: 'Categoria criada com sucesso!' });
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({ title: 'Erro', description: 'Ocorreu um erro ao salvar.', variant: 'destructive' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteCategory(id);
+    toast({ title: 'Sucesso', description: 'Categoria removida com sucesso!' });
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    await toggleCategoryStatus(id, currentStatus);
+  };
 
   if (loading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="text-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
           <p className="text-muted-foreground">Carregando categorias...</p>
         </div>
       </MainLayout>
@@ -224,109 +102,180 @@ export default function InventoryCategories() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Categorias de Inventário</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold tracking-tight">Categorias de Inventário</h1>
+            <p className="text-muted-foreground">
               Gerencie as categorias para organizar os itens do estoque
             </p>
           </div>
           <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4 mr-2" />
             Nova Categoria
           </Button>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Categorias Cadastradas</CardTitle>
-            <CardDescription>
-              {categories.length} {categories.length === 1 ? 'categoria' : 'categorias'} no sistema
-            </CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Categorias ({categories.length})
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {categories.map((category) => (
-                <div
-                  key={category.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div
-                      className="w-6 h-6 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: category.cor }}
-                    >
-                      <Tag className="h-3 w-3 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{category.nome}</h3>
-                        <span className="text-sm text-muted-foreground">
-                          (Ordem: {category.ordem})
-                        </span>
+            {categories.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">Nenhuma categoria encontrada</p>
+                <p className="text-sm mb-4">Crie a primeira categoria para começar</p>
+                <Button onClick={() => handleOpenDialog()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Categoria
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {categories.map((item) => (
+                  <div
+                    key={item.id}
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: item.cor }}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{item.nome}</h3>
+                            <Badge variant={item.ativo ? 'default' : 'secondary'}>
+                              {item.ativo ? 'Ativa' : 'Inativa'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Ordem: {item.ordem}
+                            </Badge>
+                          </div>
+                          {item.descricao && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.descricao}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      {category.descricao && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {category.descricao}
-                        </p>
-                      )}
+                      
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={item.ativo}
+                          onCheckedChange={() => handleToggleStatus(item.id, item.ativo)}
+                        />
+                        <Button variant="outline" size="sm" onClick={() => handleOpenDialog(item)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remover categoria</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja remover a categoria "{item.nome}"? 
+                                Esta ação não pode ser desfeita. Categorias em uso não podem ser excluídas.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(item.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Remover
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={category.ativo}
-                      onCheckedChange={() => toggleCategoryStatus(category.id, category.ativo)}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleOpenDialog(category)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteClick(category.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-
-              {categories.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  Nenhuma categoria cadastrada. Crie a primeira categoria para começar.
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <CategoryDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          category={selectedCategory}
-          onSave={handleSaveCategory}
-        />
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedItem ? 'Editar Categoria' : 'Nova Categoria'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nome *</Label>
+                <Input 
+                  value={formData.nome} 
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })} 
+                  placeholder="Nome da categoria" 
+                />
+              </div>
 
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.
-                Categorias em uso não podem ser excluídas.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmDelete}>
-                Excluir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Textarea 
+                  value={formData.descricao} 
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} 
+                  placeholder="Descrição opcional" 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Cor</Label>
+                  <div className="space-y-2">
+                    <Input 
+                      type="color" 
+                      value={formData.cor} 
+                      onChange={(e) => setFormData({ ...formData, cor: e.target.value })} 
+                    />
+                    <div className="flex flex-wrap gap-1">
+                      {colorPresets.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          className="w-6 h-6 rounded border-2 border-border hover:border-primary"
+                          style={{ backgroundColor: color }}
+                          onClick={() => setFormData({ ...formData, cor: color })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Ordem</Label>
+                  <Input 
+                    type="number" 
+                    value={formData.ordem} 
+                    onChange={(e) => setFormData({ ...formData, ordem: parseInt(e.target.value) || 0 })} 
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {selectedItem ? 'Atualizar' : 'Criar'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );
