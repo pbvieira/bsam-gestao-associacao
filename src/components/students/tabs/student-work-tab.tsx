@@ -13,6 +13,8 @@ import { useStudentBenefits } from '@/hooks/use-student-benefits';
 import { useBenefitTypes } from '@/hooks/use-benefit-types';
 import { useIncomeTypes } from '@/hooks/use-income-types';
 import { useWorkSituations } from '@/hooks/use-work-situations';
+import { useTasks } from '@/hooks/use-tasks';
+import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
@@ -56,8 +58,10 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
   const { benefitTypes, fetchBenefitTypes } = useBenefitTypes();
   const { incomeTypes, fetchIncomeTypes } = useIncomeTypes();
   const { workSituations, fetchWorkSituations } = useWorkSituations();
+  const { createTask, checkTaskExists } = useTasks();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { registerWorkForm, registerWorkSave } = useStudentFormContext();
+  const { registerWorkForm, registerWorkSave, headerForm } = useStudentFormContext();
 
   useEffect(() => {
     fetchBenefitTypes();
@@ -128,6 +132,54 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
         return false;
       }
 
+      // Lógica de criação automática de tarefa
+      if (data.situacao_trabalhista && user) {
+        const situacaoSelecionada = workSituations.find(
+          s => s.nome === data.situacao_trabalhista
+        );
+
+        if (situacaoSelecionada?.gerar_tarefa) {
+          // Verificar se já existe tarefa para este aluno e situação
+          const tarefaExiste = await checkTaskExists(
+            'student_work_situation',
+            studentId,
+            situacaoSelecionada.nome
+          );
+
+          if (!tarefaExiste) {
+            // Obter nome do aluno do header form
+            const nomeAluno = headerForm?.getValues('nome_completo') || 'Aluno';
+
+            // Criar título substituindo placeholder
+            const titulo = situacaoSelecionada.texto_tarefa
+              ?.replace('{nome_aluno}', nomeAluno)
+              || `Verificar situação de ${nomeAluno}`;
+
+            try {
+              await createTask({
+                titulo,
+                descricao: `Tarefa automática - Situação: ${situacaoSelecionada.nome}`,
+                prioridade: (situacaoSelecionada.prioridade_tarefa as 'baixa' | 'media' | 'alta' | 'urgente') || 'media',
+                status: 'pendente',
+                created_by: user.id,
+                assigned_to: user.id,
+                setor_id: situacaoSelecionada.setor_tarefa_id || undefined,
+                reference_type: 'student_work_situation',
+                reference_id: studentId,
+              });
+
+              toast({
+                title: 'Tarefa criada',
+                description: `Tarefa criada automaticamente para situação "${situacaoSelecionada.nome}"`,
+              });
+            } catch (taskError) {
+              console.error('Erro ao criar tarefa automática:', taskError);
+              // Não impede o salvamento principal
+            }
+          }
+        }
+      }
+
       return true;
     } catch (error) {
       toast({
@@ -137,7 +189,7 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
       });
       return false;
     }
-  }, [studentId, form, createOrUpdateWorkSituation, toast, rendaPerCapita]);
+  }, [studentId, form, createOrUpdateWorkSituation, toast, rendaPerCapita, workSituations, user, checkTaskExists, createTask, headerForm]);
 
   useEffect(() => {
     registerWorkSave(saveData);

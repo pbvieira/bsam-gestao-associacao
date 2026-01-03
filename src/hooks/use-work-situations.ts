@@ -9,6 +9,10 @@ export interface WorkSituation {
   cor: string;
   ativo: boolean;
   ordem: number;
+  gerar_tarefa: boolean;
+  texto_tarefa: string | null;
+  setor_tarefa_id: string | null;
+  prioridade_tarefa: string;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +23,10 @@ export interface WorkSituationFormData {
   cor?: string;
   ordem?: number;
   ativo?: boolean;
+  gerar_tarefa?: boolean;
+  texto_tarefa?: string | null;
+  setor_tarefa_id?: string | null;
+  prioridade_tarefa?: string;
 }
 
 export function useWorkSituations() {
