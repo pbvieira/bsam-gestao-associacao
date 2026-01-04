@@ -48,6 +48,11 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const [loadingCidadesEndereco, setLoadingCidadesEndereco] = useState(false);
   const [filiationStatus, setFiliationStatus] = useState<FiliationStatusOption[]>([]);
   const [loadingFiliationStatus, setLoadingFiliationStatus] = useState(true);
+  const [manualErrors, setManualErrors] = useState<{
+    data_nascimento_pai?: string;
+    data_nascimento_mae?: string;
+    data_nascimento_conjuge?: string;
+  }>({});
 
   const form = useForm<StudentBasicDataForm>({
     resolver: zodResolver(studentBasicDataSchema),
@@ -73,17 +78,38 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     if (!studentId) return true;
     
     const studentData = form.getValues();
+    const errors: typeof manualErrors = {};
     
     const maeAutoOptional = ESTADOS_DATA_OPCIONAL.includes(studentData.estado_mae || '');
     const paiAutoOptional = ESTADOS_DATA_OPCIONAL.includes(studentData.estado_pai || '');
+    const conjugeNaoSabe = studentData.data_nascimento_conjuge_desconhecida;
 
-    if (!maeAutoOptional && !studentData.data_nascimento_mae_desconhecida && !studentData.data_nascimento_mae) {
-      return false;
-    }
-
+    // Validar data do pai
     if (!paiAutoOptional && !studentData.data_nascimento_pai_desconhecida && !studentData.data_nascimento_pai) {
+      errors.data_nascimento_pai = 'Data de nascimento é obrigatória';
+    }
+
+    // Validar data da mãe
+    if (!maeAutoOptional && !studentData.data_nascimento_mae_desconhecida && !studentData.data_nascimento_mae) {
+      errors.data_nascimento_mae = 'Data de nascimento é obrigatória';
+    }
+
+    // Validar data do cônjuge (quando nome preenchido e não marcou "não sabe")
+    if (studentData.nome_conjuge && !conjugeNaoSabe && !studentData.data_nascimento_conjuge) {
+      errors.data_nascimento_conjuge = 'Data de nascimento é obrigatória';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setManualErrors(errors);
+      toast({
+        title: 'Campos obrigatórios',
+        description: 'Preencha as datas de nascimento obrigatórias ou marque "Não sabe"',
+        variant: 'destructive',
+      });
       return false;
     }
+
+    setManualErrors({});
 
     try {
       const cleanedData = {
@@ -773,9 +799,20 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                             {...field} 
                             disabled={isOptional}
                             className={isOptional ? 'opacity-50' : ''}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (manualErrors.data_nascimento_pai) {
+                                setManualErrors(prev => ({ ...prev, data_nascimento_pai: undefined }));
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
+                        {manualErrors.data_nascimento_pai && (
+                          <p className="text-sm font-medium text-destructive">
+                            {manualErrors.data_nascimento_pai}
+                          </p>
+                        )}
                       </FormItem>
                     );
                   }}
@@ -871,9 +908,20 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                             {...field} 
                             disabled={isOptional}
                             className={isOptional ? 'opacity-50' : ''}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (manualErrors.data_nascimento_mae) {
+                                setManualErrors(prev => ({ ...prev, data_nascimento_mae: undefined }));
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
+                        {manualErrors.data_nascimento_mae && (
+                          <p className="text-sm font-medium text-destructive">
+                            {manualErrors.data_nascimento_mae}
+                          </p>
+                        )}
                       </FormItem>
                     );
                   }}
@@ -944,15 +992,40 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                 <FormField
                   control={form.control}
                   name="data_nascimento_conjuge"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data Nascimento Esposa</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const nomeConjuge = form.watch('nome_conjuge');
+                    const naoSabe = form.watch('data_nascimento_conjuge_desconhecida');
+                    const isOptional = !nomeConjuge || naoSabe;
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>
+                          Data Nascimento Esposa
+                          {!isOptional && <span className="text-destructive ml-1">*</span>}
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            disabled={naoSabe}
+                            className={naoSabe ? 'opacity-50' : ''}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (manualErrors.data_nascimento_conjuge) {
+                                setManualErrors(prev => ({ ...prev, data_nascimento_conjuge: undefined }));
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        {manualErrors.data_nascimento_conjuge && (
+                          <p className="text-sm font-medium text-destructive">
+                            {manualErrors.data_nascimento_conjuge}
+                          </p>
+                        )}
+                      </FormItem>
+                    );
+                  }}
                 />
 
                {/* Checkbox "Não sabe" */}
