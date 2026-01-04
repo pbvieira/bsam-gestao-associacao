@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: bsam-frontend-container
-          image: docker.io/pbvieira/bsam-frontend:0.0.9-SNAPSHOT
+          image: docker.io/pbvieira/bsam-frontend:0.0.11-SNAPSHOT
           imagePullPolicy: Always
           ports:
             - containerPort: 80

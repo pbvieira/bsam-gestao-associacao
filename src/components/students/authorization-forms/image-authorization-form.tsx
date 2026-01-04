@@ -22,7 +22,7 @@ export function ImageAuthorizationForm({
     const docs = [];
     if (rg) docs.push(rg);
     if (cpf) docs.push(cpf);
-    return docs.length > 0 ? docs.join(" / ") : "_______________";
+    return docs.length > 0 ? docs.join(" / ") : "Não informado";
   };
 
   return (
