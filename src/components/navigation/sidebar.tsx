@@ -31,6 +31,11 @@ const mainNavigationItems = [{
   icon: Users,
   module: "students"
 }, {
+  name: "Medicamentos",
+  href: "/medicacoes",
+  icon: Pill,
+  module: "students"
+}, {
   name: "Usuários",
   href: "/usuarios",
   icon: User,
