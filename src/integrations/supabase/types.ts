@@ -631,6 +631,76 @@ export type Database = {
           },
         ]
       }
+      medication_administration_log: {
+        Row: {
+          administrado: boolean
+          administrado_por: string | null
+          created_at: string
+          data_administracao: string | null
+          data_agendada: string
+          horario_agendado: string
+          id: string
+          medication_id: string
+          nao_administrado_motivo: string | null
+          observacoes: string | null
+          schedule_id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          administrado?: boolean
+          administrado_por?: string | null
+          created_at?: string
+          data_administracao?: string | null
+          data_agendada: string
+          horario_agendado: string
+          id?: string
+          medication_id: string
+          nao_administrado_motivo?: string | null
+          observacoes?: string | null
+          schedule_id: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          administrado?: boolean
+          administrado_por?: string | null
+          created_at?: string
+          data_administracao?: string | null
+          data_agendada?: string
+          horario_agendado?: string
+          id?: string
+          medication_id?: string
+          nao_administrado_motivo?: string | null
+          observacoes?: string | null
+          schedule_id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_administration_log_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "student_medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_administration_log_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "medication_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_administration_log_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_schedules: {
         Row: {
           ativo: boolean
