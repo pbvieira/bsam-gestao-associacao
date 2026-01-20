@@ -36,6 +36,7 @@ import VaccineTypes from "./pages/VaccineTypes";
 import DiseaseTypes from "./pages/DiseaseTypes";
 import DisabilityTypes from "./pages/DisabilityTypes";
 import Medications from "./pages/Medications";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -215,6 +216,11 @@ const App = () => {
           <Route path="/medicacoes" element={
             <UnifiedRoute module="students">
               <Medications />
+            </UnifiedRoute>
+          } />
+          <Route path="/configuracoes" element={
+            <UnifiedRoute module="students">
+              <Settings />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
