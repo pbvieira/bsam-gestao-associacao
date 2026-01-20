@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MainLayout } from '@/components/layout/main-layout';
 import { PageLayout } from '@/components/layout/page-layout';
 import { useMedicationAdministration, MedicationAdministration } from '@/hooks/use-medication-administration';
 import { MedicationTimeGroup } from '@/components/medications/MedicationTimeGroup';
@@ -86,7 +87,8 @@ export default function Medications() {
   };
 
   return (
-    <PageLayout title="Administração de Medicamentos" subtitle="Gerencie a administração de medicamentos aos alunos">
+    <MainLayout>
+      <PageLayout title="Administração de Medicamentos" subtitle="Gerencie a administração de medicamentos aos alunos">
       <div className="space-y-6">
         {/* Header with filters */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -257,6 +259,7 @@ export default function Medications() {
           onConfirmNotAdminister={handleConfirmNotAdminister}
         />
       </div>
-    </PageLayout>
+      </PageLayout>
+    </MainLayout>
   );
 }
