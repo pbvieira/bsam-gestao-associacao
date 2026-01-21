@@ -123,6 +123,25 @@ export function useStudents() {
     }
   };
 
+  const activateStudent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('students')
+        .update({ 
+          ativo: true, 
+          data_saida: null,
+          hora_saida: null
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      await fetchStudents(); // Refresh list
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message };
+    }
+  };
+
   const deleteStudent = async (id: string) => {
     try {
       const { error } = await supabase
@@ -146,6 +165,7 @@ export function useStudents() {
     createStudent,
     updateStudent,
     deactivateStudent,
+    activateStudent,
     deleteStudent
   };
 }
