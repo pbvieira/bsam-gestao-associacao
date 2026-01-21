@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { AppSidebar } from "@/components/navigation/sidebar";
-import { Header } from "@/components/navigation/header";
+import { NotificationPopover } from "@/components/navigation/notification-popover";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -15,11 +13,16 @@ export function MainLayout({ children }: MainLayoutProps) {
         <AppSidebar />
         
         <SidebarInset className="flex-1">
-          {/* Header with Sidebar Trigger */}
+          {/* Header with Sidebar Trigger and Actions */}
           <header className="bg-card border-b border-border px-6 py-4">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="md:flex" />
               <div className="flex-1" />
+              
+              {/* Header Actions */}
+              <div className="flex items-center gap-2">
+                <NotificationPopover />
+              </div>
             </div>
           </header>
           
