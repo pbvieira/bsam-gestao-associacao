@@ -19,7 +19,7 @@ interface StudentListProps {
 }
 
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
-  const { students, loading, deactivateStudent, deleteStudent } = useStudents();
+  const { students, loading, deactivateStudent, activateStudent, deleteStudent } = useStudents();
   const { canAccess } = useAuth();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,6 +86,24 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
         toast({
           title: "Aluno desativado",
           description: "O aluno foi desativado com sucesso.",
+        });
+      }
+    }
+  };
+
+  const handleActivate = async (studentId: string) => {
+    if (confirm("Deseja reativar este aluno?")) {
+      const result = await activateStudent(studentId);
+      if (result.error) {
+        toast({
+          title: "Erro ao ativar",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Aluno ativado",
+          description: "O aluno foi reativado com sucesso.",
         });
       }
     }
@@ -337,7 +355,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             Editar
                           </Button>
 
-                          {student.ativo && (
+                          {student.ativo ? (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -347,6 +365,17 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             >
                               <UserX className="h-3 w-3" />
                               Desativar
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!canUpdate}
+                              onClick={() => handleActivate(student.id)}
+                              className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                            >
+                              <UserCheck className="h-3 w-3" />
+                              Ativar
                             </Button>
                           )}
 
