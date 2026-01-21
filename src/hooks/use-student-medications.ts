@@ -319,13 +319,20 @@ export function useStudentMedications(studentId?: string) {
     if (!user || !studentId) return { error: 'Dados insuficientes' };
 
     try {
-      // Create medication
+      // Create medication - sanitize empty strings to null for UUID fields
+      const sanitizedData = {
+        ...data,
+        tipo_uso_id: data.tipo_uso_id || null,
+        data_inicio: data.data_inicio || null,
+        data_fim: data.data_fim || null,
+      };
+
       const { data: newMed, error: medError } = await supabase
         .from('student_medications')
         .insert([{
           student_id: studentId,
           created_by: user.id,
-          ...data
+          ...sanitizedData
         }])
         .select()
         .single();
@@ -336,7 +343,12 @@ export function useStudentMedications(studentId?: string) {
       if (schedules.length > 0) {
         const schedulesToInsert = schedules.map(s => ({
           medication_id: newMed.id,
-          ...s
+          horario: s.horario,
+          frequencia: s.frequencia,
+          dias_semana: s.dias_semana?.length ? s.dias_semana : null,
+          instrucoes: s.instrucoes || null,
+          gerar_evento: s.gerar_evento,
+          setor_responsavel_id: s.setor_responsavel_id || null,
         }));
 
         const { error: schedError } = await supabase
@@ -377,10 +389,17 @@ export function useStudentMedications(studentId?: string) {
       // Delete old calendar events before updating
       await deleteOldCalendarEvents(medicationId);
 
-      // Update medication
+      // Update medication - sanitize empty strings to null for UUID fields
+      const sanitizedData = {
+        ...data,
+        tipo_uso_id: data.tipo_uso_id || null,
+        data_inicio: data.data_inicio || null,
+        data_fim: data.data_fim || null,
+      };
+
       const { error: medError } = await supabase
         .from('student_medications')
-        .update(data)
+        .update(sanitizedData)
         .eq('id', medicationId);
 
       if (medError) throw medError;
@@ -397,7 +416,12 @@ export function useStudentMedications(studentId?: string) {
       if (schedules.length > 0) {
         const schedulesToInsert = schedules.map(s => ({
           medication_id: medicationId,
-          ...s
+          horario: s.horario,
+          frequencia: s.frequencia,
+          dias_semana: s.dias_semana?.length ? s.dias_semana : null,
+          instrucoes: s.instrucoes || null,
+          gerar_evento: s.gerar_evento,
+          setor_responsavel_id: s.setor_responsavel_id || null,
         }));
 
         const { error: schedError } = await supabase
