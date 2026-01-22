@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MainLayout } from '@/components/layout/main-layout';
 import { PageLayout } from '@/components/layout/page-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,11 +80,12 @@ export default function Appointments() {
   }).filter(group => group.items.length > 0);
 
   return (
-    <PageLayout
-      title="Consultas e Exames"
-      subtitle="Gerencie os atendimentos médicos agendados"
-    >
-      {/* Header with filters */}
+    <MainLayout>
+      <PageLayout
+        title="Consultas e Exames"
+        subtitle="Gerencie os atendimentos médicos agendados"
+      >
+        {/* Header with filters */}
       <div className="flex flex-wrap items-center gap-4 mb-6">
         {/* Date picker */}
         <Popover>
@@ -243,6 +245,7 @@ export default function Appointments() {
         onConfirmComplete={handleConfirmComplete}
         onConfirmNotComplete={handleConfirmNotComplete}
       />
-    </PageLayout>
+      </PageLayout>
+    </MainLayout>
   );
 }

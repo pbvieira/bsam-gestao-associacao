@@ -81,7 +81,7 @@ export function useMedicalAppointments(selectedDate: Date) {
           local,
           motivo,
           data_retorno,
-          students!inner(nome_completo, codigo)
+          students!inner(nome_completo, codigo_cadastro)
         `)
         .or(`data_atendimento.eq.${dateStr},data_retorno.eq.${dateStr}`)
         .order('data_atendimento', { ascending: true });
@@ -123,7 +123,7 @@ export function useMedicalAppointments(selectedDate: Date) {
             medical_record_id: record.id,
             student_id: record.student_id,
             student_name: student?.nome_completo || 'Aluno',
-            student_codigo: student?.codigo || '',
+            student_codigo: student?.codigo_cadastro || '',
             tipo: 'atendimento',
             tipo_atendimento: record.tipo_atendimento,
             especialidade: record.especialidade,
@@ -151,7 +151,7 @@ export function useMedicalAppointments(selectedDate: Date) {
             medical_record_id: record.id,
             student_id: record.student_id,
             student_name: student?.nome_completo || 'Aluno',
-            student_codigo: student?.codigo || '',
+            student_codigo: student?.codigo_cadastro || '',
             tipo: 'retorno',
             tipo_atendimento: record.tipo_atendimento,
             especialidade: record.especialidade,
