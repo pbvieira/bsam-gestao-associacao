@@ -4,27 +4,35 @@ import { PageLayout } from '@/components/layout/page-layout';
 import { useMedicationAdministration, MedicationAdministration } from '@/hooks/use-medication-administration';
 import { MedicationTimeGroup } from '@/components/medications/MedicationTimeGroup';
 import { AdministrationDialog } from '@/components/medications/AdministrationDialog';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarIcon, Filter, RefreshCw, Pill, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
-import { format, isToday } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Filter, RefreshCw, Pill, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSetores } from '@/hooks/use-setores';
+import { DatePeriodSelector, ViewPeriod } from '@/components/ui/date-period-selector';
+import { DateGroupHeader } from '@/components/ui/date-group-header';
+import { parseISO } from 'date-fns';
 
 type StatusFilter = 'all' | 'pending' | 'administered' | 'not-administered';
 
 export default function Medications() {
   const [date, setDate] = useState<Date>(new Date());
+  const [viewPeriod, setViewPeriod] = useState<ViewPeriod>('day');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [setorFilter, setSetorFilter] = useState<string>('all');
   
-  const { groupedMedications, medications, loading, refetch, markAsAdministered, markAsNotAdministered, undoAdministration } = useMedicationAdministration(date);
+  const { 
+    groupedMedications, 
+    dateGroupedMedications,
+    medications, 
+    loading, 
+    refetch, 
+    markAsAdministered, 
+    markAsNotAdministered, 
+    undoAdministration 
+  } = useMedicationAdministration(date, viewPeriod);
   const { setores } = useSetores();
 
   // Dialog state
@@ -32,24 +40,30 @@ export default function Medications() {
   const [dialogMode, setDialogMode] = useState<'administer' | 'not-administer'>('administer');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Filter medications
-  const filteredGroups = groupedMedications.map(group => {
-    let filteredItems = group.items;
+  // Filter medications by status and setor
+  const filterItems = (items: MedicationAdministration[]) => {
+    let filtered = items;
 
     // Status filter
     if (statusFilter === 'pending') {
-      filteredItems = filteredItems.filter(item => !item.administrado && !item.nao_administrado_motivo);
+      filtered = filtered.filter(item => !item.administrado && !item.nao_administrado_motivo);
     } else if (statusFilter === 'administered') {
-      filteredItems = filteredItems.filter(item => item.administrado);
+      filtered = filtered.filter(item => item.administrado);
     } else if (statusFilter === 'not-administered') {
-      filteredItems = filteredItems.filter(item => item.nao_administrado_motivo);
+      filtered = filtered.filter(item => item.nao_administrado_motivo);
     }
 
     // Setor filter
     if (setorFilter !== 'all') {
-      filteredItems = filteredItems.filter(item => item.setor_responsavel_id === setorFilter);
+      filtered = filtered.filter(item => item.setor_responsavel_id === setorFilter);
     }
 
+    return filtered;
+  };
+
+  // Filter for day view
+  const filteredGroups = groupedMedications.map(group => {
+    const filteredItems = filterItems(group.items);
     return {
       ...group,
       items: filteredItems,
@@ -58,11 +72,35 @@ export default function Medications() {
     };
   }).filter(group => group.items.length > 0);
 
+  // Filter for week/month view
+  const filteredDateGroups = dateGroupedMedications.map(dateGroup => {
+    const filteredGroupsForDate = dateGroup.groups.map(group => {
+      const filteredItems = filterItems(group.items);
+      return {
+        ...group,
+        items: filteredItems,
+        total: filteredItems.length,
+        administrados: filteredItems.filter(i => i.administrado).length
+      };
+    }).filter(group => group.items.length > 0);
+
+    const total = filteredGroupsForDate.reduce((sum, g) => sum + g.total, 0);
+    const administrados = filteredGroupsForDate.reduce((sum, g) => sum + g.administrados, 0);
+
+    return {
+      ...dateGroup,
+      groups: filteredGroupsForDate,
+      total,
+      administrados
+    };
+  }).filter(dateGroup => dateGroup.groups.length > 0);
+
   // Stats
-  const totalMedications = medications.length;
-  const administeredCount = medications.filter(m => m.administrado).length;
-  const pendingCount = medications.filter(m => !m.administrado && !m.nao_administrado_motivo).length;
-  const notAdministeredCount = medications.filter(m => m.nao_administrado_motivo).length;
+  const filteredMedications = filterItems(medications);
+  const totalMedications = filteredMedications.length;
+  const administeredCount = filteredMedications.filter(m => m.administrado).length;
+  const pendingCount = filteredMedications.filter(m => !m.administrado && !m.nao_administrado_motivo).length;
+  const notAdministeredCount = filteredMedications.filter(m => m.nao_administrado_motivo).length;
 
   const handleAdminister = (item: MedicationAdministration) => {
     setDialogItem(item);
@@ -93,30 +131,13 @@ export default function Medications() {
         {/* Header with filters */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4 flex-wrap">
-            {/* Date Picker */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    isToday(date) && "border-primary"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(d) => d && setDate(d)}
-                  locale={ptBR}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            {/* Date Period Selector */}
+            <DatePeriodSelector
+              date={date}
+              onDateChange={setDate}
+              viewPeriod={viewPeriod}
+              onViewPeriodChange={setViewPeriod}
+            />
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
@@ -223,30 +244,71 @@ export default function Medications() {
               </Card>
             ))}
           </div>
-        ) : filteredGroups.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Nenhum medicamento encontrado</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {totalMedications === 0
-                  ? 'Não há medicamentos agendados para esta data.'
-                  : 'Nenhum medicamento corresponde aos filtros selecionados.'}
-              </p>
-            </CardContent>
-          </Card>
+        ) : viewPeriod === 'day' ? (
+          // Day view - show time groups directly
+          filteredGroups.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium">Nenhum medicamento encontrado</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {medications.length === 0
+                    ? 'Não há medicamentos agendados para esta data.'
+                    : 'Nenhum medicamento corresponde aos filtros selecionados.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div>
+              {filteredGroups.map((group) => (
+                <MedicationTimeGroup
+                  key={group.horario}
+                  group={group}
+                  onAdminister={handleAdminister}
+                  onNotAdminister={handleNotAdminister}
+                  onUndo={undoAdministration}
+                />
+              ))}
+            </div>
+          )
         ) : (
-          <div>
-            {filteredGroups.map((group) => (
-              <MedicationTimeGroup
-                key={group.horario}
-                group={group}
-                onAdminister={handleAdminister}
-                onNotAdminister={handleNotAdminister}
-                onUndo={undoAdministration}
-              />
-            ))}
-          </div>
+          // Week/Month view - show date headers with time groups
+          filteredDateGroups.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium">Nenhum medicamento encontrado</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {medications.length === 0
+                    ? `Não há medicamentos agendados para ${viewPeriod === 'week' ? 'esta semana' : 'este mês'}.`
+                    : 'Nenhum medicamento corresponde aos filtros selecionados.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {filteredDateGroups.map((dateGroup) => (
+                <div key={dateGroup.date.toISOString()}>
+                  <DateGroupHeader
+                    date={dateGroup.date}
+                    itemCount={dateGroup.total}
+                    pendingCount={dateGroup.total - dateGroup.administrados}
+                  />
+                  <div className="ml-4">
+                    {dateGroup.groups.map((group) => (
+                      <MedicationTimeGroup
+                        key={`${dateGroup.date.toISOString()}-${group.horario}`}
+                        group={group}
+                        onAdminister={handleAdminister}
+                        onNotAdminister={handleNotAdminister}
+                        onUndo={undoAdministration}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         )}
 
         {/* Administration Dialog */}

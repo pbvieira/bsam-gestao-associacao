@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
 import { useToast } from './use-toast';
-import { format } from 'date-fns';
+import { format, eachDayOfInterval } from 'date-fns';
+import { ViewPeriod, getDateRange } from '@/components/ui/date-period-selector';
 
 export interface MedicalAppointment {
   id: string;
@@ -36,6 +37,14 @@ export interface GroupedAppointments {
   realizados: number;
 }
 
+export interface DateGroupedAppointments {
+  date: Date;
+  dateStr: string;
+  groups: GroupedAppointments[];
+  total: number;
+  realizados: number;
+}
+
 const APPOINTMENT_GROUPS: Record<string, { label: string; icon: string }> = {
   'consulta_medica': { label: 'Consultas Médicas', icon: 'Stethoscope' },
   'consulta_odontologica': { label: 'Consultas Odontológicas', icon: 'Smile' },
@@ -48,11 +57,12 @@ const APPOINTMENT_GROUPS: Record<string, { label: string; icon: string }> = {
   'retorno': { label: 'Retornos', icon: 'RotateCcw' },
 };
 
-export function useMedicalAppointments(selectedDate: Date) {
+export function useMedicalAppointments(selectedDate: Date, viewPeriod: ViewPeriod = 'day') {
   const { user } = useAuth();
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<MedicalAppointment[]>([]);
   const [groupedAppointments, setGroupedAppointments] = useState<GroupedAppointments[]>([]);
+  const [dateGroupedAppointments, setDateGroupedAppointments] = useState<DateGroupedAppointments[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,9 +76,12 @@ export function useMedicalAppointments(selectedDate: Date) {
     setError(null);
 
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const { start, end } = getDateRange(selectedDate, viewPeriod);
+      const startStr = format(start, 'yyyy-MM-dd');
+      const endStr = format(end, 'yyyy-MM-dd');
+      const datesInRange = eachDayOfInterval({ start, end });
 
-      // Fetch medical records with data_atendimento or data_retorno matching the selected date
+      // Fetch medical records with data_atendimento or data_retorno in the date range
       const { data: records, error: recordsError } = await supabase
         .from('student_medical_records')
         .select(`
@@ -83,12 +96,12 @@ export function useMedicalAppointments(selectedDate: Date) {
           data_retorno,
           students!inner(nome_completo, codigo_cadastro)
         `)
-        .or(`data_atendimento.eq.${dateStr},data_retorno.eq.${dateStr}`)
+        .or(`and(data_atendimento.gte.${startStr},data_atendimento.lte.${endStr}),and(data_retorno.gte.${startStr},data_retorno.lte.${endStr})`)
         .order('data_atendimento', { ascending: true });
 
       if (recordsError) throw recordsError;
 
-      // Fetch logs for these records
+      // Fetch logs for these records in the date range
       const recordIds = records?.map(r => r.id) || [];
       let logsMap: Record<string, any> = {};
 
@@ -97,111 +110,138 @@ export function useMedicalAppointments(selectedDate: Date) {
           .from('medical_appointment_log')
           .select('*, profiles:realizado_por(full_name)')
           .in('medical_record_id', recordIds)
-          .eq('data_agendada', dateStr);
+          .gte('data_agendada', startStr)
+          .lte('data_agendada', endStr);
 
         if (logsError) throw logsError;
 
         logs?.forEach(log => {
-          const key = `${log.medical_record_id}-${log.tipo}`;
+          const key = `${log.data_agendada}-${log.medical_record_id}-${log.tipo}`;
           logsMap[key] = log;
         });
       }
 
-      // Transform records into appointments
+      // Process appointments for all dates in range
       const allAppointments: MedicalAppointment[] = [];
+      const dateGroups: DateGroupedAppointments[] = [];
 
-      records?.forEach(record => {
-        const student = record.students as any;
+      for (const currentDate of datesInRange) {
+        const dateStr = format(currentDate, 'yyyy-MM-dd');
+        const dateAppointments: MedicalAppointment[] = [];
 
-        // Add appointment for data_atendimento
-        if (record.data_atendimento === dateStr) {
-          const logKey = `${record.id}-atendimento`;
-          const log = logsMap[logKey];
+        records?.forEach(record => {
+          const student = record.students as any;
 
-          allAppointments.push({
-            id: `${record.id}-atendimento`,
-            medical_record_id: record.id,
-            student_id: record.student_id,
-            student_name: student?.nome_completo || 'Aluno',
-            student_codigo: student?.codigo_cadastro || '',
-            tipo: 'atendimento',
-            tipo_atendimento: record.tipo_atendimento,
-            especialidade: record.especialidade,
-            profissional: record.profissional,
-            local: record.local,
-            motivo: record.motivo,
-            data_agendada: dateStr,
-            log_id: log?.id,
-            realizado: log?.realizado || false,
-            data_realizacao: log?.data_realizacao,
-            realizado_por: log?.realizado_por,
-            realizado_por_nome: log?.profiles?.full_name,
-            observacoes: log?.observacoes,
-            nao_realizado_motivo: log?.nao_realizado_motivo,
+          // Add appointment for data_atendimento if it matches this date
+          if (record.data_atendimento === dateStr) {
+            const logKey = `${dateStr}-${record.id}-atendimento`;
+            const log = logsMap[logKey];
+
+            dateAppointments.push({
+              id: `${record.id}-atendimento-${dateStr}`,
+              medical_record_id: record.id,
+              student_id: record.student_id,
+              student_name: student?.nome_completo || 'Aluno',
+              student_codigo: student?.codigo_cadastro || '',
+              tipo: 'atendimento',
+              tipo_atendimento: record.tipo_atendimento,
+              especialidade: record.especialidade,
+              profissional: record.profissional,
+              local: record.local,
+              motivo: record.motivo,
+              data_agendada: dateStr,
+              log_id: log?.id,
+              realizado: log?.realizado || false,
+              data_realizacao: log?.data_realizacao,
+              realizado_por: log?.realizado_por,
+              realizado_por_nome: log?.profiles?.full_name,
+              observacoes: log?.observacoes,
+              nao_realizado_motivo: log?.nao_realizado_motivo,
+            });
+          }
+
+          // Add appointment for data_retorno if it matches this date
+          if (record.data_retorno === dateStr) {
+            const logKey = `${dateStr}-${record.id}-retorno`;
+            const log = logsMap[logKey];
+
+            dateAppointments.push({
+              id: `${record.id}-retorno-${dateStr}`,
+              medical_record_id: record.id,
+              student_id: record.student_id,
+              student_name: student?.nome_completo || 'Aluno',
+              student_codigo: student?.codigo_cadastro || '',
+              tipo: 'retorno',
+              tipo_atendimento: record.tipo_atendimento,
+              especialidade: record.especialidade,
+              profissional: record.profissional,
+              local: record.local,
+              motivo: record.motivo,
+              data_agendada: dateStr,
+              log_id: log?.id,
+              realizado: log?.realizado || false,
+              data_realizacao: log?.data_realizacao,
+              realizado_por: log?.realizado_por,
+              realizado_por_nome: log?.profiles?.full_name,
+              observacoes: log?.observacoes,
+              nao_realizado_motivo: log?.nao_realizado_motivo,
+            });
+          }
+        });
+
+        allAppointments.push(...dateAppointments);
+
+        // Group appointments for this date
+        if (dateAppointments.length > 0) {
+          const groups: Record<string, MedicalAppointment[]> = {};
+
+          dateAppointments.forEach(apt => {
+            const groupKey = apt.tipo === 'retorno' ? 'retorno' : apt.tipo_atendimento;
+            if (!groups[groupKey]) {
+              groups[groupKey] = [];
+            }
+            groups[groupKey].push(apt);
+          });
+
+          const grouped: GroupedAppointments[] = Object.entries(groups).map(([key, items]) => {
+            const groupInfo = APPOINTMENT_GROUPS[key] || { label: key, icon: 'FileText' };
+            return {
+              grupo: groupInfo.label,
+              icon: groupInfo.icon,
+              items,
+              total: items.length,
+              realizados: items.filter(i => i.realizado).length,
+            };
+          });
+
+          // Sort: Retornos last, others alphabetically
+          grouped.sort((a, b) => {
+            if (a.grupo === 'Retornos') return 1;
+            if (b.grupo === 'Retornos') return -1;
+            return a.grupo.localeCompare(b.grupo);
+          });
+
+          dateGroups.push({
+            date: currentDate,
+            dateStr,
+            groups: grouped,
+            total: dateAppointments.length,
+            realizados: dateAppointments.filter(a => a.realizado).length,
           });
         }
-
-        // Add appointment for data_retorno
-        if (record.data_retorno === dateStr) {
-          const logKey = `${record.id}-retorno`;
-          const log = logsMap[logKey];
-
-          allAppointments.push({
-            id: `${record.id}-retorno`,
-            medical_record_id: record.id,
-            student_id: record.student_id,
-            student_name: student?.nome_completo || 'Aluno',
-            student_codigo: student?.codigo_cadastro || '',
-            tipo: 'retorno',
-            tipo_atendimento: record.tipo_atendimento,
-            especialidade: record.especialidade,
-            profissional: record.profissional,
-            local: record.local,
-            motivo: record.motivo,
-            data_agendada: dateStr,
-            log_id: log?.id,
-            realizado: log?.realizado || false,
-            data_realizacao: log?.data_realizacao,
-            realizado_por: log?.realizado_por,
-            realizado_por_nome: log?.profiles?.full_name,
-            observacoes: log?.observacoes,
-            nao_realizado_motivo: log?.nao_realizado_motivo,
-          });
-        }
-      });
+      }
 
       setAppointments(allAppointments);
+      setDateGroupedAppointments(dateGroups);
 
-      // Group appointments
-      const groups: Record<string, MedicalAppointment[]> = {};
-
-      allAppointments.forEach(apt => {
-        const groupKey = apt.tipo === 'retorno' ? 'retorno' : apt.tipo_atendimento;
-        if (!groups[groupKey]) {
-          groups[groupKey] = [];
-        }
-        groups[groupKey].push(apt);
-      });
-
-      const grouped: GroupedAppointments[] = Object.entries(groups).map(([key, items]) => {
-        const groupInfo = APPOINTMENT_GROUPS[key] || { label: key, icon: 'FileText' };
-        return {
-          grupo: groupInfo.label,
-          icon: groupInfo.icon,
-          items,
-          total: items.length,
-          realizados: items.filter(i => i.realizado).length,
-        };
-      });
-
-      // Sort: Retornos last, others alphabetically
-      grouped.sort((a, b) => {
-        if (a.grupo === 'Retornos') return 1;
-        if (b.grupo === 'Retornos') return -1;
-        return a.grupo.localeCompare(b.grupo);
-      });
-
-      setGroupedAppointments(grouped);
+      // For backward compatibility (day view), set groupedAppointments
+      if (viewPeriod === 'day' && dateGroups.length > 0) {
+        setGroupedAppointments(dateGroups[0].groups);
+      } else {
+        // Flatten all groups
+        const allGroups = dateGroups.flatMap(dg => dg.groups);
+        setGroupedAppointments(allGroups);
+      }
     } catch (err: any) {
       console.error('Error fetching appointments:', err);
       setError(err.message);
@@ -213,7 +253,7 @@ export function useMedicalAppointments(selectedDate: Date) {
     } finally {
       setLoading(false);
     }
-  }, [user, selectedDate, toast]);
+  }, [user, selectedDate, viewPeriod, toast]);
 
   useEffect(() => {
     fetchAppointments();
@@ -351,6 +391,7 @@ export function useMedicalAppointments(selectedDate: Date) {
   return {
     appointments,
     groupedAppointments,
+    dateGroupedAppointments,
     loading,
     error,
     stats,
