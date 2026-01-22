@@ -129,7 +129,7 @@ export function useDashboardHealthSummary(timeFilter: TimeFilter = 'day') {
           const diasSemana = schedule.dias_semana || [];
 
           let appliesThisDay = false;
-          if (freq === 'diario') {
+          if (freq === 'diario' || freq === 'diaria') {
             appliesThisDay = true;
           } else if (freq === 'dias_especificos' && diasSemana.includes(dayName)) {
             appliesThisDay = true;
