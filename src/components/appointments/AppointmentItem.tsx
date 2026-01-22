@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
-  Check, 
-  X, 
-  RotateCcw, 
+  CheckCircle, 
+  XCircle, 
+  Undo2, 
+  RotateCcw,
   MapPin, 
   User, 
   Stethoscope,
-  Clock,
   AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -107,7 +107,7 @@ export function AppointmentItem({
           {/* Completion status */}
           {isCompleted && (
             <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-              <Check className="h-4 w-4" />
+              <CheckCircle className="h-4 w-4" />
               <span>
                 Realizado às {format(new Date(item.data_realizacao!), "HH:mm", { locale: ptBR })}
                 {item.realizado_por_nome && ` por ${item.realizado_por_nome}`}
@@ -116,7 +116,7 @@ export function AppointmentItem({
           )}
 
           {wasNotCompleted && (
-            <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
+            <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
               <AlertCircle className="h-4 w-4" />
               <span>
                 Não realizado: {item.nao_realizado_motivo}
@@ -133,38 +133,37 @@ export function AppointmentItem({
         </div>
 
         {/* Actions */}
-        <TooltipProvider>
-          <div className="flex items-center gap-1">
-            {!item.log_id ? (
-              <>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {!item.log_id ? (
+            <>
+              <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={onComplete}
-                      className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Marcar como realizado</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                       onClick={onNotComplete}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100"
                     >
-                      <X className="h-4 w-4" />
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Não compareceu
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Não compareceu</TooltipContent>
+                  <TooltipContent>Registrar que não compareceu</TooltipContent>
                 </Tooltip>
-              </>
-            ) : (
+              </TooltipProvider>
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+                onClick={onComplete}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Realizado
+              </Button>
+            </>
+          ) : (
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
@@ -173,14 +172,14 @@ export function AppointmentItem({
                     onClick={onUndo}
                     className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                   >
-                    <RotateCcw className="h-4 w-4" />
+                    <Undo2 className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Desfazer</TooltipContent>
               </Tooltip>
-            )}
-          </div>
-        </TooltipProvider>
+            </TooltipProvider>
+          )}
+        </div>
       </div>
     </div>
   );
