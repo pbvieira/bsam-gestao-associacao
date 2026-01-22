@@ -631,6 +631,56 @@ export type Database = {
           },
         ]
       }
+      medical_appointment_log: {
+        Row: {
+          created_at: string
+          data_agendada: string
+          data_realizacao: string | null
+          id: string
+          medical_record_id: string
+          nao_realizado_motivo: string | null
+          observacoes: string | null
+          realizado: boolean | null
+          realizado_por: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_agendada: string
+          data_realizacao?: string | null
+          id?: string
+          medical_record_id: string
+          nao_realizado_motivo?: string | null
+          observacoes?: string | null
+          realizado?: boolean | null
+          realizado_por?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_agendada?: string
+          data_realizacao?: string | null
+          id?: string
+          medical_record_id?: string
+          nao_realizado_motivo?: string | null
+          observacoes?: string | null
+          realizado?: boolean | null
+          realizado_por?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_appointment_log_medical_record_id_fkey"
+            columns: ["medical_record_id"]
+            isOneToOne: false
+            referencedRelation: "student_medical_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_administration_log: {
         Row: {
           administrado: boolean

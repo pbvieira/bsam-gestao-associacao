@@ -36,6 +36,7 @@ import VaccineTypes from "./pages/VaccineTypes";
 import DiseaseTypes from "./pages/DiseaseTypes";
 import DisabilityTypes from "./pages/DisabilityTypes";
 import Medications from "./pages/Medications";
+import Appointments from "./pages/Appointments";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -216,6 +217,11 @@ const App = () => {
           <Route path="/medicacoes" element={
             <UnifiedRoute module="students">
               <Medications />
+            </UnifiedRoute>
+          } />
+          <Route path="/consultas" element={
+            <UnifiedRoute module="students">
+              <Appointments />
             </UnifiedRoute>
           } />
           <Route path="/configuracoes" element={
