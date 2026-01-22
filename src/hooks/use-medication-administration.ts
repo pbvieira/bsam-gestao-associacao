@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
-import { format, isToday, parseISO, getDay } from 'date-fns';
+import { format, parseISO, getDay, eachDayOfInterval, isSameDay } from 'date-fns';
 import { toast } from 'sonner';
+import { ViewPeriod, getDateRange } from '@/components/ui/date-period-selector';
 
 export interface MedicationAdministration {
   id: string;
@@ -19,6 +20,7 @@ export interface MedicationAdministration {
   setor_nome: string | null;
   instrucoes: string | null;
   frequencia: string;
+  data_agendada?: string;
   
   // Log status
   log_id?: string;
@@ -32,7 +34,15 @@ export interface MedicationAdministration {
 
 export interface GroupedMedications {
   horario: string;
+  date?: Date; // For week/month grouping
   items: MedicationAdministration[];
+  total: number;
+  administrados: number;
+}
+
+export interface DateGroupedMedications {
+  date: Date;
+  groups: GroupedMedications[];
   total: number;
   administrados: number;
 }
@@ -48,10 +58,11 @@ const dayNumberToName: { [key: number]: string } = {
   6: 'sabado'
 };
 
-export function useMedicationAdministration(date: Date) {
+export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod = 'day') {
   const { user } = useAuth();
   const [medications, setMedications] = useState<MedicationAdministration[]>([]);
   const [groupedMedications, setGroupedMedications] = useState<GroupedMedications[]>([]);
+  const [dateGroupedMedications, setDateGroupedMedications] = useState<DateGroupedMedications[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,9 +73,8 @@ export function useMedicationAdministration(date: Date) {
     setError(null);
 
     try {
-      const formattedDate = format(date, 'yyyy-MM-dd');
-      const dayOfWeek = getDay(date);
-      const dayName = dayNumberToName[dayOfWeek];
+      const { start, end } = getDateRange(date, viewPeriod);
+      const datesInRange = eachDayOfInterval({ start, end });
 
       // Fetch active medication schedules with medication and student info
       const { data: schedules, error: schedulesError } = await supabase
@@ -102,41 +112,16 @@ export function useMedicationAdministration(date: Date) {
 
       if (schedulesError) throw schedulesError;
 
-      // Filter schedules based on frequency and date
-      const validSchedules = (schedules || []).filter((schedule: any) => {
-        const medication = schedule.medication;
-        
-        // Check if medication is within date range
-        if (medication.data_inicio && formattedDate < medication.data_inicio) return false;
-        if (medication.data_fim && formattedDate > medication.data_fim) return false;
-
-        // Check frequency
-        const freq = schedule.frequencia;
-        
-        if (freq === 'diaria') return true;
-        
-        if (freq === 'semanal' || freq === 'dias_especificos') {
-          const diasSemana = schedule.dias_semana || [];
-          return diasSemana.includes(dayName);
-        }
-        
-        if (freq === 'dias_alternados') {
-          // For alternating days, check if it's an even or odd day from start
-          if (!medication.data_inicio) return true;
-          const startDate = parseISO(medication.data_inicio);
-          const diffDays = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-          return diffDays % 2 === 0;
-        }
-        
-        return true;
-      });
-
-      // Fetch existing logs for this date
+      // Fetch existing logs for the date range
+      const startStr = format(start, 'yyyy-MM-dd');
+      const endStr = format(end, 'yyyy-MM-dd');
+      
       const { data: logs, error: logsError } = await supabase
         .from('medication_administration_log')
         .select(`
           id,
           schedule_id,
+          data_agendada,
           horario_agendado,
           administrado,
           data_administracao,
@@ -144,14 +129,15 @@ export function useMedicationAdministration(date: Date) {
           observacoes,
           nao_administrado_motivo
         `)
-        .eq('data_agendada', formattedDate);
+        .gte('data_agendada', startStr)
+        .lte('data_agendada', endStr);
 
       if (logsError) throw logsError;
 
       // Get admin user names
-      const adminUserIds = (logs || [])
+      const adminUserIds = [...new Set((logs || [])
         .filter(log => log.administrado_por)
-        .map(log => log.administrado_por);
+        .map(log => log.administrado_por))];
       
       let adminProfiles: { [key: string]: string } = {};
       if (adminUserIds.length > 0) {
@@ -168,77 +154,136 @@ export function useMedicationAdministration(date: Date) {
         }
       }
 
-      // Create logs map for quick lookup
+      // Create logs map for quick lookup (date-schedule-horario)
       const logsMap = new Map<string, any>();
       (logs || []).forEach(log => {
-        const key = `${log.schedule_id}-${log.horario_agendado}`;
+        const key = `${log.data_agendada}-${log.schedule_id}-${log.horario_agendado}`;
         logsMap.set(key, log);
       });
 
-      // Transform schedules to MedicationAdministration
-      const medicationItems: MedicationAdministration[] = validSchedules.map((schedule: any) => {
-        const medication = schedule.medication;
-        const student = medication.student;
-        const setor = schedule.setor;
-        const logKey = `${schedule.id}-${schedule.horario}`;
-        const log = logsMap.get(logKey);
+      // Process medications for each date in range
+      const allMedications: MedicationAdministration[] = [];
+      const dateGroups: DateGroupedMedications[] = [];
 
-        return {
-          id: `${schedule.id}-${formattedDate}`,
-          student_id: student.id,
-          student_name: student.nome_completo,
-          student_codigo: student.codigo_cadastro,
-          medication_id: medication.id,
-          medication_name: medication.nome_medicamento,
-          dosagem: medication.dosagem,
-          principio_ativo: medication.principio_ativo,
-          schedule_id: schedule.id,
-          horario: schedule.horario,
-          setor_responsavel_id: schedule.setor_responsavel_id,
-          setor_nome: setor?.nome || null,
-          instrucoes: schedule.instrucoes,
-          frequencia: schedule.frequencia,
+      for (const currentDate of datesInRange) {
+        const formattedDate = format(currentDate, 'yyyy-MM-dd');
+        const dayOfWeek = getDay(currentDate);
+        const dayName = dayNumberToName[dayOfWeek];
+
+        // Filter schedules for this specific date
+        const validSchedules = (schedules || []).filter((schedule: any) => {
+          const medication = schedule.medication;
           
-          // Log data
-          log_id: log?.id,
-          administrado: log?.administrado || false,
-          data_administracao: log?.data_administracao,
-          administrado_por: log?.administrado_por,
-          administrado_por_nome: log?.administrado_por ? adminProfiles[log.administrado_por] : undefined,
-          observacoes: log?.observacoes,
-          nao_administrado_motivo: log?.nao_administrado_motivo
-        };
-      });
+          // Check if medication is within date range
+          if (medication.data_inicio && formattedDate < medication.data_inicio) return false;
+          if (medication.data_fim && formattedDate > medication.data_fim) return false;
 
-      // Sort by time and student name
-      medicationItems.sort((a, b) => {
-        if (a.horario !== b.horario) {
-          return a.horario.localeCompare(b.horario);
-        }
-        return a.student_name.localeCompare(b.student_name);
-      });
+          // Check frequency
+          const freq = schedule.frequencia;
+          
+          if (freq === 'diaria') return true;
+          
+          if (freq === 'semanal' || freq === 'dias_especificos') {
+            const diasSemana = schedule.dias_semana || [];
+            return diasSemana.includes(dayName);
+          }
+          
+          if (freq === 'dias_alternados') {
+            if (!medication.data_inicio) return true;
+            const startDate = parseISO(medication.data_inicio);
+            const diffDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays % 2 === 0;
+          }
+          
+          return true;
+        });
 
-      setMedications(medicationItems);
+        // Transform schedules to MedicationAdministration for this date
+        const dateMedications: MedicationAdministration[] = validSchedules.map((schedule: any) => {
+          const medication = schedule.medication;
+          const student = medication.student;
+          const setor = schedule.setor;
+          const logKey = `${formattedDate}-${schedule.id}-${schedule.horario}`;
+          const log = logsMap.get(logKey);
 
-      // Group by time
-      const grouped = medicationItems.reduce((acc, item) => {
-        const existing = acc.find(g => g.horario === item.horario);
-        if (existing) {
-          existing.items.push(item);
-          existing.total++;
-          if (item.administrado) existing.administrados++;
-        } else {
-          acc.push({
-            horario: item.horario,
-            items: [item],
-            total: 1,
-            administrados: item.administrado ? 1 : 0
+          return {
+            id: `${schedule.id}-${formattedDate}`,
+            student_id: student.id,
+            student_name: student.nome_completo,
+            student_codigo: student.codigo_cadastro,
+            medication_id: medication.id,
+            medication_name: medication.nome_medicamento,
+            dosagem: medication.dosagem,
+            principio_ativo: medication.principio_ativo,
+            schedule_id: schedule.id,
+            horario: schedule.horario,
+            setor_responsavel_id: schedule.setor_responsavel_id,
+            setor_nome: setor?.nome || null,
+            instrucoes: schedule.instrucoes,
+            frequencia: schedule.frequencia,
+            data_agendada: formattedDate,
+            
+            // Log data
+            log_id: log?.id,
+            administrado: log?.administrado || false,
+            data_administracao: log?.data_administracao,
+            administrado_por: log?.administrado_por,
+            administrado_por_nome: log?.administrado_por ? adminProfiles[log.administrado_por] : undefined,
+            observacoes: log?.observacoes,
+            nao_administrado_motivo: log?.nao_administrado_motivo
+          };
+        });
+
+        // Sort by time and student name
+        dateMedications.sort((a, b) => {
+          if (a.horario !== b.horario) {
+            return a.horario.localeCompare(b.horario);
+          }
+          return a.student_name.localeCompare(b.student_name);
+        });
+
+        allMedications.push(...dateMedications);
+
+        // Group by time for this date
+        if (dateMedications.length > 0) {
+          const grouped = dateMedications.reduce((acc, item) => {
+            const existing = acc.find(g => g.horario === item.horario);
+            if (existing) {
+              existing.items.push(item);
+              existing.total++;
+              if (item.administrado) existing.administrados++;
+            } else {
+              acc.push({
+                horario: item.horario,
+                date: currentDate,
+                items: [item],
+                total: 1,
+                administrados: item.administrado ? 1 : 0
+              });
+            }
+            return acc;
+          }, [] as GroupedMedications[]);
+
+          dateGroups.push({
+            date: currentDate,
+            groups: grouped,
+            total: dateMedications.length,
+            administrados: dateMedications.filter(m => m.administrado).length
           });
         }
-        return acc;
-      }, [] as GroupedMedications[]);
+      }
 
-      setGroupedMedications(grouped);
+      setMedications(allMedications);
+      setDateGroupedMedications(dateGroups);
+
+      // For backward compatibility (day view), also set grouped medications
+      if (viewPeriod === 'day' && dateGroups.length > 0) {
+        setGroupedMedications(dateGroups[0].groups);
+      } else {
+        // Flatten all groups for simple groupedMedications
+        const allGroups = dateGroups.flatMap(dg => dg.groups);
+        setGroupedMedications(allGroups);
+      }
 
     } catch (err: any) {
       console.error('Error fetching medications:', err);
@@ -247,7 +292,7 @@ export function useMedicationAdministration(date: Date) {
     } finally {
       setLoading(false);
     }
-  }, [date, user]);
+  }, [date, viewPeriod, user]);
 
   useEffect(() => {
     fetchMedications();
@@ -377,6 +422,7 @@ export function useMedicationAdministration(date: Date) {
   return {
     medications,
     groupedMedications,
+    dateGroupedMedications,
     loading,
     error,
     markAsAdministered,
