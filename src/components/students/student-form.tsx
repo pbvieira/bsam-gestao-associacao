@@ -32,6 +32,7 @@ import { StudentHealthTab } from './tabs/student-health-tab';
 import { StudentCashBookTab } from './tabs/student-cash-book-tab';
 import { StudentAnnotationsTab } from './tabs/student-annotations-tab';
 import { StudentDocumentsTab } from './tabs/student-documents-tab';
+import { StudentStaysTab } from './tabs/student-stays-tab';
 import { StudentFormProvider, useStudentFormContext } from '@/contexts/StudentFormContext';
 
 const calculatePermanencia = (dataAbertura?: string, dataSaida?: string): string => {
@@ -325,7 +326,7 @@ function StudentFormContent({
       )}
       
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="header">Registro</TabsTrigger>
           <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
           <TabsTrigger value="children">Filhos</TabsTrigger>
@@ -334,6 +335,7 @@ function StudentFormContent({
           <TabsTrigger value="health">Saúde</TabsTrigger>
           <TabsTrigger value="cashbook">Financeiro</TabsTrigger>
           <TabsTrigger value="annotations">Anotações</TabsTrigger>
+          <TabsTrigger value="stays">Estadias</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
 
@@ -530,6 +532,10 @@ function StudentFormContent({
 
         <TabsContent value="annotations" forceMount className={activeTab !== 'annotations' ? 'hidden' : ''}>
           <StudentAnnotationsTab studentId={savedStudentId} />
+        </TabsContent>
+
+        <TabsContent value="stays" forceMount className={activeTab !== 'stays' ? 'hidden' : ''}>
+          <StudentStaysTab studentId={savedStudentId} />
         </TabsContent>
 
         <TabsContent value="documents" forceMount className={activeTab !== 'documents' ? 'hidden' : ''}>

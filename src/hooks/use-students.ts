@@ -123,18 +123,59 @@ export function useStudents() {
     }
   };
 
-  const activateStudent = async (id: string) => {
+  const activateStudent = async (
+    id: string,
+    options?: {
+      motivo_saida?: string;
+      observacoes?: string;
+      nova_data_entrada?: string;
+      nova_hora_entrada?: string;
+    }
+  ) => {
     try {
-      const { error } = await supabase
+      // 1. Get current student data to archive
+      const { data: student, error: fetchError } = await supabase
+        .from('students')
+        .select('data_abertura, hora_entrada, data_saida, hora_saida')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // 2. If student has a previous stay with data_saida, archive it
+      if (student?.data_saida && user?.id) {
+        const { error: stayError } = await supabase
+          .from('student_stays')
+          .insert([{
+            student_id: id,
+            data_entrada: student.data_abertura,
+            hora_entrada: student.hora_entrada,
+            data_saida: student.data_saida,
+            hora_saida: student.hora_saida,
+            motivo_saida: options?.motivo_saida || null,
+            observacoes: options?.observacoes || null,
+            created_by: user.id,
+          }]);
+
+        if (stayError) throw stayError;
+      }
+
+      // 3. Update student with new entry data
+      const newDataAbertura = options?.nova_data_entrada || new Date().toISOString().split('T')[0];
+      const newHoraEntrada = options?.nova_hora_entrada || null;
+
+      const { error: updateError } = await supabase
         .from('students')
         .update({ 
           ativo: true, 
+          data_abertura: newDataAbertura,
+          hora_entrada: newHoraEntrada,
           data_saida: null,
           hora_saida: null
         })
         .eq('id', id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
       await fetchStudents(); // Refresh list
       return { error: null };
     } catch (err: any) {

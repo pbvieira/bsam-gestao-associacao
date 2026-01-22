@@ -1927,6 +1927,56 @@ export type Database = {
           },
         ]
       }
+      student_stays: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_entrada: string
+          data_saida: string
+          hora_entrada: string | null
+          hora_saida: string | null
+          id: string
+          motivo_saida: string | null
+          observacoes: string | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_entrada: string
+          data_saida: string
+          hora_entrada?: string | null
+          hora_saida?: string | null
+          id?: string
+          motivo_saida?: string | null
+          observacoes?: string | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_entrada?: string
+          data_saida?: string
+          hora_entrada?: string | null
+          hora_saida?: string | null
+          id?: string
+          motivo_saida?: string | null
+          observacoes?: string | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_stays_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_vaccines: {
         Row: {
           created_at: string
