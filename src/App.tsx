@@ -1,3 +1,4 @@
+// App Router - Updated 2026-01-22
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
