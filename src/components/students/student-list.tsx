@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useStudents } from "@/hooks/use-students";
+import { useStudents, Student } from "@/hooks/use-students";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Plus, Edit, UserCheck, UserX, Calendar, Phone, Filter, Trash2 } from "lucide-react";
 import { format, differenceInYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { StayActivationDialog } from "./stay-activation-dialog";
 
 interface StudentListProps {
   onCreateStudent: () => void;
@@ -25,6 +26,8 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("nome_completo");
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false);
+  const [studentToActivate, setStudentToActivate] = useState<Student | null>(null);
 
   const canCreate = canAccess("students");
   const canUpdate = canAccess("students");
@@ -91,21 +94,40 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
     }
   };
 
-  const handleActivate = async (studentId: string) => {
-    if (confirm("Deseja reativar este aluno?")) {
-      const result = await activateStudent(studentId);
-      if (result.error) {
-        toast({
-          title: "Erro ao ativar",
-          description: result.error,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Aluno ativado",
-          description: "O aluno foi reativado com sucesso.",
-        });
-      }
+  const handleActivateClick = (student: Student) => {
+    // If student has a data_saida, show the dialog to collect reason
+    if (student.data_saida) {
+      setStudentToActivate(student);
+      setActivationDialogOpen(true);
+    } else {
+      // If no previous exit date, just activate directly
+      handleActivateConfirm(student.id);
+    }
+  };
+
+  const handleActivateConfirm = async (
+    studentId: string,
+    options?: {
+      motivo_saida?: string;
+      observacoes?: string;
+      nova_data_entrada?: string;
+      nova_hora_entrada?: string;
+    }
+  ) => {
+    const result = await activateStudent(studentId, options);
+    if (result.error) {
+      toast({
+        title: "Erro ao ativar",
+        description: result.error,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Aluno ativado",
+        description: options?.motivo_saida 
+          ? "O aluno foi reativado e a estadia anterior foi arquivada."
+          : "O aluno foi reativado com sucesso.",
+      });
     }
   };
 
@@ -371,7 +393,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                               variant="ghost"
                               size="sm"
                               disabled={!canUpdate}
-                              onClick={() => handleActivate(student.id)}
+                              onClick={() => handleActivateClick(student)}
                               className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
                             >
                               <UserCheck className="h-3 w-3" />
@@ -410,6 +432,25 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
           )}
         </CardContent>
       </Card>
+
+      {/* Stay Activation Dialog */}
+      <StayActivationDialog
+        open={activationDialogOpen}
+        onOpenChange={setActivationDialogOpen}
+        studentName={studentToActivate?.nome_completo || ''}
+        dataSaidaAnterior={studentToActivate?.data_saida || null}
+        onConfirm={async (data) => {
+          if (studentToActivate) {
+            await handleActivateConfirm(studentToActivate.id, {
+              motivo_saida: data.motivo_saida,
+              observacoes: data.observacoes,
+              nova_data_entrada: data.nova_data_entrada,
+              nova_hora_entrada: data.nova_hora_entrada,
+            });
+            setStudentToActivate(null);
+          }
+        }}
+      />
     </div>
   );
 }

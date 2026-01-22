@@ -15,6 +15,7 @@ import { useStudentVaccines } from '@/hooks/use-student-vaccines';
 import { useStudentMedications } from '@/hooks/use-student-medications';
 import { useStudentHospitalizations, HOSPITALIZATION_TYPES } from '@/hooks/use-student-hospitalizations';
 import { useStudentMedicalRecords, MEDICAL_RECORD_TYPES } from '@/hooks/use-student-medical-records';
+import { useStudentStays } from '@/hooks/use-student-stays';
 import { Loader2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -131,6 +132,7 @@ export function StudentPrintView({ studentId }: StudentPrintViewProps) {
   const { medications, loading: loadingMedications } = useStudentMedications(studentId);
   const { hospitalizations, loading: loadingHospitalizations } = useStudentHospitalizations(studentId);
   const { medicalRecords, loading: loadingMedicalRecords } = useStudentMedicalRecords(studentId);
+  const { stays, loading: loadingStays, getMotivoLabel } = useStudentStays(studentId);
 
   useEffect(() => {
     const fetchStudent = async () => {
@@ -156,7 +158,7 @@ export function StudentPrintView({ studentId }: StudentPrintViewProps) {
   const isLoading = loading || loadingBasic || loadingChildren || loadingWork || 
     loadingIncome || loadingBenefits || loadingContacts || loadingHealth ||
     loadingDiseases || loadingDisabilities || loadingVaccines || loadingMedications ||
-    loadingHospitalizations || loadingMedicalRecords;
+    loadingHospitalizations || loadingMedicalRecords || loadingStays;
 
   if (isLoading) {
     return (
@@ -244,8 +246,41 @@ export function StudentPrintView({ studentId }: StudentPrintViewProps) {
             <div className="print-field">
               <span className="font-medium">Código:</span> {student.codigo_cadastro}
             </div>
+            <div className="print-field">
+              <span className="font-medium">Estadias Anteriores:</span> {stays.length}
+            </div>
           </div>
         </section>
+
+        {/* Section: Histórico de Estadias */}
+        {stays.length > 0 && (
+          <section className="mb-6 print-section">
+            <h2 className="section-title">Histórico de Estadias Anteriores</h2>
+            <table className="print-table">
+              <thead>
+                <tr>
+                  <th>Entrada</th>
+                  <th>Saída</th>
+                  <th>Permanência</th>
+                  <th>Motivo Saída</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stays.map((stay) => {
+                  const dias = differenceInDays(parseISO(stay.data_saida), parseISO(stay.data_entrada));
+                  return (
+                    <tr key={stay.id}>
+                      <td>{formatDate(stay.data_entrada)}</td>
+                      <td>{formatDate(stay.data_saida)}</td>
+                      <td>{calculatePermanencia(stay.data_entrada, stay.data_saida)}</td>
+                      <td>{getMotivoLabel(stay.motivo_saida)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </section>
+        )}
 
         {/* Section: Dados Básicos */}
         {basicData && (
