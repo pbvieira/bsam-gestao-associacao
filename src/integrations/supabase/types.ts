@@ -673,6 +673,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_medical_appointment_log_realizado_por"
+            columns: ["realizado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "medical_appointment_log_medical_record_id_fkey"
             columns: ["medical_record_id"]
             isOneToOne: false
