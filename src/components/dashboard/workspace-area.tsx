@@ -22,8 +22,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { HealthSummaryCards } from "./health-summary-cards";
 
-type TimeFilter = 'day' | 'week' | 'month';
+export type TimeFilter = 'day' | 'week' | 'month';
 
 export function WorkspaceArea() {
   const { events } = useCalendar();
@@ -345,6 +346,9 @@ export function WorkspaceArea() {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Resumo de Saúde (Medicamentos e Consultas) */}
+          <HealthSummaryCards timeFilter={timeFilter} />
+
           {/* Compromissos */}
           {filteredEvents.length > 0 && (
             <div className="space-y-2">
