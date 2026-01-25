@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CalendarIcon, Clock, Users, Mail, X, Plus, FileText, Calendar as CalendarTabIcon } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { CalendarIcon, Clock, Users, Mail, X, Plus, FileText, Calendar as CalendarTabIcon, UserCheck, UserX, UserMinus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -513,6 +514,78 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
             </TabsContent>
 
             <TabsContent value="participants" className="space-y-4 mt-0">
+              {/* Exibir participantes atuais - MODO VISUALIZAÇÃO */}
+              {isEdit && currentEvent && (
+                <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+                  <Label className="text-base font-medium">Participantes do Evento</Label>
+                  
+                  {/* Organizador */}
+                  {currentEvent.created_by_profile && (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="bg-primary">
+                        <UserCheck className="w-3 h-3 mr-1" />
+                        Organizador
+                      </Badge>
+                      <span className="text-sm font-medium">{currentEvent.created_by_profile.full_name}</span>
+                    </div>
+                  )}
+                  
+                  {/* Participantes internos com status */}
+                  {currentEvent.participants?.filter(p => !p.is_organizer).map((p) => (
+                    <div key={p.id} className="flex items-center gap-2">
+                      <Badge 
+                        variant={p.status === 'aceito' ? 'default' : p.status === 'recusado' ? 'destructive' : 'secondary'}
+                        className={cn(
+                          p.status === 'aceito' && "bg-green-600 hover:bg-green-700"
+                        )}
+                      >
+                        {p.status === 'aceito' ? (
+                          <><UserCheck className="w-3 h-3 mr-1" />Confirmado</>
+                        ) : p.status === 'recusado' ? (
+                          <><UserX className="w-3 h-3 mr-1" />Recusado</>
+                        ) : (
+                          <><UserMinus className="w-3 h-3 mr-1" />Pendente</>
+                        )}
+                      </Badge>
+                      <span className="text-sm">{p.user_profile?.full_name || 'Usuário'}</span>
+                    </div>
+                  ))}
+                  
+                  {/* Participantes externos com status */}
+                  {currentEvent.external_participants?.map((ext) => (
+                    <div key={ext.id} className="flex items-center gap-2">
+                      <Badge 
+                        variant={ext.status === 'aceito' ? 'default' : ext.status === 'recusado' ? 'destructive' : 'secondary'}
+                        className={cn(
+                          ext.status === 'aceito' && "bg-green-600 hover:bg-green-700"
+                        )}
+                      >
+                        {ext.status === 'aceito' ? (
+                          <><UserCheck className="w-3 h-3 mr-1" />Confirmado</>
+                        ) : ext.status === 'recusado' ? (
+                          <><UserX className="w-3 h-3 mr-1" />Recusado</>
+                        ) : (
+                          <><UserMinus className="w-3 h-3 mr-1" />Pendente</>
+                        )}
+                      </Badge>
+                      <span className="text-sm">{ext.name}</span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        {ext.email}
+                      </span>
+                    </div>
+                  ))}
+                  
+                  {/* Mensagem se não houver participantes além do organizador */}
+                  {(!currentEvent.participants || currentEvent.participants.filter(p => !p.is_organizer).length === 0) && 
+                   (!currentEvent.external_participants || currentEvent.external_participants.length === 0) && (
+                    <p className="text-sm text-muted-foreground">Nenhum participante convidado ainda.</p>
+                  )}
+                  
+                  <Separator className="my-2" />
+                </div>
+              )}
+
               {/* Usuários Internos */}
               <div className="space-y-3">
                 <Label className="text-base font-medium">Usuários do Sistema</Label>
