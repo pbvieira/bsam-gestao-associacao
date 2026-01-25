@@ -361,7 +361,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
                       <Calendar
                         mode="single"
                         selected={formData.data_inicio}
-                        onSelect={(date) => date && setFormData(prev => ({ ...prev, data_inicio: date }))}
+                        onSelect={(date) => date && setFormData(prev => ({ ...prev, data_inicio: date, data_fim: date }))}
                         initialFocus
                         className="pointer-events-auto"
                       />
