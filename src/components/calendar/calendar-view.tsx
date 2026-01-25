@@ -1,12 +1,18 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Users, Repeat } from "lucide-react";
 import { CalendarEvent } from "@/hooks/use-calendar";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+
+// Tipo estendido para eventos com instâncias recorrentes
+interface ExpandedCalendarEvent extends CalendarEvent {
+  _isRecurrenceInstance?: boolean;
+  _originalEventId?: string;
+}
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -40,6 +46,77 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
     resetViewState
   }));
 
+  // Função para expandir eventos recorrentes
+  const expandRecurringEvents = (events: CalendarEvent[], rangeStart: Date, rangeEnd: Date): ExpandedCalendarEvent[] => {
+    const expandedEvents: ExpandedCalendarEvent[] = [];
+    
+    events.forEach(event => {
+      // Eventos sem recorrência são adicionados diretamente
+      if (!event.recurrence_type || event.recurrence_type === 'none') {
+        expandedEvents.push(event);
+        return;
+      }
+      
+      const eventStart = new Date(event.data_inicio);
+      const eventEnd = new Date(event.data_fim);
+      const duration = eventEnd.getTime() - eventStart.getTime();
+      
+      // Definir limite de recorrência
+      const recurrenceEnd = event.recurrence_end 
+        ? new Date(event.recurrence_end) 
+        : addMonths(rangeEnd, 3); // Limite de 3 meses se não definido
+      
+      let currentDate = new Date(eventStart);
+      let instanceCount = 0;
+      const maxInstances = 100; // Limite de segurança
+      
+      while (currentDate <= recurrenceEnd && currentDate <= rangeEnd && instanceCount < maxInstances) {
+        // Só adiciona se estiver dentro do range visível
+        if (currentDate >= rangeStart || isSameDay(currentDate, eventStart)) {
+          const instanceEnd = new Date(currentDate.getTime() + duration);
+          
+          // A primeira instância é o evento original
+          if (isSameDay(currentDate, eventStart)) {
+            expandedEvents.push({
+              ...event,
+              _isRecurrenceInstance: false,
+              _originalEventId: event.id
+            });
+          } else {
+            // Criar instância virtual
+            expandedEvents.push({
+              ...event,
+              id: `${event.id}_${format(currentDate, 'yyyy-MM-dd')}`,
+              data_inicio: currentDate.toISOString(),
+              data_fim: instanceEnd.toISOString(),
+              _isRecurrenceInstance: true,
+              _originalEventId: event.id
+            });
+          }
+        }
+        
+        instanceCount++;
+        
+        // Avançar para próxima ocorrência
+        switch (event.recurrence_type) {
+          case 'daily':
+            currentDate = addDays(currentDate, 1);
+            break;
+          case 'weekly':
+            currentDate = addDays(currentDate, 7);
+            break;
+          case 'monthly':
+            currentDate = addMonths(currentDate, 1);
+            break;
+          default:
+            currentDate = addDays(currentDate, 1);
+        }
+      }
+    });
+    
+    return expandedEvents;
+  };
+
   // Definir cores e labels dos tipos de evento
   const typeColors = {
     reuniao: "bg-blue-100 text-blue-900 border-blue-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-800",
@@ -55,23 +132,43 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
     lembrete: "Lembrete"
   };
 
+  // Calcular range de datas visível para expansão de recorrência
+  const visibleRangeStart = useMemo(() => {
+    if (viewMode === 'week') {
+      return startOfWeek(currentDate, { weekStartsOn: 0 });
+    }
+    return startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
+  }, [currentDate, viewMode]);
+
+  const visibleRangeEnd = useMemo(() => {
+    if (viewMode === 'week') {
+      return endOfWeek(currentDate, { weekStartsOn: 0 });
+    }
+    return endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
+  }, [currentDate, viewMode]);
+
+  // Expandir eventos recorrentes para o range visível
+  const expandedEvents = useMemo(() => {
+    return expandRecurringEvents(events, visibleRangeStart, visibleRangeEnd);
+  }, [events, visibleRangeStart, visibleRangeEnd]);
+
   // Função para filtrar eventos baseado no modo de visualização
-  const getFilteredEvents = () => {
+  const getFilteredEvents = (): ExpandedCalendarEvent[] => {
     if (showingSpecificDay) {
-      return events.filter(event => isSameDay(new Date(event.data_inicio), selectedDate));
+      return expandedEvents.filter(event => isSameDay(new Date(event.data_inicio), selectedDate));
     }
 
     if (viewMode === 'month') {
       const monthStart = startOfMonth(currentDate);
       const monthEnd = endOfMonth(currentDate);
-      return events.filter(event => {
+      return expandedEvents.filter(event => {
         const eventDate = new Date(event.data_inicio);
         return eventDate >= monthStart && eventDate <= monthEnd;
       });
     } else if (viewMode === 'week') {
       const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
       const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
-      return events.filter(event => {
+      return expandedEvents.filter(event => {
         const eventDate = new Date(event.data_inicio);
         return eventDate >= weekStart && eventDate <= weekEnd;
       });
@@ -119,7 +216,7 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
   while (day <= endDate) {
     const daysInRow = viewMode === 'week' ? 7 : 7;
     for (let i = 0; i < daysInRow; i++) {
-      const dayEvents = events.filter(event => 
+      const dayEvents = expandedEvents.filter(event => 
         isSameDay(new Date(event.data_inicio), day)
       );
 
@@ -159,10 +256,17 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
                 )}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEditEvent(event.id);
+                  // Para instâncias recorrentes, abrir o evento original
+                  const eventIdToEdit = (event as ExpandedCalendarEvent)._originalEventId || event.id;
+                  onEditEvent(eventIdToEdit);
                 }}
               >
-                <div className="truncate font-medium">{event.titulo}</div>
+                <div className="truncate font-medium flex items-center gap-1">
+                  {event.titulo}
+                  {event.recurrence_type && event.recurrence_type !== 'none' && (
+                    <Repeat className="w-2.5 h-2.5 flex-shrink-0" />
+                  )}
+                </div>
                 <div className="flex items-center gap-1 text-xs opacity-75">
                   {!event.all_day && (
                     <span>{format(new Date(event.data_inicio), "HH:mm")}</span>
@@ -314,46 +418,54 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
             <div className="space-y-3">
               {getFilteredEvents()
                 .sort((a, b) => new Date(a.data_inicio).getTime() - new Date(b.data_inicio).getTime())
-                .map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => onEditEvent(event.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {!showingSpecificDay && (
-                            <span className="mr-2">{format(new Date(event.data_inicio), "dd/MM", { locale: ptBR })}</span>
+                .map((event) => {
+                  // Para instâncias recorrentes, abrir o evento original
+                  const eventIdToEdit = (event as ExpandedCalendarEvent)._originalEventId || event.id;
+                  
+                  return (
+                    <div
+                      key={event.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => onEditEvent(eventIdToEdit)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {!showingSpecificDay && (
+                              <span className="mr-2">{format(new Date(event.data_inicio), "dd/MM", { locale: ptBR })}</span>
+                            )}
+                            {event.all_day 
+                              ? 'Dia todo' 
+                              : `${format(new Date(event.data_inicio), "HH:mm")} - ${format(new Date(event.data_fim), "HH:mm")}`
+                            }
+                          </span>
+                          {event.recurrence_type && event.recurrence_type !== 'none' && (
+                            <Repeat className="w-3.5 h-3.5 text-muted-foreground" />
                           )}
-                          {event.all_day 
-                            ? 'Dia todo' 
-                            : `${format(new Date(event.data_inicio), "HH:mm")} - ${format(new Date(event.data_fim), "HH:mm")}`
-                          }
-                        </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <div className="font-medium">{event.titulo}</div>
+                          {event.location && (
+                            <div className="text-sm text-muted-foreground">{event.location}</div>
+                          )}
+                          {event.created_by_profile && (
+                            <div className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                              <Users className="w-3 h-3" />
+                              Organizado por: {event.created_by_profile.full_name}
+                            </div>
+                          )}
+                        </div>
+                        <Badge className={cn("border", typeColors[event.tipo])}>
+                          {typeLabels[event.tipo]}
+                        </Badge>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <div className="text-right">
-                        <div className="font-medium">{event.titulo}</div>
-                        {event.location && (
-                          <div className="text-sm text-muted-foreground">{event.location}</div>
-                        )}
-                        {event.created_by_profile && (
-                          <div className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
-                            <Users className="w-3 h-3" />
-                            Organizado por: {event.created_by_profile.full_name}
-                          </div>
-                        )}
-                      </div>
-                      <Badge className={cn("border", typeColors[event.tipo])}>
-                        {typeLabels[event.tipo]}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           )}
         </CardContent>
