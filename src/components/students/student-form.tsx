@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -168,8 +169,55 @@ function StudentFormContent({
     }
     
     const data = form.getValues();
+    const currentStudentId = savedStudentId || student?.id;
     
     try {
+      // Verificar CPF duplicado
+      if (data.cpf && data.cpf.length > 0) {
+        let query = supabase
+          .from('students')
+          .select('id, nome_completo')
+          .eq('cpf', data.cpf);
+        
+        if (currentStudentId) {
+          query = query.neq('id', currentStudentId);
+        }
+        
+        const { data: existingCpf } = await query.maybeSingle();
+        
+        if (existingCpf) {
+          toast({
+            title: 'CPF já cadastrado',
+            description: `Este CPF já pertence a: ${existingCpf.nome_completo}`,
+            variant: 'destructive'
+          });
+          return { success: false };
+        }
+      }
+
+      // Verificar RG duplicado
+      if (data.rg && data.rg.length > 0) {
+        let query = supabase
+          .from('students')
+          .select('id, nome_completo')
+          .eq('rg', data.rg);
+        
+        if (currentStudentId) {
+          query = query.neq('id', currentStudentId);
+        }
+        
+        const { data: existingRg } = await query.maybeSingle();
+        
+        if (existingRg) {
+          toast({
+            title: 'RG já cadastrado',
+            description: `Este RG já pertence a: ${existingRg.nome_completo}`,
+            variant: 'destructive'
+          });
+          return { success: false };
+        }
+      }
+
       let result;
       if (student || savedStudentId) {
         const idToUpdate = savedStudentId || student.id;
@@ -199,6 +247,24 @@ function StudentFormContent({
       }
       
       if (result.error) {
+        // Tratar erros de constraint de unicidade
+        if (result.error.includes('students_cpf_unique')) {
+          toast({
+            title: 'CPF já cadastrado',
+            description: 'Este CPF já está registrado para outro aluno.',
+            variant: 'destructive'
+          });
+          return { success: false };
+        }
+        if (result.error.includes('students_rg_unique')) {
+          toast({
+            title: 'RG já cadastrado',
+            description: 'Este RG já está registrado para outro aluno.',
+            variant: 'destructive'
+          });
+          return { success: false };
+        }
+        
         toast({
           title: 'Erro',
           description: result.error,
@@ -436,7 +502,12 @@ function StudentFormContent({
                   }) => <FormItem>
                           <FormLabel>CPF</FormLabel>
                           <FormControl>
-                            <Input placeholder="000.000.000-00" {...field} />
+                            <MaskedInput
+                              mask="cpf"
+                              value={field.value || ''}
+                              onChange={field.onChange}
+                              disabled={form.watch('nao_possui_documentos')}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />
@@ -446,7 +517,12 @@ function StudentFormContent({
                   }) => <FormItem>
                           <FormLabel>RG</FormLabel>
                           <FormControl>
-                            <Input placeholder="00.000.000-0" {...field} />
+                            <MaskedInput
+                              mask="rg"
+                              value={field.value || ''}
+                              onChange={field.onChange}
+                              disabled={form.watch('nao_possui_documentos')}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>} />
