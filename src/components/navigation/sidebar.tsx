@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Package, BarChart3, Home, User, ShoppingCart, Warehouse, LogOut, CheckSquare, Calendar, Shield, Pill, Settings, Stethoscope } from "lucide-react";
+import { Users, Package, BarChart3, Home, User, ShoppingCart, Warehouse, LogOut, CheckSquare, Calendar, Shield, Pill, Settings, Stethoscope, CalendarCheck } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,6 +20,11 @@ const mainNavigationItems = [{
   name: "Calendário",
   href: "/calendario",
   icon: Calendar,
+  module: "calendar"
+}, {
+  name: "Convites Pendentes",
+  href: "/convites-pendentes",
+  icon: CalendarCheck,
   module: "calendar"
 }, {
   name: "Alunos",
