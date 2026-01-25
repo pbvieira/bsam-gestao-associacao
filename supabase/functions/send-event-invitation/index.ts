@@ -108,6 +108,8 @@ serve(async (req) => {
     const { eventId, participantIds = [], externalParticipants = [] }: InvitationRequest = await req.json();
 
     console.log('Processing invitation request for event:', eventId);
+    console.log('Internal participants:', participantIds.length);
+    console.log('External participants:', externalParticipants.length);
 
     // Fetch event details
     const { data: eventData, error: eventError } = await supabase
@@ -137,34 +139,20 @@ serve(async (req) => {
     const icsContent = generateICSFile(eventData);
     const icsBase64 = btoa(icsContent);
 
-    // Process internal participants
+    let emailsSent = 0;
+    let emailsFailed = 0;
+
+    // Process internal participants - ONLY SEND EMAILS (participants already inserted by hook)
     if (participantIds.length > 0) {
-      // Add internal participants to event_participants table
-      const internalParticipantsData = participantIds.map(userId => ({
-        event_id: eventId,
-        user_id: userId,
-        status: 'pendente' as const,
-        is_organizer: false
-      }));
+      console.log('Sending emails to internal participants...');
 
-      const { error: internalError } = await supabase
-        .from('event_participants')
-        .insert(internalParticipantsData);
-
-      if (internalError) {
-        console.error('Error adding internal participants:', internalError);
-      } else {
-        console.log('Added internal participants:', participantIds.length);
-      }
-
-      // Fetch internal participants emails for sending invitations
+      // Fetch internal participants info
       const { data: internalUsers } = await supabase
         .from('profiles')
         .select('user_id, full_name')
         .in('user_id', participantIds);
 
       if (internalUsers) {
-        // Get emails from auth.users (using service role)
         for (const user of internalUsers) {
           const { data: authUser } = await supabase.auth.admin.getUserById(user.user_id);
           
@@ -179,6 +167,7 @@ serve(async (req) => {
                 ${eventData.location ? `<p><strong>Local:</strong> ${eventData.location}</p>` : ''}
                 
                 <p>O arquivo .ics em anexo pode ser adicionado ao seu calendário.</p>
+                <p>Acesse o sistema para responder ao convite.</p>
                 
                 <p>Atenciosamente,<br>Sistema de Calendário</p>
               `;
@@ -199,37 +188,30 @@ serve(async (req) => {
               );
               
               console.log(`Email sent to internal user: ${authUser.user.email}`);
+              emailsSent++;
             } catch (emailError) {
               console.error(`Failed to send email to ${authUser.user.email}:`, emailError);
+              emailsFailed++;
             }
           }
         }
       }
     }
 
-    // Process external participants
+    // Process external participants - ONLY SEND EMAILS (participants already inserted by hook)
     if (externalParticipants.length > 0) {
-      // Add external participants to external_event_participants table
-      const externalParticipantsData = externalParticipants.map(participant => ({
-        event_id: eventId,
-        email: participant.email,
-        name: participant.name,
-        status: 'pendente' as const,
-        invite_token: crypto.randomUUID()
-      }));
+      console.log('Sending emails to external participants...');
 
-      const { data: insertedParticipants, error: externalError } = await supabase
+      // Fetch external participants with their invite tokens (already inserted by the hook)
+      const { data: externalParticipantsData, error: fetchError } = await supabase
         .from('external_event_participants')
-        .insert(externalParticipantsData)
-        .select('email, name, invite_token');
+        .select('email, name, invite_token')
+        .eq('event_id', eventId);
 
-      if (externalError) {
-        console.error('Error adding external participants:', externalError);
-      } else {
-        console.log('Added external participants:', externalParticipants.length);
-
-        // Send emails to external participants
-        for (const participant of insertedParticipants || []) {
+      if (fetchError) {
+        console.error('Error fetching external participants:', fetchError);
+      } else if (externalParticipantsData && externalParticipantsData.length > 0) {
+        for (const participant of externalParticipantsData) {
           const acceptUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/process-invitation-response?token=${participant.invite_token}&action=aceitar`;
           const declineUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/process-invitation-response?token=${participant.invite_token}&action=recusar`;
 
@@ -276,17 +258,25 @@ serve(async (req) => {
             );
             
             console.log(`Email sent to external participant: ${participant.email}`);
+            emailsSent++;
           } catch (emailError) {
             console.error(`Failed to send email to ${participant.email}:`, emailError);
+            emailsFailed++;
           }
         }
+      } else {
+        console.log('No external participants found in database for event:', eventId);
       }
     }
+
+    console.log(`Invitation processing complete. Sent: ${emailsSent}, Failed: ${emailsFailed}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Convites enviados para ${participantIds.length} usuários internos e ${externalParticipants.length} participantes externos` 
+        message: `Convites enviados: ${emailsSent} sucesso, ${emailsFailed} falhas`,
+        emailsSent,
+        emailsFailed
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
