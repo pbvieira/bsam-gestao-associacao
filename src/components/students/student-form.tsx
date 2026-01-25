@@ -124,6 +124,9 @@ function StudentFormContent({
   
   const { registerHeaderForm, setStudentId, saveAll, isSaving } = useStudentFormContext();
   
+  // Código de cadastro (somente leitura, exibido apenas em edição)
+  const codigoCadastro = student?.codigo_cadastro || '';
+  
   const form = useForm<StudentHeaderForm>({
     resolver: zodResolver(studentHeaderSchema),
     defaultValues: {
@@ -426,6 +429,21 @@ function StudentFormContent({
               <Form {...form}>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Código de Cadastro - apenas em modo edição */}
+                    {codigoCadastro && (
+                      <FormItem>
+                        <FormLabel>Código de Cadastro</FormLabel>
+                        <FormControl>
+                          <Input 
+                            value={codigoCadastro} 
+                            readOnly 
+                            disabled
+                            className="font-mono bg-muted cursor-not-allowed"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+
                     <FormField control={form.control} name="hora_entrada" render={({
                     field
                   }) => <FormItem>
