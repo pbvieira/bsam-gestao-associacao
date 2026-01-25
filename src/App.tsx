@@ -39,6 +39,7 @@ import DisabilityTypes from "./pages/DisabilityTypes";
 import Medications from "./pages/Medications";
 import Appointments from "./pages/Appointments";
 import Settings from "./pages/Settings";
+import PendingInvitations from "./pages/PendingInvitations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -228,6 +229,11 @@ const App = () => {
           <Route path="/configuracoes" element={
             <UnifiedRoute module="students">
               <Settings />
+            </UnifiedRoute>
+          } />
+          <Route path="/convites-pendentes" element={
+            <UnifiedRoute module="calendar">
+              <PendingInvitations />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
