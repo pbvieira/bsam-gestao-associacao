@@ -127,7 +127,6 @@ function StudentFormContent({
   const form = useForm<StudentHeaderForm>({
     resolver: zodResolver(studentHeaderSchema),
     defaultValues: {
-      numero_interno: student?.numero_interno || '',
       hora_entrada: student?.hora_entrada || '',
       nome_completo: student?.nome_completo || '',
       data_nascimento: student?.data_nascimento || '',
@@ -247,7 +246,6 @@ function StudentFormContent({
           data_abertura: data.data_abertura || new Date().toISOString().split('T')[0],
           data_saida: data.data_saida ? data.data_saida.split('T')[0] : null,
           hora_saida: data.data_saida ? data.data_saida.split('T')[1]?.slice(0, 5) : null,
-          numero_interno: data.numero_interno,
           hora_entrada: data.hora_entrada,
           cpf: data.cpf,
           rg: data.rg,
@@ -428,16 +426,6 @@ function StudentFormContent({
               <Form {...form}>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="numero_interno" render={({
-                    field
-                  }) => <FormItem>
-                          <FormLabel>Número Interno</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Número de controle interno" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>} />
-
                     <FormField control={form.control} name="hora_entrada" render={({
                     field
                   }) => <FormItem>

@@ -26,7 +26,6 @@ interface Student {
   data_nascimento: string;
   cpf: string | null;
   rg: string | null;
-  numero_interno: string | null;
   hora_entrada: string | null;
   data_abertura: string;
   data_saida: string | null;
@@ -201,9 +200,6 @@ export function StudentPrintView({ studentId }: StudentPrintViewProps) {
           <p className="text-sm text-muted-foreground mt-1">
             Impresso em: {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
           </p>
-          {student.numero_interno && (
-            <p className="text-sm font-medium mt-1">N° Interno: {student.numero_interno}</p>
-          )}
         </header>
 
         {/* Section: Registro */}

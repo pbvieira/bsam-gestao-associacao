@@ -2156,7 +2156,6 @@ export type Database = {
           nao_possui_documentos: boolean | null
           nome_completo: string
           nome_responsavel: string | null
-          numero_interno: string | null
           parentesco_responsavel: string | null
           rg: string | null
           updated_at: string
@@ -2176,7 +2175,6 @@ export type Database = {
           nao_possui_documentos?: boolean | null
           nome_completo: string
           nome_responsavel?: string | null
-          numero_interno?: string | null
           parentesco_responsavel?: string | null
           rg?: string | null
           updated_at?: string
@@ -2196,7 +2194,6 @@ export type Database = {
           nao_possui_documentos?: boolean | null
           nome_completo?: string
           nome_responsavel?: string | null
-          numero_interno?: string | null
           parentesco_responsavel?: string | null
           rg?: string | null
           updated_at?: string
