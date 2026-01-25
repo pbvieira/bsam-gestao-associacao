@@ -2,7 +2,7 @@ import { useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Users } from "lucide-react";
 import { CalendarEvent } from "@/hooks/use-calendar";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -163,11 +163,17 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
                 }}
               >
                 <div className="truncate font-medium">{event.titulo}</div>
-                {!event.all_day && (
-                  <div className="text-xs opacity-75">
-                    {format(new Date(event.data_inicio), "HH:mm")}
-                  </div>
-                )}
+                <div className="flex items-center gap-1 text-xs opacity-75">
+                  {!event.all_day && (
+                    <span>{format(new Date(event.data_inicio), "HH:mm")}</span>
+                  )}
+                  {event.participants && event.participants.length > 1 && (
+                    <span className="flex items-center gap-0.5">
+                      <Users className="w-2.5 h-2.5" />
+                      {event.participants.length}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
             {dayEvents.length > 3 && (
@@ -330,10 +336,16 @@ export const CalendarView = forwardRef<CalendarViewRef, CalendarViewProps>(({
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <div>
+                      <div className="text-right">
                         <div className="font-medium">{event.titulo}</div>
                         {event.location && (
                           <div className="text-sm text-muted-foreground">{event.location}</div>
+                        )}
+                        {event.created_by_profile && (
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                            <Users className="w-3 h-3" />
+                            Organizado por: {event.created_by_profile.full_name}
+                          </div>
                         )}
                       </div>
                       <Badge className={cn("border", typeColors[event.tipo])}>
