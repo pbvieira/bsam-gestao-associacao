@@ -132,16 +132,40 @@ export function useNotifications() {
         .from('calendar_events')
         .select('titulo, created_by')
         .eq('id', eventId)
-        .single();
+        .maybeSingle();
 
       if (eventError) throw eventError;
+
+      // Verificar se o evento existe
+      if (!eventData) {
+        // Evento foi deletado - remover a notificação órfã
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('type', 'calendar_invite')
+          .eq('reference_id', eventId)
+          .eq('user_id', user.id);
+        
+        // Atualizar estado local
+        setNotifications(prev => 
+          prev.filter(n => !(n.type === 'calendar_invite' && n.reference_id === eventId))
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+        
+        toast({
+          title: "Evento não encontrado",
+          description: "Este evento foi cancelado ou removido.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Buscar nome do usuário que está respondendo
       const { data: profileData } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       const userName = profileData?.full_name || 'Um participante';
 
