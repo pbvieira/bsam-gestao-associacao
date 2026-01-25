@@ -12,6 +12,7 @@ import {
   Bell,
   Check,
   X,
+  Trash2,
   AlertCircle,
   Calendar,
   CheckSquare,
@@ -26,7 +27,7 @@ import { ptBR } from "date-fns/locale";
 export function NotificationPopover() {
   const [open, setOpen] = useState(false);
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
-  const { notifications, markAsRead, markAllAsRead, respondToEventInvite, loading, unreadCount } = useNotifications();
+  const { notifications, deleteNotification, markAllAsRead, respondToEventInvite, loading, unreadCount } = useNotifications();
 
   // Filtrar por não lidas se o filtro estiver ativo
   const filteredNotifications = showOnlyUnread 
@@ -60,8 +61,8 @@ export function NotificationPopover() {
     }
   };
 
-  const handleMarkAsRead = async (notificationId: string) => {
-    await markAsRead(notificationId);
+  const handleDelete = async (notificationId: string) => {
+    await deleteNotification(notificationId);
   };
 
   return (
@@ -200,16 +201,18 @@ export function NotificationPopover() {
                       )}
                   </div>
 
-                  {!notification.read && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0 h-6 w-6 p-0"
-                      onClick={() => handleMarkAsRead(notification.id)}
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(notification.id);
+                    }}
+                    title="Excluir notificação"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               ))}
             </div>
