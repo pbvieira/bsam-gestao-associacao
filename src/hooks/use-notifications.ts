@@ -199,13 +199,26 @@ export function useNotifications() {
         });
       }
 
-      // Ocultar a notificação do convite
-      const notification = notifications.find(
-        n => n.type === 'calendar_invite' && n.reference_id === eventId
-      );
-      
-      if (notification) {
-        await deleteNotification(notification.id);
+      // Deletar a notificação do convite diretamente no banco
+      const { error: deleteError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('type', 'calendar_invite')
+        .eq('reference_id', eventId)
+        .eq('user_id', user.id);
+
+      if (!deleteError) {
+        // Atualizar estado local removendo a notificação
+        setNotifications(prev => 
+          prev.filter(n => !(n.type === 'calendar_invite' && n.reference_id === eventId))
+        );
+        // Decrementar contador se a notificação não estava lida
+        const wasUnread = notifications.find(
+          n => n.type === 'calendar_invite' && n.reference_id === eventId && !n.read
+        );
+        if (wasUnread) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
       }
 
     } catch (err) {

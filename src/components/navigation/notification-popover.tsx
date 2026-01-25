@@ -25,9 +25,15 @@ import { ptBR } from "date-fns/locale";
 
 export function NotificationPopover() {
   const [open, setOpen] = useState(false);
+  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const { notifications, markAsRead, markAllAsRead, respondToEventInvite, loading, unreadCount } = useNotifications();
 
-  const recentNotifications = notifications.slice(0, 5);
+  // Filtrar por não lidas se o filtro estiver ativo
+  const filteredNotifications = showOnlyUnread 
+    ? notifications.filter(n => !n.read)
+    : notifications;
+
+  const recentNotifications = filteredNotifications.slice(0, 5);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -84,17 +90,28 @@ export function NotificationPopover() {
               </Badge>
             )}
           </h4>
-          {unreadCount > 0 && (
+          <div className="flex items-center gap-1">
             <Button
-              variant="ghost"
+              variant={showOnlyUnread ? "secondary" : "ghost"}
               size="sm"
-              onClick={markAllAsRead}
-              className="text-xs h-7"
+              onClick={() => setShowOnlyUnread(!showOnlyUnread)}
+              className="text-xs h-7 px-2"
+              title={showOnlyUnread ? "Mostrar todas" : "Mostrar só não lidas"}
             >
-              <Check className="h-3 w-3 mr-1" />
-              Marcar todas
+              {showOnlyUnread ? "Não lidas" : "Todas"}
             </Button>
-          )}
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={markAllAsRead}
+                className="text-xs h-7"
+              >
+                <Check className="h-3 w-3 mr-1" />
+                Ler todas
+              </Button>
+            )}
+          </div>
         </div>
 
         {loading ? (
