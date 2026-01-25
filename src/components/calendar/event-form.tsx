@@ -294,7 +294,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
   const totalParticipants = selectedParticipants.length + externalParticipants.length;
 
   return (
-    <form onSubmit={handleSubmit} className="max-h-[85vh] overflow-hidden">
+    <form onSubmit={handleSubmit} className="max-h-[90vh] overflow-hidden">
       <Tabs defaultValue="info" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="info" className="flex items-center gap-2">
@@ -307,7 +307,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
           </TabsTrigger>
         </TabsList>
 
-        <ScrollArea className="h-[65vh] mt-4">
+        <ScrollArea className="h-[70vh] mt-4">
           <div className="space-y-6 pr-6">
             <TabsContent value="info" className="space-y-4 mt-0">
               {/* Título e Tipo */}
