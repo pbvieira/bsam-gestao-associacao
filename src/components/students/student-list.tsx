@@ -40,8 +40,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
         searchTerm === "" ||
         student.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.codigo_cadastro.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.cpf?.includes(searchTerm) ||
-        student.numero_interno?.includes(searchTerm);
+        student.cpf?.includes(searchTerm);
 
       // Status filter
       const statusMatch =

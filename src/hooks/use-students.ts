@@ -6,7 +6,6 @@ export interface Student {
   id: string;
   user_id: string;
   codigo_cadastro: string;
-  numero_interno: string | null;
   data_abertura: string;
   hora_entrada: string | null;
   nome_completo: string;
@@ -56,7 +55,6 @@ export function useStudents() {
     data_nascimento: string;
     ativo?: boolean;
     data_abertura?: string;
-    numero_interno?: string | null;
     hora_entrada?: string | null;
     cpf?: string | null;
     rg?: string | null;

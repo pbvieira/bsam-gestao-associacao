@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 // Main student schema
 export const studentHeaderSchema = z.object({
-  numero_interno: z.string().nullish(),
   hora_entrada: z.string().nullish(),
   nome_completo: z.string().min(1, 'Nome completo é obrigatório').max(255),
   data_nascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
