@@ -5,6 +5,7 @@ import { studentBasicDataSchema, type StudentBasicDataForm } from '@/lib/student
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -347,7 +348,11 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input placeholder="(00) 00000-0000" {...field} />
+                        <MaskedInput 
+                          mask="telefone" 
+                          value={field.value || ''} 
+                          onChange={field.onChange} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -633,7 +638,11 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>PIS/NIS</FormLabel>
                       <FormControl>
-                        <Input placeholder="000.00000.00-0" {...field} />
+                        <MaskedInput 
+                          mask="pis_nis" 
+                          value={field.value || ''} 
+                          onChange={field.onChange} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -647,7 +656,11 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>Cartão SUS</FormLabel>
                       <FormControl>
-                        <Input placeholder="000 0000 0000 0000" {...field} />
+                        <MaskedInput 
+                          mask="cartao_sus" 
+                          value={field.value || ''} 
+                          onChange={field.onChange} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
