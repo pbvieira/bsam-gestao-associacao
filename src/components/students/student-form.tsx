@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { differenceInDays, differenceInMonths, differenceInYears, isValid, parseISO, addYears, addMonths } from 'date-fns';
 import { studentHeaderSchema, type StudentHeaderForm, PARENTESCO_OPTIONS } from '@/lib/student-schemas';
+import { validateCPF } from '@/lib/cpf-validation';
 import { useStudents } from '@/hooks/use-students';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/hooks/use-auth';
@@ -172,8 +173,18 @@ function StudentFormContent({
     const currentStudentId = savedStudentId || student?.id;
     
     try {
-      // Verificar CPF duplicado
+      // Validar dígitos verificadores do CPF
       if (data.cpf && data.cpf.length > 0) {
+        if (!validateCPF(data.cpf)) {
+          toast({
+            title: 'CPF inválido',
+            description: 'Os dígitos verificadores do CPF não conferem. Verifique o número digitado.',
+            variant: 'destructive'
+          });
+          return { success: false };
+        }
+        
+        // Verificar CPF duplicado
         let query = supabase
           .from('students')
           .select('id, nome_completo')
