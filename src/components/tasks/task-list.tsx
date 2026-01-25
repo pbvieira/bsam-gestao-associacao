@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Task, TaskPriority, TaskStatus } from "@/hooks/use-tasks";
 import { TaskCard } from "./task-card";
-import { TaskBoard } from "./task-board";
+import { TaskTable } from "./task-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutGrid, List, Search, Filter } from "lucide-react";
+import { Table2, List, Search, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface TaskListProps {
@@ -17,7 +17,7 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, loading, onEditTask, refetch }: TaskListProps) {
-  const [viewMode, setViewMode] = useState<'list' | 'board'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
@@ -92,13 +92,13 @@ export function TaskList({ tasks, loading, onEditTask, refetch }: TaskListProps)
               Lista
             </Button>
             <Button
-              variant={viewMode === 'board' ? 'default' : 'ghost'}
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('board')}
+              onClick={() => setViewMode('table')}
               className="rounded-l-none"
             >
-              <LayoutGrid className="h-4 w-4 mr-2" />
-              Quadro
+              <Table2 className="h-4 w-4 mr-2" />
+              Tabela
             </Button>
           </div>
         </div>
@@ -175,7 +175,7 @@ export function TaskList({ tasks, loading, onEditTask, refetch }: TaskListProps)
                 ))}
               </div>
             ) : (
-              <TaskBoard tasks={filteredTasks} onEditTask={onEditTask} onStatusChange={resetFilters} />
+              <TaskTable tasks={filteredTasks} onEditTask={onEditTask} onStatusChange={resetFilters} />
             )}
           </>
         )}
