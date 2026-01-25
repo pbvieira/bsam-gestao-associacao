@@ -55,19 +55,22 @@ export function useNotifications() {
 
   const markAsRead = async (notificationId: string) => {
     try {
+      const notification = notifications.find(n => n.id === notificationId);
+      
       const { error } = await supabase
         .from('notifications')
-        .update({ read: true })
+        .delete()
         .eq('id', notificationId);
 
       if (error) throw error;
 
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      
+      if (notification && !notification.read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (err) {
-      console.error('Erro ao marcar notificação como lida:', err);
+      console.error('Erro ao excluir notificação:', err);
     }
   };
 
@@ -78,25 +81,22 @@ export function useNotifications() {
 
       const { error } = await supabase
         .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user.id)
-        .eq('read', false);
+        .delete()
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, read: true }))
-      );
+      setNotifications([]);
       setUnreadCount(0);
 
       toast({
         title: "Sucesso",
-        description: "Todas as notificações foram marcadas como lidas",
+        description: "Todas as notificações foram excluídas",
       });
     } catch (err) {
       toast({
         title: "Erro",
-        description: "Erro ao marcar notificações como lidas",
+        description: "Erro ao excluir notificações",
         variant: "destructive",
       });
     }
