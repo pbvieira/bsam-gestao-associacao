@@ -2554,6 +2554,7 @@ export type Database = {
         Args: { creator_uuid: string; event_uuid: string }
         Returns: boolean
       }
+      cleanup_old_notifications: { Args: never; Returns: number }
       count_active_admins: { Args: never; Returns: number }
       get_current_user_role: { Args: never; Returns: string }
       get_user_email: { Args: { user_uuid: string }; Returns: string }
