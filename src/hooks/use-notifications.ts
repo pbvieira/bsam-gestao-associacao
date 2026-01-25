@@ -155,6 +155,18 @@ export function useNotifications() {
 
         if (error) throw error;
 
+        // Notificar o organizador sobre o aceite
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: eventData.created_by,
+            type: 'calendar_update',
+            reference_id: eventId,
+            title: 'Convite aceito',
+            message: `${userName} aceitou o convite para o evento "${eventData.titulo}"`,
+            read: false
+          });
+
         toast({
           title: "Sucesso",
           description: "Convite aceito com sucesso",

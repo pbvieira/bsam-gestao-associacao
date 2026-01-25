@@ -154,7 +154,7 @@ serve(async (req) => {
     }
 
     // Convert action to status
-    const status = action === 'aceitar' ? 'confirmado' : 'recusado';
+    const status = action === 'aceitar' ? 'aceito' : 'recusado';
 
     // Fetch participant details first
     const { data: participantData, error: fetchError } = await supabase
@@ -257,7 +257,7 @@ serve(async (req) => {
         .from('notifications')
         .insert({
           user_id: eventData.created_by,
-          type: 'calendar_response',
+          type: 'calendar_update',
           reference_id: participantData.event_id,
           title: organizerNotificationTitle,
           message: organizerNotificationMessage
