@@ -29,6 +29,7 @@ export function TemplatePreview({ template }: TemplatePreviewProps) {
       <div className="bg-white w-full max-w-[210mm] min-h-[297mm] p-12 shadow-lg border rounded-sm" style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}>
         {/* Header */}
         <header className="text-center mb-8">
+          <img src={logoObs} alt="Logo" className="mx-auto mb-4 w-[120px]" />
           <h1 className="font-serif font-bold text-base text-foreground leading-tight">
             {template.header_line1 || 'ASSOCIAÇÃO DE ASSISTÊNCIA SOCIAL E EDUCACIONAL'}
           </h1>

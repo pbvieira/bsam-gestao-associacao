@@ -57,6 +57,7 @@ function DocumentContent({ template, variables }: { template: DocumentTemplate; 
         <div className="print-container bg-white w-full max-w-[210mm] min-h-[297mm] p-12 shadow-lg print:shadow-none mx-4 print:mx-0">
           {/* Header */}
           <header className="text-center mb-8">
+            <img src={logoObs} alt="Logo" className="mx-auto mb-4 w-[120px]" />
             <h1 className="font-serif font-bold text-base text-foreground leading-tight">
               {template.header_line1}
             </h1>
