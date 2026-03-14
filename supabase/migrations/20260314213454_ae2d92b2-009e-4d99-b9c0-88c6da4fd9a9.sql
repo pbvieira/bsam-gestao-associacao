@@ -1,0 +1,1 @@
+ALTER TABLE public.student_medications ADD COLUMN farmacia varchar(255) DEFAULT NULL;

@@ -26,6 +26,7 @@ export interface StudentMedication {
   forma_farmaceutica: string | null;
   tipo_uso_id: string | null;
   prescrito_por: string | null;
+  farmacia: string | null;
   data_inicio: string | null;
   data_fim: string | null;
   ativo: boolean;
@@ -48,6 +49,7 @@ export interface MedicationInput {
   forma_farmaceutica?: string;
   tipo_uso_id?: string;
   prescrito_por?: string;
+  farmacia?: string;
   data_inicio?: string;
   data_fim?: string;
   observacoes?: string;
@@ -323,6 +325,7 @@ export function useStudentMedications(studentId?: string) {
       const sanitizedData = {
         ...data,
         tipo_uso_id: data.tipo_uso_id || null,
+        farmacia: data.farmacia || null,
         data_inicio: data.data_inicio || null,
         data_fim: data.data_fim || null,
       };
@@ -393,6 +396,7 @@ export function useStudentMedications(studentId?: string) {
       const sanitizedData = {
         ...data,
         tipo_uso_id: data.tipo_uso_id || null,
+        farmacia: data.farmacia || null,
         data_inicio: data.data_inicio || null,
         data_fim: data.data_fim || null,
       };

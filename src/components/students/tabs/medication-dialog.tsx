@@ -78,6 +78,7 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
     forma_farmaceutica: '',
     tipo_uso_id: '',
     prescrito_por: '',
+    farmacia: '',
     data_inicio: '',
     data_fim: '',
     observacoes: ''
@@ -99,6 +100,7 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
         forma_farmaceutica: medication.forma_farmaceutica || '',
         tipo_uso_id: medication.tipo_uso_id || '',
         prescrito_por: medication.prescrito_por || '',
+        farmacia: medication.farmacia || '',
         data_inicio: medication.data_inicio || '',
         data_fim: medication.data_fim || '',
         observacoes: medication.observacoes || ''
@@ -121,6 +123,7 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
         forma_farmaceutica: '',
         tipo_uso_id: '',
         prescrito_por: '',
+        farmacia: '',
         data_inicio: '',
         data_fim: '',
         observacoes: ''
@@ -272,6 +275,16 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
                 value={formData.prescrito_por}
                 onChange={(e) => setFormData({ ...formData, prescrito_por: e.target.value })}
                 placeholder="Nome do médico"
+              />
+            </div>
+            <div>
+              <Label htmlFor="farmacia">Farmácia</Label>
+              <Input
+                id="farmacia"
+                value={formData.farmacia}
+                onChange={(e) => setFormData({ ...formData, farmacia: e.target.value.slice(0, 255) })}
+                placeholder="Nome da farmácia"
+                maxLength={255}
               />
             </div>
             <div>
