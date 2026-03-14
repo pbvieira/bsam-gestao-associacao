@@ -192,6 +192,7 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
             </TableBody>
           </Table>
         </TooltipProvider>
+        )}
       </CardContent>
     </Card>
   );
