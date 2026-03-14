@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -20,9 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Clock, Calendar } from 'lucide-react';
+import { Plus, Trash2, Clock } from 'lucide-react';
 import { useMedicationUsageTypes } from '@/hooks/use-medication-usage-types';
-import { useSetores } from '@/hooks/use-setores';
 import { StudentMedication, MedicationInput, ScheduleInput } from '@/hooks/use-student-medications';
 import { toast } from 'sonner';
 
