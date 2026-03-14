@@ -205,7 +205,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
                   </div>
                   
                   <div className="flex gap-2">
-                    {isImageFile(document.mime_type) && (
+                    {isPreviewable(document.mime_type) && (
                       <Button
                         variant="outline"
                         size="sm"
