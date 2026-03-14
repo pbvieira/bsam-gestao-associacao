@@ -278,6 +278,16 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
               />
             </div>
             <div>
+              <Label htmlFor="farmacia">Farmácia</Label>
+              <Input
+                id="farmacia"
+                value={formData.farmacia}
+                onChange={(e) => setFormData({ ...formData, farmacia: e.target.value.slice(0, 255) })}
+                placeholder="Nome da farmácia"
+                maxLength={255}
+              />
+            </div>
+            <div>
               <Label htmlFor="data_inicio">Data Início</Label>
               <Input
                 id="data_inicio"
