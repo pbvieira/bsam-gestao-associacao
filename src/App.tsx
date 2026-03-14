@@ -39,6 +39,7 @@ import DisabilityTypes from "./pages/DisabilityTypes";
 import Medications from "./pages/Medications";
 import Appointments from "./pages/Appointments";
 import Settings from "./pages/Settings";
+import DocumentTemplates from "./pages/DocumentTemplates";
 import PendingInvitations from "./pages/PendingInvitations";
 import NotFound from "./pages/NotFound";
 
