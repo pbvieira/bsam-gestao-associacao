@@ -242,6 +242,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
         onOpenChange={setViewerOpen}
         imageUrl={viewerUrl}
         fileName={viewerFileName}
+        fileType={viewerDocument && isPdfFile(viewerDocument.mime_type) ? 'pdf' : 'image'}
         loading={viewerLoading}
         onDownload={viewerDocument ? () => downloadDocument(viewerDocument) : undefined}
       />
