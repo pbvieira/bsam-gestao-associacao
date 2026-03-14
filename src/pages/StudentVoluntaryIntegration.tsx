@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { VoluntaryIntegrationForm } from '@/components/students/authorization-forms/voluntary-integration-form';
+import { GenericDocumentRenderer } from '@/components/documents/generic-document-renderer';
+import { Loader2 } from 'lucide-react';
 
 interface StudentData {
   nome_completo: string;
@@ -17,28 +18,22 @@ export default function StudentVoluntaryIntegration() {
   useEffect(() => {
     async function fetchStudent() {
       if (!id) return;
-
       const { data, error } = await supabase
         .from('students')
         .select('nome_completo, rg, cpf')
         .eq('id', id)
         .single();
-
-      if (error) {
-        console.error('Error fetching student:', error);
-      } else {
-        setStudent(data);
-      }
+      if (error) console.error('Error fetching student:', error);
+      else setStudent(data);
       setLoading(false);
     }
-
     fetchStudent();
   }, [id]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -52,7 +47,8 @@ export default function StudentVoluntaryIntegration() {
   }
 
   return (
-    <VoluntaryIntegrationForm
+    <GenericDocumentRenderer
+      slug="integracao-voluntaria"
       name={student.nome_completo}
       rg={student.rg}
       cpf={student.cpf}
