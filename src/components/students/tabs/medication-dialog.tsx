@@ -140,8 +140,6 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
       frequencia: 'diaria',
       dias_semana: [],
       instrucoes: '',
-      gerar_evento: false,
-      setor_responsavel_id: ''
     }]);
   };
 
