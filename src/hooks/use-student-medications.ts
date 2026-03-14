@@ -396,6 +396,7 @@ export function useStudentMedications(studentId?: string) {
       const sanitizedData = {
         ...data,
         tipo_uso_id: data.tipo_uso_id || null,
+        farmacia: data.farmacia || null,
         data_inicio: data.data_inicio || null,
         data_fim: data.data_fim || null,
       };
