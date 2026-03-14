@@ -16,8 +16,15 @@ interface StudentDisabilitiesSectionProps {
 }
 
 export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSectionProps) {
-  const { disabilityTypes, isLoading, saveDisability, deleteDisability, getDisabilityStatus, getStats } = useStudentDisabilities(studentId);
+  const { disabilityTypes, studentDisabilities, isLoading, saveDisability, deleteDisability, getDisabilityStatus, getStats } = useStudentDisabilities(studentId);
   const stats = getStats();
+  const [showTable, setShowTable] = useState(false);
+
+  useEffect(() => {
+    if (studentDisabilities.length > 0 && studentDisabilities.some(d => d.possui)) {
+      setShowTable(true);
+    }
+  }, [studentDisabilities]);
 
   const handleStatusChange = (disabilityTypeId: string, value: string) => {
     if (!studentId) return;
