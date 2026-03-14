@@ -66,7 +66,6 @@ const DIAS_SEMANA = [
 
 export function MedicationDialog({ open, onOpenChange, medication, onSave }: MedicationDialogProps) {
   const { types } = useMedicationUsageTypes();
-  const { setores } = useSetores();
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<MedicationInput>({
