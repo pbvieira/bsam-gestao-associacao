@@ -183,13 +183,16 @@ export function useStudents() {
 
   const deleteStudent = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error, count } = await supabase
         .from('students')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', id);
 
       if (error) throw error;
-      await fetchStudents(); // Refresh list
+      if (count === 0) {
+        return { error: 'Você não tem permissão para excluir alunos. Apenas diretores e administradores podem realizar esta ação.' };
+      }
+      await fetchStudents();
       return { error: null };
     } catch (err: any) {
       return { error: err.message };
