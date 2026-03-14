@@ -111,7 +111,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
       observacoes?: string;
       nova_data_entrada?: string;
       nova_hora_entrada?: string;
-    }
+    },
   ) => {
     const result = await activateStudent(studentId, options);
     if (result.error) {
@@ -123,7 +123,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
     } else {
       toast({
         title: "Aluno ativado",
-        description: options?.motivo_saida 
+        description: options?.motivo_saida
           ? "O aluno foi reativado e a estadia anterior foi arquivada."
           : "O aluno foi reativado com sucesso.",
       });
@@ -400,7 +400,6 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             </Button>
                           )}
 
-                          {/* 
                           <Button
                             variant="ghost"
                             size="sm"
@@ -411,7 +410,6 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             <Trash2 className="h-3 w-3" />
                             Excluir
                           </Button>
-                          */}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -436,7 +434,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
       <StayActivationDialog
         open={activationDialogOpen}
         onOpenChange={setActivationDialogOpen}
-        studentName={studentToActivate?.nome_completo || ''}
+        studentName={studentToActivate?.nome_completo || ""}
         dataSaidaAnterior={studentToActivate?.data_saida || null}
         onConfirm={async (data) => {
           if (studentToActivate) {
