@@ -87,24 +87,24 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
 
     // Validar data do pai
     if (!paiAutoOptional && !studentData.data_nascimento_pai_desconhecida && !studentData.data_nascimento_pai) {
-      errors.data_nascimento_pai = 'Data de nascimento é obrigatória';
+      errors.data_nascimento_pai = 'Data de nascimento do pai é obrigatória';
     }
 
     // Validar data da mãe
     if (!maeAutoOptional && !studentData.data_nascimento_mae_desconhecida && !studentData.data_nascimento_mae) {
-      errors.data_nascimento_mae = 'Data de nascimento é obrigatória';
+      errors.data_nascimento_mae = 'Data de nascimento da mãe é obrigatória';
     }
 
     // Validar data do cônjuge (quando nome preenchido e não marcou "não sabe")
     if (studentData.nome_conjuge && !conjugeNaoSabe && !studentData.data_nascimento_conjuge) {
-      errors.data_nascimento_conjuge = 'Data de nascimento é obrigatória';
+      errors.data_nascimento_conjuge = 'Data de nascimento do cônjuge é obrigatória';
     }
 
     if (Object.keys(errors).length > 0) {
       setManualErrors(errors);
       toast({
         title: 'Campos obrigatórios',
-        description: 'Preencha as datas de nascimento obrigatórias ou marque "Não sabe"',
+        description: 'Preencha as datas de nascimento do pai, da mãe e do cônjuge obrigatórias na aba de Dados Básicos ou marque "Não sabe"',
         variant: 'destructive',
       });
       return false;
