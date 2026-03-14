@@ -1,4 +1,5 @@
 import { type DocumentTemplate } from '@/hooks/use-document-templates';
+import logoObs from '@/assets/logo-obs.png';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
