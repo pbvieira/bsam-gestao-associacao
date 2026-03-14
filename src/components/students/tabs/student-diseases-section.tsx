@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { useStudentDiseases } from "@/hooks/use-student-diseases";
 
 interface StudentDiseasesSectionProps {
@@ -20,8 +21,24 @@ export function StudentDiseasesSection({ studentId }: StudentDiseasesSectionProp
     if (value === "nao_informado") {
       deleteDisease({ studentId, diseaseTypeId });
     } else {
-      saveDisease({ student_id: studentId, disease_type_id: diseaseTypeId, possui: value === "sim" });
+      const existing = getDiseaseStatus(diseaseTypeId);
+      saveDisease({
+        student_id: studentId,
+        disease_type_id: diseaseTypeId,
+        possui: value === "sim",
+        observacoes: value === "sim" ? (existing?.observacoes ?? null) : null,
+      });
     }
+  };
+
+  const handleObservacoesChange = (diseaseTypeId: string, observacoes: string) => {
+    if (!studentId) return;
+    saveDisease({
+      student_id: studentId,
+      disease_type_id: diseaseTypeId,
+      possui: true,
+      observacoes: observacoes || null,
+    });
   };
 
   const getStatusValue = (diseaseTypeId: string): string => {
@@ -93,11 +110,13 @@ export function StudentDiseasesSection({ studentId }: StudentDiseasesSectionProp
               <TableRow>
                 <TableHead>Doença</TableHead>
                 <TableHead className="w-[140px]">Status</TableHead>
+                <TableHead>Observações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {diseaseTypes.map((disease) => {
                 const statusValue = getStatusValue(disease.id);
+                const diseaseStatus = getDiseaseStatus(disease.id);
                 return (
                   <TableRow key={disease.id}>
                     <TableCell className="py-2">
@@ -133,6 +152,17 @@ export function StudentDiseasesSection({ studentId }: StudentDiseasesSectionProp
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {statusValue === "sim" && (
+                        <Input
+                          className="h-8 text-sm"
+                          placeholder="Observações..."
+                          defaultValue={diseaseStatus?.observacoes ?? ""}
+                          onBlur={(e) => handleObservacoesChange(disease.id, e.target.value)}
+                          disabled={!studentId}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 );
