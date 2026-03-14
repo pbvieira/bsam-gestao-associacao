@@ -670,11 +670,6 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto }: St
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => window.open(`/alunos/${savedStudentId}/imprimir`, "_blank")}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Ficha Completa
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => window.open(`/alunos/${savedStudentId}/autorizacao-imagem`, "_blank")}>
                   <Image className="h-4 w-4 mr-2" />
                   Autorização de Imagem
