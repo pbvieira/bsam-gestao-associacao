@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -20,9 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Clock, Calendar } from 'lucide-react';
+import { Plus, Trash2, Clock } from 'lucide-react';
 import { useMedicationUsageTypes } from '@/hooks/use-medication-usage-types';
-import { useSetores } from '@/hooks/use-setores';
 import { StudentMedication, MedicationInput, ScheduleInput } from '@/hooks/use-student-medications';
 import { toast } from 'sonner';
 
@@ -68,7 +66,6 @@ const DIAS_SEMANA = [
 
 export function MedicationDialog({ open, onOpenChange, medication, onSave }: MedicationDialogProps) {
   const { types } = useMedicationUsageTypes();
-  const { setores } = useSetores();
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<MedicationInput>({
@@ -111,8 +108,6 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
           frequencia: s.frequencia,
           dias_semana: s.dias_semana || [],
           instrucoes: s.instrucoes || '',
-          gerar_evento: s.gerar_evento,
-          setor_responsavel_id: s.setor_responsavel_id || ''
         })) || []
       );
     } else {
@@ -145,8 +140,6 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
       frequencia: 'diaria',
       dias_semana: [],
       instrucoes: '',
-      gerar_evento: false,
-      setor_responsavel_id: ''
     }]);
   };
 
@@ -411,41 +404,6 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
                       />
                     </div>
 
-                    <div className="border-t pt-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={schedule.gerar_evento}
-                          onCheckedChange={(checked) => updateSchedule(index, 'gerar_evento', checked)}
-                        />
-                        <div>
-                          <Label className="cursor-pointer">Gerar evento no calendário</Label>
-                          <p className="text-xs text-muted-foreground">
-                            Cria um lembrete recorrente para administração
-                          </p>
-                        </div>
-                      </div>
-
-                      {schedule.gerar_evento && (
-                        <div>
-                          <Label>Setor Responsável</Label>
-                          <Select
-                            value={schedule.setor_responsavel_id || ''}
-                            onValueChange={(value) => updateSchedule(index, 'setor_responsavel_id', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o setor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {setores.filter(s => s.ativo).map((setor) => (
-                                <SelectItem key={setor.id} value={setor.id}>
-                                  {setor.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 ))
               )}

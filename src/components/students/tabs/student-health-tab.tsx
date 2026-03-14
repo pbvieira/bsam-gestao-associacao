@@ -18,7 +18,7 @@ import { useStudentMedications, StudentMedication, MedicationInput, ScheduleInpu
 import { useStudentHospitalizations, HOSPITALIZATION_TYPES, StudentHospitalization } from '@/hooks/use-student-hospitalizations';
 import { useStudentMedicalRecords, MEDICAL_RECORD_TYPES, StudentMedicalRecord } from '@/hooks/use-student-medical-records';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Calendar, Building2, FileText, Stethoscope, CalendarClock } from 'lucide-react';
+import { Loader2, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Building2, FileText, Stethoscope, CalendarClock } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
 import { MedicationDialog } from './medication-dialog';
 import { HospitalizationDialog } from './hospitalization-dialog';
@@ -435,9 +435,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                                   <div key={idx} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
                                     <Clock className="h-3 w-3" />
                                     <span>{sched.horario.slice(0, 5)}</span>
-                                    {sched.gerar_evento && (
-                                      <Calendar className="h-3 w-3 text-primary ml-1" />
-                                    )}
                                   </div>
                                 ))}
                               </div>
