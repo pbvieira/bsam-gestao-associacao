@@ -404,41 +404,6 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
                       />
                     </div>
 
-                    <div className="border-t pt-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={schedule.gerar_evento}
-                          onCheckedChange={(checked) => updateSchedule(index, 'gerar_evento', checked)}
-                        />
-                        <div>
-                          <Label className="cursor-pointer">Gerar evento no calendário</Label>
-                          <p className="text-xs text-muted-foreground">
-                            Cria um lembrete recorrente para administração
-                          </p>
-                        </div>
-                      </div>
-
-                      {schedule.gerar_evento && (
-                        <div>
-                          <Label>Setor Responsável</Label>
-                          <Select
-                            value={schedule.setor_responsavel_id || ''}
-                            onValueChange={(value) => updateSchedule(index, 'setor_responsavel_id', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o setor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {setores.filter(s => s.ativo).map((setor) => (
-                                <SelectItem key={setor.id} value={setor.id}>
-                                  {setor.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 ))
               )}

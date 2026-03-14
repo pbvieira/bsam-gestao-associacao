@@ -435,9 +435,6 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                                   <div key={idx} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
                                     <Clock className="h-3 w-3" />
                                     <span>{sched.horario.slice(0, 5)}</span>
-                                    {sched.gerar_evento && (
-                                      <Calendar className="h-3 w-3 text-primary ml-1" />
-                                    )}
                                   </div>
                                 ))}
                               </div>
