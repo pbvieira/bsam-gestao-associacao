@@ -25,6 +25,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
   const [viewerFileName, setViewerFileName] = useState('');
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerDocument, setViewerDocument] = useState<StudentDocument | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<StudentDocument | null>(null);
 
   const isImageFile = (mimeType: string | null) => mimeType?.startsWith('image/') ?? false;
   const isPdfFile = (mimeType: string | null) => mimeType === 'application/pdf';
