@@ -49,6 +49,7 @@ export interface MedicationInput {
   forma_farmaceutica?: string;
   tipo_uso_id?: string;
   prescrito_por?: string;
+  farmacia?: string;
   data_inicio?: string;
   data_fim?: string;
   observacoes?: string;
