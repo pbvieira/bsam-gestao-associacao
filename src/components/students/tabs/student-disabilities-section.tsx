@@ -95,17 +95,17 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
             Deficiências
           </CardTitle>
           <div className="flex items-center gap-2">
-            {stats.positivas > 0 && (
+            {showTable && stats.positivas > 0 && (
               <Badge variant="destructive" className="text-xs">
                 <Check className="mr-1 h-3 w-3" />{stats.positivas} Sim
               </Badge>
             )}
-            {stats.negativas > 0 && (
+            {showTable && stats.negativas > 0 && (
               <Badge variant="secondary" className="text-xs">
                 <X className="mr-1 h-3 w-3" />{stats.negativas} Não
               </Badge>
             )}
-            {stats.naoInformadas > 0 && (
+            {showTable && stats.naoInformadas > 0 && (
               <Badge variant="outline" className="text-xs">
                 <HelpCircle className="mr-1 h-3 w-3" />{stats.naoInformadas} Não informado
               </Badge>
@@ -114,6 +114,18 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
         </div>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center gap-3 mb-4">
+          <Switch
+            id="possui-deficiencia"
+            checked={showTable}
+            onCheckedChange={setShowTable}
+            disabled={!studentId}
+          />
+          <Label htmlFor="possui-deficiencia" className="text-sm font-medium cursor-pointer">
+            Possui alguma deficiência?
+          </Label>
+        </div>
+        {showTable && (
         <TooltipProvider>
           <Table>
             <TableHeader>
