@@ -108,8 +108,6 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
           frequencia: s.frequencia,
           dias_semana: s.dias_semana || [],
           instrucoes: s.instrucoes || '',
-          gerar_evento: s.gerar_evento,
-          setor_responsavel_id: s.setor_responsavel_id || ''
         })) || []
       );
     } else {
