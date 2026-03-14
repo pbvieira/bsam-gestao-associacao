@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Accessibility, Info, Check, X, HelpCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useStudentDisabilities } from "@/hooks/use-student-disabilities";
 
 interface StudentDisabilitiesSectionProps {
@@ -13,8 +16,15 @@ interface StudentDisabilitiesSectionProps {
 }
 
 export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSectionProps) {
-  const { disabilityTypes, isLoading, saveDisability, deleteDisability, getDisabilityStatus, getStats } = useStudentDisabilities(studentId);
+  const { disabilityTypes, studentDisabilities, isLoading, saveDisability, deleteDisability, getDisabilityStatus, getStats } = useStudentDisabilities(studentId);
   const stats = getStats();
+  const [showTable, setShowTable] = useState(false);
+
+  useEffect(() => {
+    if (studentDisabilities.length > 0 && studentDisabilities.some(d => d.possui)) {
+      setShowTable(true);
+    }
+  }, [studentDisabilities]);
 
   const handleStatusChange = (disabilityTypeId: string, value: string) => {
     if (!studentId) return;
@@ -85,17 +95,17 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
             Deficiências
           </CardTitle>
           <div className="flex items-center gap-2">
-            {stats.positivas > 0 && (
+            {showTable && stats.positivas > 0 && (
               <Badge variant="destructive" className="text-xs">
                 <Check className="mr-1 h-3 w-3" />{stats.positivas} Sim
               </Badge>
             )}
-            {stats.negativas > 0 && (
+            {showTable && stats.negativas > 0 && (
               <Badge variant="secondary" className="text-xs">
                 <X className="mr-1 h-3 w-3" />{stats.negativas} Não
               </Badge>
             )}
-            {stats.naoInformadas > 0 && (
+            {showTable && stats.naoInformadas > 0 && (
               <Badge variant="outline" className="text-xs">
                 <HelpCircle className="mr-1 h-3 w-3" />{stats.naoInformadas} Não informado
               </Badge>
@@ -104,6 +114,18 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
         </div>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center gap-3 mb-4">
+          <Switch
+            id="possui-deficiencia"
+            checked={showTable}
+            onCheckedChange={setShowTable}
+            disabled={!studentId}
+          />
+          <Label htmlFor="possui-deficiencia" className="text-sm font-medium cursor-pointer">
+            Possui alguma deficiência?
+          </Label>
+        </div>
+        {showTable && (
         <TooltipProvider>
           <Table>
             <TableHeader>
@@ -170,6 +192,7 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
             </TableBody>
           </Table>
         </TooltipProvider>
+        )}
       </CardContent>
     </Card>
   );
