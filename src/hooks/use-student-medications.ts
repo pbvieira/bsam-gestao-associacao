@@ -26,6 +26,7 @@ export interface StudentMedication {
   forma_farmaceutica: string | null;
   tipo_uso_id: string | null;
   prescrito_por: string | null;
+  farmacia: string | null;
   data_inicio: string | null;
   data_fim: string | null;
   ativo: boolean;
