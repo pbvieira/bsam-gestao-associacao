@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { useStudentDisabilities } from "@/hooks/use-student-disabilities";
 
 interface StudentDisabilitiesSectionProps {
@@ -20,8 +21,24 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
     if (value === "nao_informado") {
       deleteDisability({ studentId, disabilityTypeId });
     } else {
-      saveDisability({ student_id: studentId, disability_type_id: disabilityTypeId, possui: value === "sim" });
+      const existing = getDisabilityStatus(disabilityTypeId);
+      saveDisability({
+        student_id: studentId,
+        disability_type_id: disabilityTypeId,
+        possui: value === "sim",
+        observacoes: value === "sim" ? (existing?.observacoes ?? null) : null,
+      });
     }
+  };
+
+  const handleObservacoesChange = (disabilityTypeId: string, observacoes: string) => {
+    if (!studentId) return;
+    saveDisability({
+      student_id: studentId,
+      disability_type_id: disabilityTypeId,
+      possui: true,
+      observacoes: observacoes || null,
+    });
   };
 
   const getStatusValue = (disabilityTypeId: string): string => {
@@ -93,11 +110,13 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
               <TableRow>
                 <TableHead>Deficiência</TableHead>
                 <TableHead className="w-[140px]">Status</TableHead>
+                <TableHead>Observações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {disabilityTypes.map((disability) => {
                 const statusValue = getStatusValue(disability.id);
+                const disabilityStatus = getDisabilityStatus(disability.id);
                 return (
                   <TableRow key={disability.id}>
                     <TableCell className="py-2">
@@ -133,6 +152,17 @@ export function StudentDisabilitiesSection({ studentId }: StudentDisabilitiesSec
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {statusValue === "sim" && (
+                        <Input
+                          className="h-8 text-sm"
+                          placeholder="Observações..."
+                          defaultValue={disabilityStatus?.observacoes ?? ""}
+                          onBlur={(e) => handleObservacoesChange(disability.id, e.target.value)}
+                          disabled={!studentId}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 );
