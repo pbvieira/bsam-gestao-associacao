@@ -227,7 +227,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => deleteDocument(document)}
+                      onClick={() => setDocumentToDelete(document)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -238,6 +238,31 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o documento "{documentToDelete?.nome_arquivo}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (documentToDelete) {
+                  deleteDocument(documentToDelete);
+                  setDocumentToDelete(null);
+                }
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ImageViewerDialog
         open={viewerOpen}
