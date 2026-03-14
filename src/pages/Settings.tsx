@@ -60,6 +60,14 @@ const settingsCategories: SettingsCategory[] = [
     ]
   },
   {
+    title: "Documentos",
+    description: "Gerencie os templates de documentos legais",
+    icon: FileText,
+    items: [
+      { name: "Templates de Documentos", href: "/configuracoes/templates-documentos", icon: FileText, module: "students", description: "Edite o conteúdo dos documentos impressos" },
+    ]
+  },
+  {
     title: "Permissões e Acessos",
     description: "Gerencie os acessos e permissões do sistema",
     icon: Shield,
