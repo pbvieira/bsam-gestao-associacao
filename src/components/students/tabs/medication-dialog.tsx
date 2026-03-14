@@ -100,6 +100,7 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
         forma_farmaceutica: medication.forma_farmaceutica || '',
         tipo_uso_id: medication.tipo_uso_id || '',
         prescrito_por: medication.prescrito_por || '',
+        farmacia: medication.farmacia || '',
         data_inicio: medication.data_inicio || '',
         data_fim: medication.data_fim || '',
         observacoes: medication.observacoes || ''
