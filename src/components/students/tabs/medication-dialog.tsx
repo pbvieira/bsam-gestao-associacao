@@ -123,6 +123,7 @@ export function MedicationDialog({ open, onOpenChange, medication, onSave }: Med
         forma_farmaceutica: '',
         tipo_uso_id: '',
         prescrito_por: '',
+        farmacia: '',
         data_inicio: '',
         data_fim: '',
         observacoes: ''
