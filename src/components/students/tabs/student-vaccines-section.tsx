@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStudentVaccines } from '@/hooks/use-student-vaccines';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Syringe, Info, Check, X, Minus } from 'lucide-react';
+import { Loader2, Syringe, Info, Check, X, Minus, HelpCircle } from 'lucide-react';
 
 interface StudentVaccinesSectionProps {
   studentId?: string | null;
@@ -17,7 +18,6 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
   const { toast } = useToast();
   const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
 
-  // Count statistics
   const stats = vaccineTypes.reduce(
     (acc, type) => {
       const status = getVaccineStatus(type.id);
@@ -31,27 +31,19 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
 
   const handleStatusChange = async (vaccineTypeId: string, value: string) => {
     if (!studentId) return;
-
     setSavingStates(prev => ({ ...prev, [vaccineTypeId]: true }));
-
     try {
       if (value === 'null') {
-        // Delete the record if set to "Não informado"
         await deleteVaccine(vaccineTypeId);
       } else {
-        const tomou = value === 'true';
         await saveVaccine({
           vaccine_type_id: vaccineTypeId,
-          tomou,
+          tomou: value === 'true',
           data_vacinacao: null,
         });
       }
     } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao salvar status da vacina',
-        variant: 'destructive',
-      });
+      toast({ title: 'Erro', description: 'Erro ao salvar status da vacina', variant: 'destructive' });
     } finally {
       setSavingStates(prev => ({ ...prev, [vaccineTypeId]: false }));
     }
@@ -59,24 +51,13 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
 
   const handleDateChange = async (vaccineTypeId: string, date: string) => {
     if (!studentId) return;
-
     const status = getVaccineStatus(vaccineTypeId);
-    if (status.tomou !== true) return; // Only save date if tomou = true
-
+    if (status.tomou !== true) return;
     setSavingStates(prev => ({ ...prev, [vaccineTypeId]: true }));
-
     try {
-      await saveVaccine({
-        vaccine_type_id: vaccineTypeId,
-        tomou: true,
-        data_vacinacao: date || null,
-      });
+      await saveVaccine({ vaccine_type_id: vaccineTypeId, tomou: true, data_vacinacao: date || null });
     } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao salvar data da vacina',
-        variant: 'destructive',
-      });
+      toast({ title: 'Erro', description: 'Erro ao salvar data da vacina', variant: 'destructive' });
     } finally {
       setSavingStates(prev => ({ ...prev, [vaccineTypeId]: false }));
     }
@@ -95,13 +76,37 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Syringe className="h-5 w-5" />
-          Vacinas
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Syringe className="h-5 w-5" />
+            Vacinas
+          </CardTitle>
+          {studentId && vaccineTypes.length > 0 && (
+            <div className="flex items-center gap-2">
+              {stats.tomadas > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  <Check className="mr-1 h-3 w-3" />
+                  {stats.tomadas} Sim
+                </Badge>
+              )}
+              {stats.naoTomadas > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  <X className="mr-1 h-3 w-3" />
+                  {stats.naoTomadas} Não
+                </Badge>
+              )}
+              {stats.naoInformadas > 0 && (
+                <Badge variant="outline" className="text-xs">
+                  <HelpCircle className="mr-1 h-3 w-3" />
+                  {stats.naoInformadas} Não informado
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         {!studentId && (
           <p className="text-sm text-muted-foreground">
             Salve o aluno primeiro para registrar as vacinas.
@@ -109,123 +114,85 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
         )}
 
         {studentId && vaccineTypes.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Nenhum tipo de vacina cadastrado. Configure os tipos de vacinas em Tabelas Auxiliares.
+          <p className="text-sm text-muted-foreground">
+            Nenhum tipo de vacina cadastrado. Configure os tipos em Tabelas Auxiliares.
           </p>
         )}
 
         {studentId && vaccineTypes.length > 0 && (
           <TooltipProvider>
-            <div className="space-y-3">
-              {vaccineTypes.map((type) => {
-                const status = getVaccineStatus(type.id);
-                const isSaving = savingStates[type.id];
-                const selectValue = status.tomou === null ? 'null' : status.tomou.toString();
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vacina</TableHead>
+                  <TableHead className="w-[140px]">Status</TableHead>
+                  <TableHead className="w-[140px]">Data</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vaccineTypes.map((type) => {
+                  const status = getVaccineStatus(type.id);
+                  const isSaving = savingStates[type.id];
+                  const selectValue = status.tomou === null ? 'null' : status.tomou.toString();
 
-                return (
-                  <div
-                    key={type.id}
-                    className="flex items-center gap-3 py-2 border-b border-border/50 last:border-0"
-                  >
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: type.cor }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{type.nome}</span>
-                        {type.informacao_adicional && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 text-blue-500 cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">{type.informacao_adicional}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                      {type.descricao && (
-                        <p className="text-xs text-muted-foreground truncate">{type.descricao}</p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Select
-                        value={selectValue}
-                        onValueChange={(value) => handleStatusChange(type.id, value)}
-                        disabled={isSaving}
-                      >
-                        <SelectTrigger className="w-[140px]">
-                          {isSaving ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <SelectValue>
-                              {status.tomou === null && (
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <Minus className="h-3 w-3" /> Não informado
-                                </span>
-                              )}
-                              {status.tomou === true && (
-                                <span className="flex items-center gap-1 text-green-600">
-                                  <Check className="h-3 w-3" /> Sim
-                                </span>
-                              )}
-                              {status.tomou === false && (
-                                <span className="flex items-center gap-1 text-red-600">
-                                  <X className="h-3 w-3" /> Não
-                                </span>
-                              )}
-                            </SelectValue>
+                  return (
+                    <TableRow key={type.id}>
+                      <TableCell className="py-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: type.cor }} />
+                          <span className="text-sm font-medium">{type.nome}</span>
+                          {type.informacao_adicional && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3.5 w-3.5 cursor-help text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p>{type.informacao_adicional}</p>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="null">
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                              <Minus className="h-3 w-3" /> Não informado
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="true">
-                            <span className="flex items-center gap-1 text-green-600">
-                              <Check className="h-3 w-3" /> Sim
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="false">
-                            <span className="flex items-center gap-1 text-red-600">
-                              <X className="h-3 w-3" /> Não
-                            </span>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-
-                      {status.tomou === true && (
-                        <Input
-                          type="date"
-                          className="w-[140px]"
-                          value={status.data || ''}
-                          onChange={(e) => handleDateChange(type.id, e.target.value)}
-                          disabled={isSaving}
-                          placeholder="Data"
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Statistics summary */}
-              <div className="flex items-center gap-4 pt-4 mt-4 border-t">
-                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">
-                  ✅ {stats.tomadas} {stats.tomadas === 1 ? 'tomada' : 'tomadas'}
-                </Badge>
-                <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-200">
-                  ❌ {stats.naoTomadas} não {stats.naoTomadas === 1 ? 'tomada' : 'tomadas'}
-                </Badge>
-                <Badge variant="outline" className="bg-muted text-muted-foreground">
-                  ⚪ {stats.naoInformadas} não {stats.naoInformadas === 1 ? 'informada' : 'informadas'}
-                </Badge>
-              </div>
-            </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <Select value={selectValue} onValueChange={(v) => handleStatusChange(type.id, v)} disabled={isSaving}>
+                          <SelectTrigger className="h-8 w-[130px]">
+                            {isSaving ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <SelectValue />
+                            )}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="null">
+                              <span className="flex items-center gap-1 text-muted-foreground"><Minus className="h-3 w-3" /> -</span>
+                            </SelectItem>
+                            <SelectItem value="true">
+                              <span className="flex items-center gap-1 text-green-600"><Check className="h-3 w-3" /> Sim</span>
+                            </SelectItem>
+                            <SelectItem value="false">
+                              <span className="flex items-center gap-1 text-red-600"><X className="h-3 w-3" /> Não</span>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {status.tomou === true ? (
+                          <Input
+                            type="date"
+                            className="h-8 w-[130px]"
+                            value={status.data || ''}
+                            onChange={(e) => handleDateChange(type.id, e.target.value)}
+                            disabled={isSaving}
+                          />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </TooltipProvider>
         )}
       </CardContent>
