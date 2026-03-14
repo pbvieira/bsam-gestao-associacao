@@ -1923,6 +1923,7 @@ export type Database = {
           data_fim: string | null
           data_inicio: string | null
           dosagem: string | null
+          farmacia: string | null
           forma_farmaceutica: string | null
           id: string
           nome_medicamento: string
@@ -1940,6 +1941,7 @@ export type Database = {
           data_fim?: string | null
           data_inicio?: string | null
           dosagem?: string | null
+          farmacia?: string | null
           forma_farmaceutica?: string | null
           id?: string
           nome_medicamento: string
@@ -1957,6 +1959,7 @@ export type Database = {
           data_fim?: string | null
           data_inicio?: string | null
           dosagem?: string | null
+          farmacia?: string | null
           forma_farmaceutica?: string | null
           id?: string
           nome_medicamento?: string
