@@ -25,9 +25,9 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerDocument, setViewerDocument] = useState<StudentDocument | null>(null);
 
-  const isImageFile = (mimeType: string | null) => {
-    return mimeType?.startsWith('image/') ?? false;
-  };
+  const isImageFile = (mimeType: string | null) => mimeType?.startsWith('image/') ?? false;
+  const isPdfFile = (mimeType: string | null) => mimeType === 'application/pdf';
+  const isPreviewable = (mimeType: string | null) => isImageFile(mimeType) || isPdfFile(mimeType);
 
   const handlePreview = async (document: StudentDocument) => {
     setViewerFileName(document.nome_arquivo);
@@ -205,7 +205,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
                   </div>
                   
                   <div className="flex gap-2">
-                    {isImageFile(document.mime_type) && (
+                    {isPreviewable(document.mime_type) && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -242,6 +242,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
         onOpenChange={setViewerOpen}
         imageUrl={viewerUrl}
         fileName={viewerFileName}
+        fileType={viewerDocument && isPdfFile(viewerDocument.mime_type) ? 'pdf' : 'image'}
         loading={viewerLoading}
         onDownload={viewerDocument ? () => downloadDocument(viewerDocument) : undefined}
       />
