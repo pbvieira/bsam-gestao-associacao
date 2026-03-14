@@ -321,6 +321,51 @@ export type Database = {
         }
         Relationships: []
       }
+      document_templates: {
+        Row: {
+          body_content: string
+          created_at: string | null
+          family_lines_count: number | null
+          header_address: string | null
+          header_city: string | null
+          header_line1: string | null
+          header_line2: string | null
+          id: string
+          show_family_lines: boolean | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          body_content: string
+          created_at?: string | null
+          family_lines_count?: number | null
+          header_address?: string | null
+          header_city?: string | null
+          header_line1?: string | null
+          header_line2?: string | null
+          id?: string
+          show_family_lines?: boolean | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          body_content?: string
+          created_at?: string | null
+          family_lines_count?: number | null
+          header_address?: string | null
+          header_city?: string | null
+          header_line1?: string | null
+          header_line2?: string | null
+          id?: string
+          show_family_lines?: boolean | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       event_participants: {
         Row: {
           created_at: string

@@ -18,6 +18,7 @@ import {
   Accessibility,
   Table2,
   Shield,
+  FileText,
   LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -56,6 +57,14 @@ const settingsCategories: SettingsCategory[] = [
       { name: "Tipos de Vacinas", href: "/tipos-vacinas", icon: Syringe, module: "students", description: "Cadastro de vacinas" },
       { name: "Tipos de Doenças", href: "/tipos-doencas", icon: HeartPulse, module: "students", description: "Cadastro de doenças" },
       { name: "Tipos de Deficiências", href: "/tipos-deficiencias", icon: Accessibility, module: "students", description: "Tipos de deficiência" },
+    ]
+  },
+  {
+    title: "Documentos",
+    description: "Gerencie os templates de documentos legais",
+    icon: FileText,
+    items: [
+      { name: "Templates de Documentos", href: "/configuracoes/templates-documentos", icon: FileText, module: "students", description: "Edite o conteúdo dos documentos impressos" },
     ]
   },
   {

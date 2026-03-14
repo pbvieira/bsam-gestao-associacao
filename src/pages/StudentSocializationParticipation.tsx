@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { SocializationParticipationForm } from '@/components/students/authorization-forms/socialization-participation-form';
+import { GenericDocumentRenderer } from '@/components/documents/generic-document-renderer';
 import { Loader2 } from 'lucide-react';
 
 interface StudentData {
@@ -18,21 +18,15 @@ export default function StudentSocializationParticipation() {
   useEffect(() => {
     const fetchStudent = async () => {
       if (!id) return;
-
       const { data, error } = await supabase
         .from('students')
         .select('nome_completo, rg, cpf')
         .eq('id', id)
         .single();
-
-      if (error) {
-        console.error('Error fetching student:', error);
-      } else {
-        setStudent(data);
-      }
+      if (error) console.error('Error fetching student:', error);
+      else setStudent(data);
       setLoading(false);
     };
-
     fetchStudent();
   }, [id]);
 
@@ -53,7 +47,8 @@ export default function StudentSocializationParticipation() {
   }
 
   return (
-    <SocializationParticipationForm
+    <GenericDocumentRenderer
+      slug="participacao-socializacao"
       name={student.nome_completo}
       rg={student.rg}
       cpf={student.cpf}
