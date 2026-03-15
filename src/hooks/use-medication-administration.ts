@@ -393,7 +393,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       }
 
       toast.success('Registro salvo');
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error marking as not administered:', err);
       toast.error('Erro ao registrar');
