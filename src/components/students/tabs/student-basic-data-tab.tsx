@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
 
 // Estados de filiação que tornam a data de nascimento automaticamente opcional
-const ESTADOS_DATA_OPCIONAL = ['Desconhecido(a)', 'Não declarado(a) no registro'];
+const ESTADOS_DATA_OPCIONAL = ['Desconhecido(a)', 'Não declarado(a) no registro', 'Ausente / sem contato', 'Falecido(a)'];
 
 interface Estado {
   id: number;
