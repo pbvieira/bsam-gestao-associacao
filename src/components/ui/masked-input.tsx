@@ -6,6 +6,7 @@ interface MaskedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   mask: 'cpf' | 'rg' | 'telefone' | 'pis_nis' | 'cartao_sus';
   value?: string;
   onChange?: (value: string) => void;
+  padOnBlur?: boolean;
 }
 
 // Mask patterns
