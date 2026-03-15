@@ -1,7 +1,6 @@
-import { Pill, User, FileText, Clock, Undo2, XCircle, CheckCircle } from 'lucide-react';
+import { Pill, FileText, Undo2, XCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { MedicationAdministration } from '@/hooks/use-medication-administration';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -29,22 +28,6 @@ export function MedicationItem({ item, onAdminister, onNotAdminister, onUndo }: 
       item.administrado && "bg-green-50/50 dark:bg-green-900/10",
       wasNotAdministered && "bg-amber-50/50 dark:bg-amber-900/10"
     )}>
-      {/* Checkbox */}
-      <div className="flex-shrink-0">
-        <Checkbox
-          checked={item.administrado}
-          onCheckedChange={(checked) => {
-            if (checked) {
-              onAdminister();
-            }
-          }}
-          disabled={item.administrado}
-          className={cn(
-            "h-6 w-6",
-            item.administrado && "data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-          )}
-        />
-      </div>
 
       {/* Student and Medication Info */}
       <div className="flex-1 min-w-0">
