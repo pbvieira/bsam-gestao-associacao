@@ -305,7 +305,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
     if (!user) return;
 
     try {
-      const formattedDate = format(date, 'yyyy-MM-dd');
+      const formattedDate = item.data_agendada || format(date, 'yyyy-MM-dd');
       const now = new Date().toISOString();
 
       if (item.log_id) {
@@ -342,7 +342,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       }
 
       toast.success('Medicamento registrado como administrado');
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error marking as administered:', err);
       toast.error('Erro ao registrar administração');
@@ -357,7 +357,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
     if (!user) return;
 
     try {
-      const formattedDate = format(date, 'yyyy-MM-dd');
+      const formattedDate = item.data_agendada || format(date, 'yyyy-MM-dd');
 
       if (item.log_id) {
         // Update existing log
@@ -393,7 +393,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       }
 
       toast.success('Registro salvo');
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error marking as not administered:', err);
       toast.error('Erro ao registrar');
@@ -412,7 +412,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       if (error) throw error;
 
       toast.success('Registro removido');
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error undoing administration:', err);
       toast.error('Erro ao remover registro');
@@ -466,7 +466,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       }
 
       toast.success(`${pendingItems.length} medicamento(s) registrado(s) como administrado(s)`);
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error bulk marking as administered:', err);
       toast.error('Erro ao registrar administrações em lote');
