@@ -56,6 +56,8 @@ export const studentChildrenSchema = z.object({
   tem_filhos: z.boolean().default(false),
   quantidade_filhos: z.number().default(0),
   convive_filhos: z.boolean().default(false),
+  paga_pensao: z.boolean().default(false),
+  valor_pensao: z.number().nullish(),
 });
 
 export const childSchema = z.object({
