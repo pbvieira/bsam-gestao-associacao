@@ -3,7 +3,7 @@ import { Input } from './input';
 import { cn } from '@/lib/utils';
 
 interface MaskedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
-  mask: 'cpf' | 'rg' | 'telefone' | 'pis_nis' | 'cartao_sus';
+  mask: 'cpf' | 'rg' | 'telefone' | 'pis_nis' | 'cartao_sus' | 'cep';
   value?: string;
   onChange?: (value: string) => void;
   padOnBlur?: boolean;
@@ -41,6 +41,12 @@ const masks = {
     maxLength: 18,
     placeholder: '000 0000 0000 0000',
     maxDigits: 15
+  },
+  cep: {
+    pattern: '#####-###',
+    maxLength: 9,
+    placeholder: '00000-000',
+    maxDigits: 8
   }
 };
 
