@@ -188,6 +188,32 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
     fetchFiliationStatus();
   }, []);
 
+  // CEP lookup function
+  const handleCepLookup = useCallback(async () => {
+    const cepDigits = (form.getValues('cep') || '').replace(/\D/g, '');
+    if (cepDigits.length !== 8) return;
+
+    setLoadingCep(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepDigits}/json/`);
+      const data = await response.json();
+      if (data.erro) {
+        toast({ title: 'CEP não encontrado', description: 'Verifique o CEP informado', variant: 'destructive' });
+        return;
+      }
+      if (data.logradouro) form.setValue('endereco', data.logradouro);
+      if (data.bairro) form.setValue('bairro', data.bairro);
+      if (data.uf) {
+        setPendingCityFromCep(data.localidade || null);
+        form.setValue('estado', data.uf);
+      }
+    } catch {
+      toast({ title: 'Erro', description: 'Erro ao consultar o CEP', variant: 'destructive' });
+    } finally {
+      setLoadingCep(false);
+    }
+  }, [form, toast]);
+
   useEffect(() => {
     const estado = form.watch('estado');
     if (estado) {
@@ -199,6 +225,17 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
             a.nome.localeCompare(b.nome)
           );
           setCidadesEndereco(cidadesOrdenadas);
+
+          // Auto-select city from CEP lookup
+          if (pendingCityFromCep) {
+            const found = cidadesOrdenadas.find((c: Cidade) => 
+              c.nome.toLowerCase() === pendingCityFromCep.toLowerCase()
+            );
+            if (found) {
+              form.setValue('cidade', found.nome);
+            }
+            setPendingCityFromCep(null);
+          }
         })
         .catch(error => {
           console.error('Erro ao carregar cidades:', error);
