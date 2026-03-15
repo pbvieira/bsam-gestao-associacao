@@ -202,6 +202,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
         return;
       }
       if (data.logradouro) form.setValue('endereco', data.logradouro);
+      if (data.complemento) form.setValue('complemento', data.complemento);
       if (data.bairro) form.setValue('bairro', data.bairro);
       if (data.uf) {
         setPendingCityFromCep(data.localidade || null);
@@ -316,6 +317,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
           endereco: data.endereco ?? undefined,
           cep: data.cep ?? undefined,
           numero: data.numero ?? undefined,
+          complemento: data.complemento ?? undefined,
           bairro: data.bairro ?? undefined,
           cidade: data.cidade ?? undefined,
           estado: data.estado ?? undefined,
@@ -444,6 +446,20 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                       <FormLabel>Número</FormLabel>
                       <FormControl>
                         <Input placeholder="123" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="complemento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Complemento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Apto 901, Bloco B..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -20,6 +20,7 @@ export const studentBasicDataSchema = z.object({
   endereco: z.string().nullish(),
   cep: z.string().nullish(),
   numero: z.string().nullish(),
+  complemento: z.string().nullish(),
   bairro: z.string().nullish(),
   cidade: z.string().nullish(),
   estado: z.string().nullish(),
