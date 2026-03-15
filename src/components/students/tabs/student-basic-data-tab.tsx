@@ -316,6 +316,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
           endereco: data.endereco ?? undefined,
           cep: data.cep ?? undefined,
           numero: data.numero ?? undefined,
+          complemento: data.complemento ?? undefined,
           bairro: data.bairro ?? undefined,
           cidade: data.cidade ?? undefined,
           estado: data.estado ?? undefined,
