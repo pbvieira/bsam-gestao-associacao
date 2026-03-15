@@ -49,7 +49,7 @@ export function useStudentWorkSituation(studentId?: string) {
 
   useEffect(() => {
     fetchWorkSituation();
-  }, [user, studentId]);
+  }, [user?.id, studentId]);
 
   const createOrUpdateWorkSituation = async (data: Partial<StudentWorkSituation>) => {
     if (!studentId || !user) return { error: 'Dados insuficientes' };
