@@ -405,7 +405,17 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                     <FormItem>
                       <FormLabel>CEP</FormLabel>
                       <FormControl>
-                        <Input placeholder="00000-000" {...field} />
+                        <div className="relative">
+                          <MaskedInput 
+                            mask="cep" 
+                            value={field.value || ''} 
+                            onChange={field.onChange}
+                            onBlur={handleCepLookup}
+                          />
+                          {loadingCep && (
+                            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
