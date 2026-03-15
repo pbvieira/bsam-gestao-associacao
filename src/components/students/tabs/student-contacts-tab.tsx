@@ -5,7 +5,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useStudentEmergencyContacts } from '@/hooks/use-student-emergency-contacts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactDialog } from './contact-dialog';
-import { Loader2, Phone, MapPin, Edit, Trash2, Plus } from 'lucide-react';
+import { Loader2, Phone, MapPin, Edit, Trash2, Plus, Copy } from 'lucide-react';
 
 interface StudentContactsTabProps {
   studentId?: string;
@@ -53,6 +53,33 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     }
   };
 
+  const handleCopyAllContacts = () => {
+    if (contacts.length === 0) return;
+
+    const text = contacts.map((c, i) => {
+      const lines = [`*${i + 1}. ${c.nome}*`];
+      lines.push(`📞 Telefone: ${c.telefone}`);
+      if (c.parentesco) lines.push(`👤 Parentesco: ${c.parentesco}`);
+      if (c.endereco) lines.push(`📍 Endereço: ${c.endereco}`);
+      if (c.avisar_contato) lines.push(`⚠️ Avisar em emergências`);
+      return lines.join('\n');
+    }).join('\n\n');
+
+    const header = `*Contatos de Emergência*\n${'—'.repeat(20)}\n\n`;
+
+    navigator.clipboard.writeText(header + text).then(() => {
+      toast({
+        title: 'Copiado!',
+        description: 'Dados dos contatos copiados para a área de transferência.',
+      });
+    }).catch(() => {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível copiar os dados.',
+        variant: 'destructive',
+      });
+    });
+  };
 
   if (!studentId) {
     return (
@@ -88,7 +115,15 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Contatos de Emergência</CardTitle>
-        <ContactDialog onSave={handleCreateContact} />
+        <div className="flex gap-2">
+          {contacts.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleCopyAllContacts}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copiar Todos
+            </Button>
+          )}
+          <ContactDialog onSave={handleCreateContact} />
+        </div>
       </CardHeader>
       <CardContent>
         {contacts.length === 0 ? (
