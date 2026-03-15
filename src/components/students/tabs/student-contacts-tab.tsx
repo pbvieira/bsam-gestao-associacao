@@ -53,6 +53,33 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     }
   };
 
+  const handleCopyAllContacts = () => {
+    if (contacts.length === 0) return;
+
+    const text = contacts.map((c, i) => {
+      const lines = [`*${i + 1}. ${c.nome}*`];
+      lines.push(`📞 Telefone: ${c.telefone}`);
+      if (c.parentesco) lines.push(`👤 Parentesco: ${c.parentesco}`);
+      if (c.endereco) lines.push(`📍 Endereço: ${c.endereco}`);
+      if (c.avisar_contato) lines.push(`⚠️ Avisar em emergências`);
+      return lines.join('\n');
+    }).join('\n\n');
+
+    const header = `*Contatos de Emergência*\n${'—'.repeat(20)}\n\n`;
+
+    navigator.clipboard.writeText(header + text).then(() => {
+      toast({
+        title: 'Copiado!',
+        description: 'Dados dos contatos copiados para a área de transferência.',
+      });
+    }).catch(() => {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível copiar os dados.',
+        variant: 'destructive',
+      });
+    });
+  };
 
   if (!studentId) {
     return (
