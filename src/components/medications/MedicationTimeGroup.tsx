@@ -162,9 +162,9 @@ export function MedicationTimeGroup({
             {group.items.map(item => {
               const isPending = !item.administrado && !item.nao_administrado_motivo;
               return (
-                <div key={item.id} className="flex items-center gap-1">
+                <div key={item.id} className="flex items-start gap-1">
                   {hasPending && (
-                    <div className="flex-shrink-0 pl-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex-shrink-0 pl-2 pt-3" onClick={(e) => e.stopPropagation()}>
                       {isPending ? (
                         <Checkbox
                           checked={selectedIds.has(item.id)}

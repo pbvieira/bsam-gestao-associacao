@@ -326,7 +326,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
         // Create new log
         const { error } = await supabase
           .from('medication_administration_log')
-          .insert({
+          .upsert({
             medication_id: item.medication_id,
             schedule_id: item.schedule_id,
             student_id: item.student_id,
@@ -336,7 +336,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
             data_administracao: now,
             administrado_por: user.id,
             observacoes
-          });
+          }, { onConflict: 'schedule_id,data_agendada,horario_agendado' });
 
         if (error) throw error;
       }
