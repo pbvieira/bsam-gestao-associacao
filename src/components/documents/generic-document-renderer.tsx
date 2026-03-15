@@ -105,11 +105,7 @@ function DocumentContent({ template, variables }: { template: DocumentTemplate; 
             <p>{variables.cidade}, {variables.data}</p>
           </div>
 
-          <div className="mt-20 flex flex-col items-center">
-            <div className="w-64 border-t border-foreground pt-2 text-center">
-              <p className="font-serif text-sm text-foreground">{variables.nome}</p>
-            </div>
-          </div>
+          <SignaturePad name={variables.nome} />
         </div>
       </div>
     </>
