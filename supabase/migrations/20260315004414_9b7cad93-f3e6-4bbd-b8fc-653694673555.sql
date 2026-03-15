@@ -1,0 +1,1 @@
+ALTER TABLE public.student_basic_data ADD COLUMN complemento text NULL;

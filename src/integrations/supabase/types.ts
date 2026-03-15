@@ -1254,6 +1254,7 @@ export type Database = {
           cidade: string | null
           cidade_nascimento: string | null
           comarca_juridica: string | null
+          complemento: string | null
           created_at: string
           data_nascimento_conjuge: string | null
           data_nascimento_conjuge_desconhecida: boolean | null
@@ -1292,6 +1293,7 @@ export type Database = {
           cidade?: string | null
           cidade_nascimento?: string | null
           comarca_juridica?: string | null
+          complemento?: string | null
           created_at?: string
           data_nascimento_conjuge?: string | null
           data_nascimento_conjuge_desconhecida?: boolean | null
@@ -1330,6 +1332,7 @@ export type Database = {
           cidade?: string | null
           cidade_nascimento?: string | null
           comarca_juridica?: string | null
+          complemento?: string | null
           created_at?: string
           data_nascimento_conjuge?: string | null
           data_nascimento_conjuge_desconhecida?: boolean | null

@@ -454,6 +454,20 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
 
                 <FormField
                   control={form.control}
+                  name="complemento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Complemento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Apto 901, Bloco B..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="bairro"
                   render={({ field }) => (
                     <FormItem>
