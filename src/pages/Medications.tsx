@@ -31,7 +31,8 @@ export default function Medications() {
     refetch, 
     markAsAdministered, 
     markAsNotAdministered, 
-    undoAdministration 
+    undoAdministration,
+    bulkMarkAsAdministered
   } = useMedicationAdministration(date, viewPeriod);
   const { setores } = useSetores();
 
@@ -267,6 +268,7 @@ export default function Medications() {
                   onAdminister={handleAdminister}
                   onNotAdminister={handleNotAdminister}
                   onUndo={undoAdministration}
+                  onBulkAdminister={bulkMarkAsAdministered}
                 />
               ))}
             </div>
@@ -302,6 +304,7 @@ export default function Medications() {
                         onAdminister={handleAdminister}
                         onNotAdminister={handleNotAdminister}
                         onUndo={undoAdministration}
+                        onBulkAdminister={bulkMarkAsAdministered}
                       />
                     ))}
                   </div>
