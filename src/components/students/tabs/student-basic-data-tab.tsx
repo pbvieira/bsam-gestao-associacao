@@ -49,6 +49,8 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
   const [loadingCidadesEndereco, setLoadingCidadesEndereco] = useState(false);
   const [filiationStatus, setFiliationStatus] = useState<FiliationStatusOption[]>([]);
   const [loadingFiliationStatus, setLoadingFiliationStatus] = useState(true);
+  const [loadingCep, setLoadingCep] = useState(false);
+  const [pendingCityFromCep, setPendingCityFromCep] = useState<string | null>(null);
   const [manualErrors, setManualErrors] = useState<{
     data_nascimento_pai?: string;
     data_nascimento_mae?: string;
