@@ -41,6 +41,12 @@ const masks = {
     maxLength: 18,
     placeholder: '000 0000 0000 0000',
     maxDigits: 15
+  },
+  cep: {
+    pattern: '#####-###',
+    maxLength: 9,
+    placeholder: '00000-000',
+    maxDigits: 8
   }
 };
 
