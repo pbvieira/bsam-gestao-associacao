@@ -305,7 +305,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
     if (!user) return;
 
     try {
-      const formattedDate = format(date, 'yyyy-MM-dd');
+      const formattedDate = item.data_agendada || format(date, 'yyyy-MM-dd');
       const now = new Date().toISOString();
 
       if (item.log_id) {
