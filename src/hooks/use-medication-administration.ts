@@ -466,7 +466,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       }
 
       toast.success(`${pendingItems.length} medicamento(s) registrado(s) como administrado(s)`);
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error bulk marking as administered:', err);
       toast.error('Erro ao registrar administrações em lote');
