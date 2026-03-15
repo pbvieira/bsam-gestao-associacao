@@ -17,10 +17,10 @@ const masks = {
     maxDigits: 11
   },
   rg: {
-    pattern: '##.###.###-#',
-    maxLength: 12,
-    placeholder: '00.000.000-0',
-    maxDigits: 9
+    pattern: '###.###.###-#',
+    maxLength: 13,
+    placeholder: '000.000.000-0',
+    maxDigits: 10
   },
   telefone: {
     pattern: '(##) #####-####',
