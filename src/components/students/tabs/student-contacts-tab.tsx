@@ -5,7 +5,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useStudentEmergencyContacts } from '@/hooks/use-student-emergency-contacts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactDialog } from './contact-dialog';
-import { Loader2, Phone, MapPin, Edit, Trash2, Plus } from 'lucide-react';
+import { Loader2, Phone, MapPin, Edit, Trash2, Plus, Copy } from 'lucide-react';
 
 interface StudentContactsTabProps {
   studentId?: string;
