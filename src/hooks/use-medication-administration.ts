@@ -412,7 +412,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
       if (error) throw error;
 
       toast.success('Registro removido');
-      fetchMedications();
+      await fetchMedications();
     } catch (err: any) {
       console.error('Error undoing administration:', err);
       toast.error('Erro ao remover registro');
