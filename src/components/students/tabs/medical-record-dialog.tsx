@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Lock } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Dialog,
   DialogContent,
@@ -225,6 +226,15 @@ export function MedicalRecordDialog({
                 )}
               />
             </div>
+
+            {form.watch('tipo_atendimento') === 'consulta_psicologica' && (
+              <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+                <Lock className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-700 dark:text-amber-400">
+                  <strong>Registro privado:</strong> Consultas psicológicas são visíveis apenas para o usuário que as registrou, garantindo a privacidade do aluno.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField

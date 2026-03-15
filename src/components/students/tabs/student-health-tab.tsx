@@ -18,7 +18,7 @@ import { useStudentMedications, StudentMedication, MedicationInput, ScheduleInpu
 import { useStudentHospitalizations, HOSPITALIZATION_TYPES, StudentHospitalization } from '@/hooks/use-student-hospitalizations';
 import { useStudentMedicalRecords, MEDICAL_RECORD_TYPES, StudentMedicalRecord } from '@/hooks/use-student-medical-records';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Building2, FileText, Stethoscope, CalendarClock } from 'lucide-react';
+import { Loader2, Brain, Pill, Users, Plus, Pencil, Trash2, Clock, Building2, FileText, Stethoscope, CalendarClock, Lock } from 'lucide-react';
 import { useStudentFormContext } from '@/contexts/StudentFormContext';
 import { MedicationDialog } from './medication-dialog';
 import { HospitalizationDialog } from './hospitalization-dialog';
@@ -250,6 +250,12 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                               <Badge variant="secondary">
                                 {getMedicalRecordTypeLabel(record.tipo_atendimento)}
                               </Badge>
+                              {record.tipo_atendimento === 'consulta_psicologica' && (
+                                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-200">
+                                  <Lock className="h-3 w-3 mr-1" />
+                                  Privado
+                                </Badge>
+                              )}
                               {record.especialidade && (
                                 <Badge variant="outline">{record.especialidade}</Badge>
                               )}
