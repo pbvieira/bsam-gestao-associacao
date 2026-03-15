@@ -419,6 +419,60 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
     }
   };
 
+  const bulkMarkAsAdministered = async (items: MedicationAdministration[]) => {
+    if (!user) return;
+
+    const pendingItems = items.filter(i => !i.administrado && !i.nao_administrado_motivo);
+    if (pendingItems.length === 0) return;
+
+    try {
+      const now = new Date().toISOString();
+
+      // Separate items that need update vs insert
+      const toUpdate = pendingItems.filter(i => i.log_id);
+      const toInsert = pendingItems.filter(i => !i.log_id);
+
+      if (toUpdate.length > 0) {
+        for (const item of toUpdate) {
+          const { error } = await supabase
+            .from('medication_administration_log')
+            .update({
+              administrado: true,
+              data_administracao: now,
+              administrado_por: user.id,
+              nao_administrado_motivo: null
+            })
+            .eq('id', item.log_id!);
+          if (error) throw error;
+        }
+      }
+
+      if (toInsert.length > 0) {
+        const records = toInsert.map(item => ({
+          medication_id: item.medication_id,
+          schedule_id: item.schedule_id,
+          student_id: item.student_id,
+          data_agendada: item.data_agendada || format(date, 'yyyy-MM-dd'),
+          horario_agendado: item.horario,
+          administrado: true,
+          data_administracao: now,
+          administrado_por: user.id
+        }));
+
+        const { error } = await supabase
+          .from('medication_administration_log')
+          .insert(records);
+        if (error) throw error;
+      }
+
+      toast.success(`${pendingItems.length} medicamento(s) registrado(s) como administrado(s)`);
+      fetchMedications();
+    } catch (err: any) {
+      console.error('Error bulk marking as administered:', err);
+      toast.error('Erro ao registrar administrações em lote');
+    }
+  };
+
   return {
     medications,
     groupedMedications,
