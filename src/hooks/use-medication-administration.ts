@@ -482,6 +482,7 @@ export function useMedicationAdministration(date: Date, viewPeriod: ViewPeriod =
     markAsAdministered,
     markAsNotAdministered,
     undoAdministration,
+    bulkMarkAsAdministered,
     refetch: fetchMedications
   };
 }
