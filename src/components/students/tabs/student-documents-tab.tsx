@@ -149,6 +149,7 @@ export function StudentDocumentsTab({ studentId }: StudentDocumentsTabProps) {
                       <SelectItem value="laudos">Laudos</SelectItem>
                       <SelectItem value="fotos">Fotos</SelectItem>
                       <SelectItem value="videos">Vídeos</SelectItem>
+                      <SelectItem value="documentos_assinados">Documentos Assinados</SelectItem>
                       <SelectItem value="outros">Outros</SelectItem>
                     </SelectContent>
                   </Select>

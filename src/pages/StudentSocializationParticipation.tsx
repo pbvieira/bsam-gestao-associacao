@@ -52,6 +52,7 @@ export default function StudentSocializationParticipation() {
       name={student.nome_completo}
       rg={student.rg}
       cpf={student.cpf}
+      studentId={id}
     />
   );
 }
