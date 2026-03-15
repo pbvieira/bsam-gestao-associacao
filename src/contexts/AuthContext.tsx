@@ -54,7 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('✅ Session found, fetching profile...');
         setSession(session);
         setUser(session.user);
-        await fetchUserProfile(session.user.id);
+        try {
+          await fetchUserProfile(session.user.id);
+        } catch (error) {
+          console.error('❌ Profile not found, signing out invalid session...');
+          await supabase.auth.signOut();
+          setUser(null);
+          setSession(null);
+          setProfile(null);
+          setAccessibleModules([]);
+        }
       } else {
         console.log('ℹ️ No active session found');
       }
