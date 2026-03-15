@@ -230,8 +230,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Só buscar perfil se for um novo usuário ou se ainda não temos perfil
           if (!profile || profile.user_id !== session.user.id) {
             setTimeout(() => {
-              fetchUserProfile(session.user.id).catch(error => {
-                console.error('❌ Failed to fetch profile after auth change:', error);
+              fetchUserProfile(session.user.id).catch(async (error) => {
+                console.error('❌ Profile not found after auth change, signing out...', error);
+                await supabase.auth.signOut();
+                setUser(null);
+                setSession(null);
+                setProfile(null);
+                setAccessibleModules([]);
               });
             }, 0);
           }
