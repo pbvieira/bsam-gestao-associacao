@@ -250,6 +250,12 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                               <Badge variant="secondary">
                                 {getMedicalRecordTypeLabel(record.tipo_atendimento)}
                               </Badge>
+                              {record.tipo_atendimento === 'consulta_psicologica' && (
+                                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-200">
+                                  <Lock className="h-3 w-3 mr-1" />
+                                  Privado
+                                </Badge>
+                              )}
                               {record.especialidade && (
                                 <Badge variant="outline">{record.especialidade}</Badge>
                               )}
