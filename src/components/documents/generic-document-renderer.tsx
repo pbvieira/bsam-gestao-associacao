@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, Loader2 } from 'lucide-react';
+import { Printer, Loader2, Save } from 'lucide-react';
 import { useDocumentTemplate, type DocumentTemplate } from '@/hooks/use-document-templates';
 import { SignaturePad } from './signature-pad';
+import { useStudentDocuments } from '@/hooks/use-student-documents';
+import { useToast } from '@/hooks/use-toast';
 import logoObs from '@/assets/logo-obs.png';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface GenericDocumentRendererProps {
   slug: string;
@@ -13,6 +18,7 @@ interface GenericDocumentRendererProps {
   cpf: string | null;
   city?: string;
   date?: string;
+  studentId?: string;
 }
 
 function replaceVariables(
@@ -29,9 +35,90 @@ function formatDocument(rg: string | null, cpf: string | null): string {
   return docs.length > 0 ? docs.join(' / ') : 'Não informado';
 }
 
-function DocumentContent({ template, variables }: { template: DocumentTemplate; variables: Record<string, string> }) {
+function DocumentContent({
+  template,
+  variables,
+  studentId,
+}: {
+  template: DocumentTemplate;
+  variables: Record<string, string>;
+  studentId?: string;
+}) {
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
+  const [isStoring, setIsStoring] = useState(false);
+  const { uploadDocument } = useStudentDocuments(studentId);
+  const { toast } = useToast();
+
   const processedBody = replaceVariables(template.body_content, variables);
   const paragraphs = processedBody.split('\n\n').filter(Boolean);
+
+  const isSigned = !!signatureDataUrl;
+  const canStore = isSigned && !!studentId;
+
+  const handleStore = async () => {
+    if (!canStore) return;
+    setIsStoring(true);
+
+    try {
+      const container = document.querySelector('.print-container') as HTMLElement;
+      if (!container) throw new Error('Container não encontrado');
+
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = 210;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      // Handle multi-page if content is taller than A4
+      const pageHeight = 297;
+      let position = 0;
+
+      if (pdfHeight <= pageHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      } else {
+        let remainingHeight = pdfHeight;
+        while (remainingHeight > 0) {
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+          remainingHeight -= pageHeight;
+          position -= pageHeight;
+          if (remainingHeight > 0) {
+            pdf.addPage();
+          }
+        }
+      }
+
+      const pdfBlob = pdf.output('blob');
+      const dateStr = format(new Date(), 'yyyy-MM-dd');
+      const fileName = `${template.title} - ${variables.nome} - ${dateStr}.pdf`;
+
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      const result = await uploadDocument(file, 'documentos_assinados', fileName);
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      toast({
+        title: 'Documento armazenado',
+        description: 'O documento assinado foi salvo com sucesso na aba Documentos do aluno.',
+      });
+    } catch (error: any) {
+      console.error('Erro ao armazenar documento:', error);
+      toast({
+        title: 'Erro ao armazenar',
+        description: error.message || 'Não foi possível salvar o documento.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsStoring(false);
+    }
+  };
 
   return (
     <>
@@ -45,14 +132,28 @@ function DocumentContent({ template, variables }: { template: DocumentTemplate; 
         `}
       </style>
 
-      <Button
-        onClick={() => window.print()}
-        className="fixed bottom-4 right-4 print:hidden z-50"
-        size="lg"
-      >
-        <Printer className="h-5 w-5 mr-2" />
-        Imprimir
-      </Button>
+      <div className="fixed bottom-4 right-4 print:hidden z-50 flex gap-2">
+        {canStore && (
+          <Button
+            onClick={handleStore}
+            disabled={isStoring}
+            size="lg"
+            variant="outline"
+            className="bg-background"
+          >
+            {isStoring ? (
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-5 w-5 mr-2" />
+            )}
+            Armazenar
+          </Button>
+        )}
+        <Button onClick={() => window.print()} size="lg">
+          <Printer className="h-5 w-5 mr-2" />
+          Imprimir
+        </Button>
+      </div>
 
       <div className="min-h-screen bg-muted print:bg-white print:min-h-0 py-8 print:py-0 flex justify-center">
         <div className="print-container bg-white w-full max-w-[210mm] min-h-[297mm] p-12 shadow-lg print:shadow-none mx-4 print:mx-0">
@@ -105,7 +206,7 @@ function DocumentContent({ template, variables }: { template: DocumentTemplate; 
             <p>{variables.cidade}, {variables.data}</p>
           </div>
 
-          <SignaturePad name={variables.nome} />
+          <SignaturePad name={variables.nome} onSignatureChange={setSignatureDataUrl} />
         </div>
       </div>
     </>
@@ -119,6 +220,7 @@ export function GenericDocumentRenderer({
   cpf,
   city = 'São José - SC',
   date = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
+  studentId,
 }: GenericDocumentRendererProps) {
   const { data: template, isLoading, error } = useDocumentTemplate(slug);
 
@@ -147,5 +249,5 @@ export function GenericDocumentRenderer({
     );
   }
 
-  return <DocumentContent template={template} variables={variables} />;
+  return <DocumentContent template={template} variables={variables} studentId={studentId} />;
 }
