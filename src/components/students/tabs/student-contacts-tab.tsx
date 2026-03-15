@@ -115,7 +115,15 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Contatos de Emergência</CardTitle>
-        <ContactDialog onSave={handleCreateContact} />
+        <div className="flex gap-2">
+          {contacts.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleCopyAllContacts}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copiar Todos
+            </Button>
+          )}
+          <ContactDialog onSave={handleCreateContact} />
+        </div>
       </CardHeader>
       <CardContent>
         {contacts.length === 0 ? (
