@@ -106,7 +106,7 @@ export function StudentChildrenTab({ studentId }: StudentChildrenTabProps) {
   return (
     <div className="space-y-4">
       {/* Convivência e Pensão */}
-      {children.length > 0 && (
+      {(
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Situação Familiar</CardTitle>
