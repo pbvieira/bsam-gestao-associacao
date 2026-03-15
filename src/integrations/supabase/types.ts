@@ -1460,28 +1460,34 @@ export type Database = {
           convive_filhos: boolean | null
           created_at: string
           id: string
+          paga_pensao: boolean | null
           quantidade_filhos: number | null
           student_id: string
           tem_filhos: boolean | null
           updated_at: string
+          valor_pensao: number | null
         }
         Insert: {
           convive_filhos?: boolean | null
           created_at?: string
           id?: string
+          paga_pensao?: boolean | null
           quantidade_filhos?: number | null
           student_id: string
           tem_filhos?: boolean | null
           updated_at?: string
+          valor_pensao?: number | null
         }
         Update: {
           convive_filhos?: boolean | null
           created_at?: string
           id?: string
+          paga_pensao?: boolean | null
           quantidade_filhos?: number | null
           student_id?: string
           tem_filhos?: boolean | null
           updated_at?: string
+          valor_pensao?: number | null
         }
         Relationships: [
           {
