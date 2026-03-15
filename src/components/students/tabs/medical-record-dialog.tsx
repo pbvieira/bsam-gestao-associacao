@@ -250,22 +250,6 @@ export function MedicalRecordDialog({
                   </FormItem>
                 )}
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="especialidade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Especialidade</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Cardiologia, Ortopedia..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
