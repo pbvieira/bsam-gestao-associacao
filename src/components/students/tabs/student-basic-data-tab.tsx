@@ -202,6 +202,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
         return;
       }
       if (data.logradouro) form.setValue('endereco', data.logradouro);
+      if (data.complemento) form.setValue('complemento', data.complemento);
       if (data.bairro) form.setValue('bairro', data.bairro);
       if (data.uf) {
         setPendingCityFromCep(data.localidade || null);
