@@ -304,6 +304,7 @@ export default function Medications() {
                         onAdminister={handleAdminister}
                         onNotAdminister={handleNotAdminister}
                         onUndo={undoAdministration}
+                        onBulkAdminister={bulkMarkAsAdministered}
                       />
                     ))}
                   </div>
