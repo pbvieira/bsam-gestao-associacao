@@ -78,7 +78,7 @@ const applyMask = (value: string, maskType: keyof typeof masks): string => {
 };
 
 const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  ({ mask, value = '', onChange, className, ...props }, ref) => {
+  ({ mask, value = '', onChange, padOnBlur = false, className, ...props }, ref) => {
     const maskConfig = masks[mask];
     
     // Format the displayed value
@@ -95,6 +95,17 @@ const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
       onChange?.(limitedDigits);
     };
 
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      // Pad with leading zeros so the check digit stays in the correct position
+      if (padOnBlur || mask === 'rg') {
+        const digits = unmask(value);
+        if (digits.length > 0 && digits.length < maskConfig.maxDigits) {
+          onChange?.(digits.padStart(maskConfig.maxDigits, '0'));
+        }
+      }
+      props.onBlur?.(e);
+    };
+
     return (
       <Input
         ref={ref}
@@ -102,6 +113,7 @@ const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
         inputMode="numeric"
         value={displayValue}
         onChange={handleChange}
+        onBlur={handleBlur}
         maxLength={maskConfig.maxLength}
         placeholder={props.placeholder || maskConfig.placeholder}
         className={cn(className)}
