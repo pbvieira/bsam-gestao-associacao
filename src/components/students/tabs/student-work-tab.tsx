@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -195,8 +195,10 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
     registerWorkSave(saveData);
   }, [saveData, registerWorkSave]);
 
+  const initialLoadDone = useRef(false);
+
   useEffect(() => {
-    if (workSituation) {
+    if (workSituation && !initialLoadDone.current) {
       form.reset({
         situacao_trabalhista: workSituation.situacao_trabalhista || '',
         profissao: workSituation.profissao || '',
@@ -206,6 +208,7 @@ export function StudentWorkTab({ studentId }: StudentWorkTabProps) {
         contato_empresa: workSituation.contato_empresa || '',
         quantidade_pessoas_residencia: workSituation.quantidade_pessoas_residencia?.toString() || '1',
       });
+      initialLoadDone.current = true;
     }
   }, [workSituation, form]);
 
