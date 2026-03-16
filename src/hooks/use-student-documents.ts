@@ -67,7 +67,12 @@ export function useStudentDocuments(studentId?: string) {
       }
 
       const fileName = nome_arquivo || fileToUpload.name;
-      const filePath = `${studentId}/${Date.now()}-${fileName}`;
+      const sanitizedFileName = fileName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9.\-_ ]/g, '')
+        .replace(/\s+/g, '_');
+      const filePath = `${studentId}/${Date.now()}-${sanitizedFileName}`;
       
       // Upload file to storage
       const { error: uploadError } = await supabase.storage

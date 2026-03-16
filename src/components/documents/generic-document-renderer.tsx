@@ -60,22 +60,33 @@ function DocumentContent({
     setIsStoring(true);
 
     try {
+      // Step 1: Capture DOM
       const container = document.querySelector('.print-container') as HTMLElement;
       if (!container) throw new Error('Container não encontrado');
 
-      const canvas = await html2canvas(container, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-      });
+      console.log('[Armazenar] Capturando DOM...');
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+        });
+      } catch (canvasErr) {
+        console.warn('[Armazenar] html2canvas falhou com CORS, tentando sem...', canvasErr);
+        canvas = await html2canvas(container, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+        });
+      }
 
+      // Step 2: Generate PDF
+      console.log('[Armazenar] Gerando PDF...');
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      // Handle multi-page if content is taller than A4
       const pageHeight = 297;
       let position = 0;
 
@@ -87,12 +98,12 @@ function DocumentContent({
           pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
           remainingHeight -= pageHeight;
           position -= pageHeight;
-          if (remainingHeight > 0) {
-            pdf.addPage();
-          }
+          if (remainingHeight > 0) pdf.addPage();
         }
       }
 
+      // Step 3: Upload
+      console.log('[Armazenar] Fazendo upload...');
       const pdfBlob = pdf.output('blob');
       const dateStr = format(new Date(), 'yyyy-MM-dd');
       const fileName = `${template.title} - ${variables.nome} - ${dateStr}.pdf`;
@@ -104,12 +115,13 @@ function DocumentContent({
         throw new Error(result.error);
       }
 
+      console.log('[Armazenar] Sucesso!');
       toast({
         title: 'Documento armazenado',
         description: 'O documento assinado foi salvo com sucesso na aba Documentos do aluno.',
       });
     } catch (error: any) {
-      console.error('Erro ao armazenar documento:', error);
+      console.error('[Armazenar] Erro:', error);
       toast({
         title: 'Erro ao armazenar',
         description: error.message || 'Não foi possível salvar o documento.',
