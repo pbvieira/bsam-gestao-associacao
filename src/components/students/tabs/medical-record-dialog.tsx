@@ -92,6 +92,9 @@ export function MedicalRecordDialog({
       prescricao: '',
       observacoes: '',
       data_retorno: null,
+      consideracoes: '',
+      houve_encaminhamento: false,
+      encaminhamento: '',
     },
   });
 
