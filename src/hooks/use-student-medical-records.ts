@@ -16,6 +16,9 @@ export interface StudentMedicalRecord {
   prescricao: string | null;
   observacoes: string | null;
   data_retorno: string | null;
+  consideracoes: string | null;
+  houve_encaminhamento: boolean;
+  encaminhamento: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -26,7 +29,7 @@ export type MedicalRecordInput = Omit<StudentMedicalRecord, 'id' | 'created_at' 
 export const MEDICAL_RECORD_TYPES = [
   { value: 'consulta_medica', label: 'Consulta Médica', icon: 'Stethoscope' },
   { value: 'consulta_odontologica', label: 'Consulta Odontológica', icon: 'Smile' },
-  { value: 'consulta_psicologica', label: 'Consulta Psicológica', icon: 'Brain' },
+  { value: 'consulta_psicologica', label: 'Plantão Psicológico', icon: 'Brain' },
   { value: 'exame_laboratorial', label: 'Exame Laboratorial', icon: 'TestTube' },
   { value: 'exame_imagem', label: 'Exame de Imagem', icon: 'Scan' },
   { value: 'procedimento', label: 'Procedimento', icon: 'Syringe' },
