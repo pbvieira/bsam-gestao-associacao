@@ -377,7 +377,7 @@ export function MedicalRecordDialog({
                     <FormItem>
                       <FormLabel>Local</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hospital, clínica, consultório..." {...field} />
+                        <Input placeholder="Online, presencial" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
