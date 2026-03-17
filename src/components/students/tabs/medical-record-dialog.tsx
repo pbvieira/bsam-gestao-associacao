@@ -1,52 +1,26 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Lock } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
-import { 
-  StudentMedicalRecord, 
-  MedicalRecordInput,
-  MEDICAL_RECORD_TYPES 
-} from '@/hooks/use-student-medical-records';
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, Lock } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { StudentMedicalRecord, MedicalRecordInput, MEDICAL_RECORD_TYPES } from "@/hooks/use-student-medical-records";
 
 const medicalRecordSchema = z.object({
-  data_atendimento: z.date({ required_error: 'Data do atendimento é obrigatória' }),
-  tipo_atendimento: z.string().min(1, 'Tipo é obrigatório'),
+  data_atendimento: z.date({ required_error: "Data do atendimento é obrigatória" }),
+  tipo_atendimento: z.string().min(1, "Tipo é obrigatório"),
   especialidade: z.string().optional(),
   profissional: z.string().optional(),
   local: z.string().optional(),
@@ -70,31 +44,25 @@ interface MedicalRecordDialogProps {
   onUpdate?: (id: string, data: Partial<MedicalRecordInput>) => Promise<{ error: string | null }>;
 }
 
-export function MedicalRecordDialog({
-  open,
-  onOpenChange,
-  medicalRecord,
-  onSave,
-  onUpdate,
-}: MedicalRecordDialogProps) {
+export function MedicalRecordDialog({ open, onOpenChange, medicalRecord, onSave, onUpdate }: MedicalRecordDialogProps) {
   const isEditing = !!medicalRecord;
 
   const form = useForm<MedicalRecordFormData>({
     resolver: zodResolver(medicalRecordSchema),
     defaultValues: {
       data_atendimento: new Date(),
-      tipo_atendimento: '',
-      especialidade: '',
-      profissional: '',
-      local: '',
-      motivo: '',
-      diagnostico: '',
-      prescricao: '',
-      observacoes: '',
+      tipo_atendimento: "",
+      especialidade: "",
+      profissional: "",
+      local: "",
+      motivo: "",
+      diagnostico: "",
+      prescricao: "",
+      observacoes: "",
       data_retorno: null,
-      consideracoes: '',
+      consideracoes: "",
       houve_encaminhamento: false,
-      encaminhamento: '',
+      encaminhamento: "",
     },
   });
 
@@ -103,41 +71,41 @@ export function MedicalRecordDialog({
       form.reset({
         data_atendimento: new Date(medicalRecord.data_atendimento),
         tipo_atendimento: medicalRecord.tipo_atendimento,
-        especialidade: medicalRecord.especialidade || '',
-        profissional: medicalRecord.profissional || '',
-        local: medicalRecord.local || '',
-        motivo: medicalRecord.motivo || '',
-        diagnostico: medicalRecord.diagnostico || '',
-        prescricao: medicalRecord.prescricao || '',
-        observacoes: medicalRecord.observacoes || '',
+        especialidade: medicalRecord.especialidade || "",
+        profissional: medicalRecord.profissional || "",
+        local: medicalRecord.local || "",
+        motivo: medicalRecord.motivo || "",
+        diagnostico: medicalRecord.diagnostico || "",
+        prescricao: medicalRecord.prescricao || "",
+        observacoes: medicalRecord.observacoes || "",
         data_retorno: medicalRecord.data_retorno ? new Date(medicalRecord.data_retorno) : null,
-        consideracoes: medicalRecord.consideracoes || '',
+        consideracoes: medicalRecord.consideracoes || "",
         houve_encaminhamento: medicalRecord.houve_encaminhamento || false,
-        encaminhamento: medicalRecord.encaminhamento || '',
+        encaminhamento: medicalRecord.encaminhamento || "",
       });
     } else {
       form.reset({
         data_atendimento: new Date(),
-        tipo_atendimento: '',
-        especialidade: '',
-        profissional: '',
-        local: '',
-        motivo: '',
-        diagnostico: '',
-        prescricao: '',
-        observacoes: '',
+        tipo_atendimento: "",
+        especialidade: "",
+        profissional: "",
+        local: "",
+        motivo: "",
+        diagnostico: "",
+        prescricao: "",
+        observacoes: "",
         data_retorno: null,
-        consideracoes: '',
+        consideracoes: "",
         houve_encaminhamento: false,
-        encaminhamento: '',
+        encaminhamento: "",
       });
     }
   }, [medicalRecord, form]);
 
   const onSubmit = async (data: MedicalRecordFormData) => {
     const payload: MedicalRecordInput = {
-      student_id: medicalRecord?.student_id || '',
-      data_atendimento: format(data.data_atendimento, 'yyyy-MM-dd'),
+      student_id: medicalRecord?.student_id || "",
+      data_atendimento: format(data.data_atendimento, "yyyy-MM-dd"),
       tipo_atendimento: data.tipo_atendimento,
       especialidade: data.especialidade || null,
       profissional: data.profissional || null,
@@ -146,7 +114,7 @@ export function MedicalRecordDialog({
       diagnostico: data.diagnostico || null,
       prescricao: data.prescricao || null,
       observacoes: data.observacoes || null,
-      data_retorno: data.data_retorno ? format(data.data_retorno, 'yyyy-MM-dd') : null,
+      data_retorno: data.data_retorno ? format(data.data_retorno, "yyyy-MM-dd") : null,
       consideracoes: data.consideracoes || null,
       houve_encaminhamento: data.houve_encaminhamento || false,
       encaminhamento: data.encaminhamento || null,
@@ -168,9 +136,7 @@ export function MedicalRecordDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Editar Atendimento' : 'Novo Atendimento'}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "Editar Atendimento" : "Novo Atendimento"}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -187,13 +153,10 @@ export function MedicalRecordDialog({
                         <FormControl>
                           <Button
                             variant="outline"
-                            className={cn(
-                              'w-full pl-3 text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
+                            className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
                           >
                             {field.value ? (
-                              format(field.value, 'dd/MM/yyyy', { locale: ptBR })
+                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
                             ) : (
                               <span>Selecione a data</span>
                             )}
@@ -243,16 +206,17 @@ export function MedicalRecordDialog({
               />
             </div>
 
-            {form.watch('tipo_atendimento') === 'consulta_psicologica' && (
+            {form.watch("tipo_atendimento") === "consulta_psicologica" && (
               <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
                 <Lock className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-700 dark:text-amber-400">
-                  <strong>Registro privado:</strong> Plantões psicológicos são visíveis apenas para o usuário que os registrou, garantindo a privacidade do aluno.
+                  <strong>Registro privado:</strong> Plantões psicológicos são visíveis apenas para o usuário que os
+                  registrou, garantindo a privacidade do aluno.
                 </AlertDescription>
               </Alert>
             )}
 
-            {form.watch('tipo_atendimento') !== 'consulta_psicologica' && (
+            {form.watch("tipo_atendimento") !== "consulta_psicologica" && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -291,7 +255,7 @@ export function MedicalRecordDialog({
                     <FormItem>
                       <FormLabel>Local</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hospital, clínica, consultório..." {...field} />
+                        <Input placeholder="Online, presencial, hospital, clínica, consultório..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -305,11 +269,7 @@ export function MedicalRecordDialog({
                     <FormItem>
                       <FormLabel>Motivo/Queixa</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Descreva o motivo do atendimento" 
-                          className="resize-none"
-                          {...field} 
-                        />
+                        <Textarea placeholder="Descreva o motivo do atendimento" className="resize-none" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -323,11 +283,7 @@ export function MedicalRecordDialog({
                     <FormItem>
                       <FormLabel>Diagnóstico</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Diagnóstico ou conclusão" 
-                          className="resize-none"
-                          {...field} 
-                        />
+                        <Textarea placeholder="Diagnóstico ou conclusão" className="resize-none" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -341,10 +297,10 @@ export function MedicalRecordDialog({
                     <FormItem>
                       <FormLabel>Prescrição/Recomendações</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Medicamentos, tratamentos, recomendações..." 
+                        <Textarea
+                          placeholder="Medicamentos, tratamentos, recomendações..."
                           className="resize-none"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -354,7 +310,7 @@ export function MedicalRecordDialog({
               </>
             )}
 
-            {form.watch('tipo_atendimento') === 'consulta_psicologica' && (
+            {form.watch("tipo_atendimento") === "consulta_psicologica" && (
               <>
                 <FormField
                   control={form.control}
@@ -391,10 +347,10 @@ export function MedicalRecordDialog({
                     <FormItem>
                       <FormLabel>Considerações</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Registre as considerações do plantão psicológico" 
+                        <Textarea
+                          placeholder="Registre as considerações do plantão psicológico"
                           className="resize-none min-h-[160px]"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -415,13 +371,10 @@ export function MedicalRecordDialog({
                       <FormControl>
                         <Button
                           variant="outline"
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
+                          className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
                         >
                           {field.value ? (
-                            format(field.value, 'dd/MM/yyyy', { locale: ptBR })
+                            format(field.value, "dd/MM/yyyy", { locale: ptBR })
                           ) : (
                             <span>Selecione a data (opcional)</span>
                           )}
@@ -451,11 +404,7 @@ export function MedicalRecordDialog({
                 <FormItem>
                   <FormLabel>Observações</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Observações adicionais" 
-                      className="resize-none"
-                      {...field} 
-                    />
+                    <Textarea placeholder="Observações adicionais" className="resize-none" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -471,16 +420,13 @@ export function MedicalRecordDialog({
                     <FormLabel className="text-base">Houve encaminhamento?</FormLabel>
                   </div>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}
             />
 
-            {form.watch('houve_encaminhamento') && (
+            {form.watch("houve_encaminhamento") && (
               <FormField
                 control={form.control}
                 name="encaminhamento"
@@ -488,10 +434,10 @@ export function MedicalRecordDialog({
                   <FormItem>
                     <FormLabel>Encaminhamento</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Descreva os detalhes do encaminhamento" 
+                      <Textarea
+                        placeholder="Descreva os detalhes do encaminhamento"
                         className="resize-none"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -504,9 +450,7 @@ export function MedicalRecordDialog({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                {isEditing ? 'Salvar' : 'Registrar'}
-              </Button>
+              <Button type="submit">{isEditing ? "Salvar" : "Registrar"}</Button>
             </div>
           </form>
         </Form>
