@@ -111,6 +111,9 @@ export function MedicalRecordDialog({
         prescricao: medicalRecord.prescricao || '',
         observacoes: medicalRecord.observacoes || '',
         data_retorno: medicalRecord.data_retorno ? new Date(medicalRecord.data_retorno) : null,
+        consideracoes: medicalRecord.consideracoes || '',
+        houve_encaminhamento: medicalRecord.houve_encaminhamento || false,
+        encaminhamento: medicalRecord.encaminhamento || '',
       });
     } else {
       form.reset({
