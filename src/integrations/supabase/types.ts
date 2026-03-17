@@ -1909,12 +1909,15 @@ export type Database = {
       }
       student_medical_records: {
         Row: {
+          consideracoes: string | null
           created_at: string
           created_by: string
           data_atendimento: string
           data_retorno: string | null
           diagnostico: string | null
+          encaminhamento: string | null
           especialidade: string | null
+          houve_encaminhamento: boolean
           id: string
           local: string | null
           motivo: string | null
@@ -1926,12 +1929,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          consideracoes?: string | null
           created_at?: string
           created_by: string
           data_atendimento: string
           data_retorno?: string | null
           diagnostico?: string | null
+          encaminhamento?: string | null
           especialidade?: string | null
+          houve_encaminhamento?: boolean
           id?: string
           local?: string | null
           motivo?: string | null
@@ -1943,12 +1949,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          consideracoes?: string | null
           created_at?: string
           created_by?: string
           data_atendimento?: string
           data_retorno?: string | null
           diagnostico?: string | null
+          encaminhamento?: string | null
           especialidade?: string | null
+          houve_encaminhamento?: boolean
           id?: string
           local?: string | null
           motivo?: string | null
