@@ -55,6 +55,9 @@ const medicalRecordSchema = z.object({
   prescricao: z.string().optional(),
   observacoes: z.string().optional(),
   data_retorno: z.date().nullable().optional(),
+  consideracoes: z.string().optional(),
+  houve_encaminhamento: z.boolean().optional(),
+  encaminhamento: z.string().optional(),
 });
 
 type MedicalRecordFormData = z.infer<typeof medicalRecordSchema>;
