@@ -16,6 +16,9 @@ export interface StudentMedicalRecord {
   prescricao: string | null;
   observacoes: string | null;
   data_retorno: string | null;
+  consideracoes: string | null;
+  houve_encaminhamento: boolean;
+  encaminhamento: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
