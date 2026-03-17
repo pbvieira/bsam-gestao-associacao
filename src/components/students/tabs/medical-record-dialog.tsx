@@ -247,108 +247,162 @@ export function MedicalRecordDialog({
               <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
                 <Lock className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-700 dark:text-amber-400">
-                  <strong>Registro privado:</strong> Consultas psicológicas são visíveis apenas para o usuário que as registrou, garantindo a privacidade do aluno.
+                  <strong>Registro privado:</strong> Plantões psicológicos são visíveis apenas para o usuário que os registrou, garantindo a privacidade do aluno.
                 </AlertDescription>
               </Alert>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="especialidade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Especialidade</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Cardiologia, Ortopedia..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {form.watch('tipo_atendimento') !== 'consulta_psicologica' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="especialidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Especialidade</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: Cardiologia, Ortopedia..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="profissional"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profissional</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do profissional" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="profissional"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Profissional</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome do profissional" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-            <FormField
-              control={form.control}
-              name="local"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Local</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Hospital, clínica, consultório..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="local"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Local</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Hospital, clínica, consultório..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="motivo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Motivo/Queixa</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva o motivo do atendimento" 
-                      className="resize-none"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="motivo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Motivo/Queixa</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Descreva o motivo do atendimento" 
+                          className="resize-none"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="diagnostico"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Diagnóstico</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Diagnóstico ou conclusão" 
-                      className="resize-none"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="diagnostico"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Diagnóstico</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Diagnóstico ou conclusão" 
+                          className="resize-none"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="prescricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prescrição/Recomendações</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Medicamentos, tratamentos, recomendações..." 
-                      className="resize-none"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="prescricao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prescrição/Recomendações</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Medicamentos, tratamentos, recomendações..." 
+                          className="resize-none"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            {form.watch('tipo_atendimento') === 'consulta_psicologica' && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="profissional"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Profissional</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome do profissional" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="local"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Local</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Hospital, clínica, consultório..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="consideracoes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Considerações</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Registre as considerações do plantão psicológico" 
+                          className="resize-none min-h-[160px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             <FormField
               control={form.control}
@@ -407,6 +461,44 @@ export function MedicalRecordDialog({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="houve_encaminhamento"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Houve encaminhamento?</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {form.watch('houve_encaminhamento') && (
+              <FormField
+                control={form.control}
+                name="encaminhamento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Encaminhamento</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Descreva os detalhes do encaminhamento" 
+                        className="resize-none"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
