@@ -221,7 +221,7 @@ export function MedicalRecordDialog({
                 control={form.control}
                 name="tipo_atendimento"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Tipo de Atendimento *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
