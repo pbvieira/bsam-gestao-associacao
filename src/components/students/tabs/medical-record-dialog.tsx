@@ -255,7 +255,7 @@ export function MedicalRecordDialog({ open, onOpenChange, medicalRecord, onSave,
                     <FormItem>
                       <FormLabel>Local</FormLabel>
                       <FormControl>
-                        <Input placeholder="Online, presencial, hospital, clínica, consultório..." {...field} />
+                        <Input placeholder="Posto de saúde, hospital, clínica, consultório..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
