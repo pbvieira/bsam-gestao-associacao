@@ -147,6 +147,9 @@ export function MedicalRecordDialog({
       prescricao: data.prescricao || null,
       observacoes: data.observacoes || null,
       data_retorno: data.data_retorno ? format(data.data_retorno, 'yyyy-MM-dd') : null,
+      consideracoes: data.consideracoes || null,
+      houve_encaminhamento: data.houve_encaminhamento || false,
+      encaminhamento: data.encaminhamento || null,
     };
 
     let result;
