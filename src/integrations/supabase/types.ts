@@ -977,6 +977,7 @@ export type Database = {
           full_name: string
           id: string
           role: Database["public"]["Enums"]["user_role"]
+          role_id: string | null
           setor_id: string | null
           updated_at: string
           user_id: string
@@ -988,6 +989,7 @@ export type Database = {
           full_name: string
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
           setor_id?: string | null
           updated_at?: string
           user_id: string
@@ -999,6 +1001,7 @@ export type Database = {
           full_name?: string
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
           setor_id?: string | null
           updated_at?: string
           user_id?: string
@@ -1009,6 +1012,13 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
           {
@@ -1133,6 +1143,38 @@ export type Database = {
           },
         ]
       }
+      role_capabilities: {
+        Row: {
+          allowed: boolean
+          capability: string
+          created_at: string
+          role_id: string
+          updated_at: string
+        }
+        Insert: {
+          allowed?: boolean
+          capability: string
+          created_at?: string
+          role_id: string
+          updated_at?: string
+        }
+        Update: {
+          allowed?: boolean
+          capability?: string
+          created_at?: string
+          role_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_capabilities_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_module_access: {
         Row: {
           allowed: boolean | null
@@ -1157,6 +1199,42 @@ export type Database = {
           module?: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      roles: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          description: string | null
+          id: string
+          is_system: boolean
+          key: string
+          label: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          key: string
+          label: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          key?: string
+          label?: string
+          ordem?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2619,10 +2697,19 @@ export type Database = {
       }
       cleanup_old_notifications: { Args: never; Returns: number }
       count_active_admins: { Args: never; Returns: number }
+      count_active_system_admins: { Args: never; Returns: number }
+      current_user_has_any: { Args: { _caps: string[] }; Returns: boolean }
+      current_user_has_capability: { Args: { _cap: string }; Returns: boolean }
       get_current_user_role: { Args: never; Returns: string }
+      get_current_user_role_key: { Args: never; Returns: string }
       get_user_email: { Args: { user_uuid: string }; Returns: string }
+      has_capability: {
+        Args: { _cap: string; _user_id: string }
+        Returns: boolean
+      }
       is_admin_user: { Args: { check_user_id: string }; Returns: boolean }
       is_event_participant: { Args: { event_uuid: string }; Returns: boolean }
+      is_system_admin: { Args: { _user_id: string }; Returns: boolean }
       process_event_reminders: { Args: never; Returns: undefined }
       update_external_participant_status: {
         Args: {
