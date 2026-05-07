@@ -5,7 +5,23 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useStudentEmergencyContacts } from '@/hooks/use-student-emergency-contacts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactDialog } from './contact-dialog';
-import { Loader2, Phone, MapPin, Edit, Trash2, Plus, Copy } from 'lucide-react';
+import { Loader2, Phone, MapPin, Edit, Trash2, Plus, Copy, MessageCircle } from 'lucide-react';
+
+const formatContactText = (c: { nome: string; telefone: string; parentesco?: string | null; endereco?: string | null; avisar_contato?: boolean }) => {
+  const lines = [`*${c.nome}*`];
+  lines.push(`📞 Telefone: ${c.telefone}`);
+  if (c.parentesco) lines.push(`👤 Parentesco: ${c.parentesco}`);
+  if (c.endereco) lines.push(`📍 Endereço: ${c.endereco}`);
+  if (c.avisar_contato) lines.push(`⚠️ Avisar em emergências`);
+  return lines.join('\n');
+};
+
+const buildWhatsAppUrl = (telefone: string) => {
+  const digits = (telefone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  const withCountry = digits.length <= 11 ? `55${digits}` : digits;
+  return `https://wa.me/${withCountry}`;
+};
 
 interface StudentContactsTabProps {
   studentId?: string;
@@ -56,14 +72,7 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
   const handleCopyAllContacts = () => {
     if (contacts.length === 0) return;
 
-    const text = contacts.map((c, i) => {
-      const lines = [`*${i + 1}. ${c.nome}*`];
-      lines.push(`📞 Telefone: ${c.telefone}`);
-      if (c.parentesco) lines.push(`👤 Parentesco: ${c.parentesco}`);
-      if (c.endereco) lines.push(`📍 Endereço: ${c.endereco}`);
-      if (c.avisar_contato) lines.push(`⚠️ Avisar em emergências`);
-      return lines.join('\n');
-    }).join('\n\n');
+    const text = contacts.map((c, i) => `${i + 1}. ${formatContactText(c)}`).join('\n\n');
 
     const header = `*Contatos de Emergência*\n${'—'.repeat(20)}\n\n`;
 
@@ -78,6 +87,14 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
         description: 'Não foi possível copiar os dados.',
         variant: 'destructive',
       });
+    });
+  };
+
+  const handleCopyContact = (contact: typeof contacts[number]) => {
+    navigator.clipboard.writeText(formatContactText(contact)).then(() => {
+      toast({ title: 'Copiado!', description: 'Dados do contato copiados.' });
+    }).catch(() => {
+      toast({ title: 'Erro', description: 'Não foi possível copiar os dados.', variant: 'destructive' });
     });
   };
 
@@ -162,9 +179,17 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4" />
-                        <span>{contact.telefone}</span>
+                        <a
+                          href={buildWhatsAppUrl(contact.telefone)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          title="Abrir conversa no WhatsApp"
+                        >
+                          {contact.telefone}
+                        </a>
                       </div>
-                      
+
                       {contact.parentesco && (
                         <div className="flex items-center gap-2">
                           <span className="h-4 w-4 text-center text-xs font-bold">P</span>
@@ -182,6 +207,28 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
                   </div>
                   
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyContact(contact)}
+                      title="Copiar dados do contato"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      title="Abrir WhatsApp"
+                    >
+                      <a
+                        href={buildWhatsAppUrl(contact.telefone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </a>
+                    </Button>
                     <ContactDialog 
                       contact={contact}
                       onSave={(data) => handleUpdateContact(data, contact.id)}
