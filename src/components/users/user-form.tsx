@@ -186,9 +186,28 @@ export function UserForm({ user, onClose }: UserFormProps) {
 
         console.log('🔥 UserForm: Resultado da Edge Function', { result, functionError });
 
-        if (functionError) {
-          console.error('🔥 UserForm: Erro ao chamar Edge Function', functionError);
-          throw functionError;
+        // Tentar extrair mensagem de erro amigável do corpo da resposta
+        let friendlyError: string | null = null;
+        if (functionError && (functionError as any).context?.body) {
+          try {
+            const body = (functionError as any).context.body;
+            const parsed = typeof body === 'string' ? JSON.parse(body) : body;
+            if (parsed?.code === 'email_exists' || parsed?.error?.toLowerCase?.().includes('já está cadastrado') || parsed?.error?.toLowerCase?.().includes('already been registered')) {
+              friendlyError = 'Este e-mail já está cadastrado no sistema.';
+            } else if (parsed?.error) {
+              friendlyError = parsed.error;
+            }
+          } catch {}
+        }
+        if (result?.error) {
+          if (result.code === 'email_exists') friendlyError = 'Este e-mail já está cadastrado no sistema.';
+          else friendlyError = result.error;
+        }
+
+        if (functionError || result?.error) {
+          console.error('🔥 UserForm: Erro ao chamar Edge Function', functionError || result?.error);
+          handleError(friendlyError || 'Erro ao criar usuário', 'auth');
+          return;
         }
 
         if (result?.success) {
