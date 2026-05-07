@@ -90,6 +90,13 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     });
   };
 
+  const handleCopyContact = (contact: typeof contacts[number]) => {
+    navigator.clipboard.writeText(formatContactText(contact)).then(() => {
+      toast({ title: 'Copiado!', description: 'Dados do contato copiados.' });
+    }).catch(() => {
+      toast({ title: 'Erro', description: 'Não foi possível copiar os dados.', variant: 'destructive' });
+    });
+
   if (!studentId) {
     return (
       <Card>
