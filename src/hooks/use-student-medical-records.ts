@@ -66,6 +66,7 @@ export function useStudentMedicalRecords(studentId?: string, filters: MedicalRec
     dateTo = '',
     onlyPendingReturn = false,
     sortDir = 'desc',
+    all = false,
   } = filters;
 
   const fetchMedicalRecords = useCallback(async () => {
