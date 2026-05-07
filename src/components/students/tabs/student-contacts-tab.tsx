@@ -5,7 +5,23 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useStudentEmergencyContacts } from '@/hooks/use-student-emergency-contacts';
 import { useToast } from '@/hooks/use-toast';
 import { ContactDialog } from './contact-dialog';
-import { Loader2, Phone, MapPin, Edit, Trash2, Plus, Copy } from 'lucide-react';
+import { Loader2, Phone, MapPin, Edit, Trash2, Plus, Copy, MessageCircle } from 'lucide-react';
+
+const formatContactText = (c: { nome: string; telefone: string; parentesco?: string | null; endereco?: string | null; avisar_contato?: boolean }) => {
+  const lines = [`*${c.nome}*`];
+  lines.push(`📞 Telefone: ${c.telefone}`);
+  if (c.parentesco) lines.push(`👤 Parentesco: ${c.parentesco}`);
+  if (c.endereco) lines.push(`📍 Endereço: ${c.endereco}`);
+  if (c.avisar_contato) lines.push(`⚠️ Avisar em emergências`);
+  return lines.join('\n');
+};
+
+const buildWhatsAppUrl = (telefone: string) => {
+  const digits = (telefone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  const withCountry = digits.length <= 11 ? `55${digits}` : digits;
+  return `https://wa.me/${withCountry}`;
+};
 
 interface StudentContactsTabProps {
   studentId?: string;
