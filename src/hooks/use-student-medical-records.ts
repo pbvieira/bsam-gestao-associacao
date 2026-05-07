@@ -96,10 +96,12 @@ export function useStudentMedicalRecords(studentId?: string, filters: MedicalRec
         );
       }
 
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-
-      query = query.order('data_atendimento', { ascending: sortDir === 'asc' }).range(from, to);
+      query = query.order('data_atendimento', { ascending: sortDir === 'asc' });
+      if (!all) {
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+        query = query.range(from, to);
+      }
 
       const { data, error, count } = await query;
       if (error) throw error;
