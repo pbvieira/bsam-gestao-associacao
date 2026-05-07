@@ -179,9 +179,17 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4" />
-                        <span>{contact.telefone}</span>
+                        <a
+                          href={buildWhatsAppUrl(contact.telefone)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          title="Abrir conversa no WhatsApp"
+                        >
+                          {contact.telefone}
+                        </a>
                       </div>
-                      
+
                       {contact.parentesco && (
                         <div className="flex items-center gap-2">
                           <span className="h-4 w-4 text-center text-xs font-bold">P</span>
