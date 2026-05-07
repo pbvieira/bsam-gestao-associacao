@@ -75,6 +75,14 @@ serve(async (req) => {
 
     if (createError) {
       console.error('🔥 create-user: Erro ao criar usuário', createError);
+      const code = (createError as any).code;
+      const status = (createError as any).status;
+      if (code === 'email_exists' || status === 422) {
+        return new Response(
+          JSON.stringify({ error: 'Este e-mail já está cadastrado no sistema.', code: 'email_exists' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
+        )
+      }
       throw createError
     }
 
