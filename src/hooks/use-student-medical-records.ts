@@ -37,11 +37,35 @@ export const MEDICAL_RECORD_TYPES = [
   { value: 'outro', label: 'Outro', icon: 'FileText' },
 ];
 
-export function useStudentMedicalRecords(studentId?: string) {
+export interface MedicalRecordsFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  tipo?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  onlyPendingReturn?: boolean;
+  sortDir?: 'asc' | 'desc';
+}
+
+export function useStudentMedicalRecords(studentId?: string, filters: MedicalRecordsFilters = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [medicalRecords, setMedicalRecords] = useState<StudentMedicalRecord[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalAll, setTotalAll] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const {
+    page = 1,
+    pageSize = 10,
+    search = '',
+    tipo = '',
+    dateFrom = '',
+    dateTo = '',
+    onlyPendingReturn = false,
+    sortDir = 'desc',
+  } = filters;
 
   const fetchMedicalRecords = useCallback(async () => {
     if (!user || !studentId) {
@@ -49,15 +73,44 @@ export function useStudentMedicalRecords(studentId?: string) {
       return;
     }
 
+    setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('student_medical_records')
-        .select('*')
-        .eq('student_id', studentId)
-        .order('data_atendimento', { ascending: false });
+        .select('*', { count: 'exact' })
+        .eq('student_id', studentId);
 
+      if (tipo) query = query.eq('tipo_atendimento', tipo);
+      if (dateFrom) query = query.gte('data_atendimento', dateFrom);
+      if (dateTo) query = query.lte('data_atendimento', dateTo);
+      if (onlyPendingReturn) {
+        const today = new Date().toISOString().slice(0, 10);
+        query = query.gte('data_retorno', today);
+      }
+      if (search.trim()) {
+        const s = search.trim().replace(/[%,]/g, '');
+        query = query.or(
+          `profissional.ilike.%${s}%,local.ilike.%${s}%,motivo.ilike.%${s}%,diagnostico.ilike.%${s}%,especialidade.ilike.%${s}%`
+        );
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      query = query.order('data_atendimento', { ascending: sortDir === 'asc' }).range(from, to);
+
+      const { data, error, count } = await query;
       if (error) throw error;
+
       setMedicalRecords(data || []);
+      setTotal(count || 0);
+
+      // total geral (sem filtros) para mostrar "X de Y"
+      const { count: countAll } = await supabase
+        .from('student_medical_records')
+        .select('id', { count: 'exact', head: true })
+        .eq('student_id', studentId);
+      setTotalAll(countAll || 0);
     } catch (err: any) {
       toast({
         title: 'Erro ao carregar prontuário',
@@ -67,7 +120,7 @@ export function useStudentMedicalRecords(studentId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [user, studentId, toast]);
+  }, [user, studentId, toast, page, pageSize, search, tipo, dateFrom, dateTo, onlyPendingReturn, sortDir]);
 
   useEffect(() => {
     fetchMedicalRecords();
@@ -159,6 +212,8 @@ export function useStudentMedicalRecords(studentId?: string) {
 
   return {
     medicalRecords,
+    total,
+    totalAll,
     loading,
     fetchMedicalRecords,
     createMedicalRecord,
