@@ -20,7 +20,7 @@ const buildWhatsAppUrl = (telefone: string) => {
   const digits = (telefone || '').replace(/\D/g, '');
   if (!digits) return '';
   const withCountry = digits.length <= 11 ? `55${digits}` : digits;
-  return `https://web.whatsapp.com/send?phone=%2B${withCountry}`;
+  return `https://web.whatsapp.com/send?phone=${withCountry}`;
 };
 
 interface StudentContactsTabProps {
