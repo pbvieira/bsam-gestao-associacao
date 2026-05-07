@@ -124,7 +124,7 @@ export function useStudentMedicalRecords(studentId?: string, filters: MedicalRec
     } finally {
       setLoading(false);
     }
-  }, [user, studentId, toast, page, pageSize, search, tipo, dateFrom, dateTo, onlyPendingReturn, sortDir]);
+  }, [user, studentId, toast, page, pageSize, search, tipo, dateFrom, dateTo, onlyPendingReturn, sortDir, all]);
 
   useEffect(() => {
     fetchMedicalRecords();
