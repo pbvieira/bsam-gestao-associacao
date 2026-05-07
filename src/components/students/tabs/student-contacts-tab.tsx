@@ -207,6 +207,28 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
                   </div>
                   
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyContact(contact)}
+                      title="Copiar dados do contato"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      title="Abrir WhatsApp"
+                    >
+                      <a
+                        href={buildWhatsAppUrl(contact.telefone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </a>
+                    </Button>
                     <ContactDialog 
                       contact={contact}
                       onSave={(data) => handleUpdateContact(data, contact.id)}
