@@ -130,7 +130,7 @@ export function StudentPrintView({ studentId }: StudentPrintViewProps) {
   const { vaccineTypes, vaccines, getVaccineStatus, loading: loadingVaccines } = useStudentVaccines(studentId);
   const { medications, loading: loadingMedications } = useStudentMedications(studentId);
   const { hospitalizations, loading: loadingHospitalizations } = useStudentHospitalizations(studentId);
-  const { medicalRecords, loading: loadingMedicalRecords } = useStudentMedicalRecords(studentId);
+  const { medicalRecords, loading: loadingMedicalRecords } = useStudentMedicalRecords(studentId, { all: true });
   const { stays, loading: loadingStays, getMotivoLabel } = useStudentStays(studentId);
 
   useEffect(() => {
