@@ -69,7 +69,79 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
   const { healthData, loading, createOrUpdateHealthData } = useStudentHealthData(studentId || undefined);
   const { medications, loading: loadingMeds, createMedication, updateMedication, deleteMedication, toggleMedicationStatus } = useStudentMedications(studentId || undefined);
   const { hospitalizations, loading: loadingHosp, createHospitalization, updateHospitalization, deleteHospitalization } = useStudentHospitalizations(studentId || undefined);
-  const { medicalRecords, loading: loadingRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord } = useStudentMedicalRecords(studentId || undefined);
+
+  // Filtros do prontuário
+  const [recordsPage, setRecordsPage] = useState(1);
+  const [recordsPageSize, setRecordsPageSize] = useState(10);
+  const [recordsSearchInput, setRecordsSearchInput] = useState('');
+  const [recordsSearch, setRecordsSearch] = useState('');
+  const [recordsTipo, setRecordsTipo] = useState<string>('all');
+  const [recordsPeriod, setRecordsPeriod] = useState<string>('all');
+  const [recordsCustomFrom, setRecordsCustomFrom] = useState('');
+  const [recordsCustomTo, setRecordsCustomTo] = useState('');
+  const [recordsOnlyPending, setRecordsOnlyPending] = useState(false);
+  const [recordsSortDir, setRecordsSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setRecordsSearch(recordsSearchInput);
+      setRecordsPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [recordsSearchInput]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setRecordsPage(1);
+  }, [recordsTipo, recordsPeriod, recordsCustomFrom, recordsCustomTo, recordsOnlyPending, recordsPageSize, recordsSortDir]);
+
+  const { dateFrom, dateTo } = (() => {
+    if (recordsPeriod === 'custom') {
+      return { dateFrom: recordsCustomFrom || undefined, dateTo: recordsCustomTo || undefined };
+    }
+    if (recordsPeriod === 'all') return { dateFrom: undefined, dateTo: undefined };
+    const days = recordsPeriod === '30' ? 30 : recordsPeriod === '90' ? 90 : recordsPeriod === '180' ? 180 : 0;
+    if (!days) return { dateFrom: undefined, dateTo: undefined };
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return { dateFrom: d.toISOString().slice(0, 10), dateTo: undefined };
+  })();
+
+  const {
+    medicalRecords,
+    total: recordsTotal,
+    totalAll: recordsTotalAll,
+    loading: loadingRecords,
+    createMedicalRecord,
+    updateMedicalRecord,
+    deleteMedicalRecord,
+  } = useStudentMedicalRecords(studentId || undefined, {
+    page: recordsPage,
+    pageSize: recordsPageSize,
+    search: recordsSearch,
+    tipo: recordsTipo === 'all' ? '' : recordsTipo,
+    dateFrom,
+    dateTo,
+    onlyPendingReturn: recordsOnlyPending,
+    sortDir: recordsSortDir,
+  });
+
+  const recordsTotalPages = Math.max(1, Math.ceil(recordsTotal / recordsPageSize));
+  const recordsHasFilters =
+    !!recordsSearch || recordsTipo !== 'all' || recordsPeriod !== 'all' || recordsOnlyPending;
+
+  const clearRecordsFilters = () => {
+    setRecordsSearchInput('');
+    setRecordsSearch('');
+    setRecordsTipo('all');
+    setRecordsPeriod('all');
+    setRecordsCustomFrom('');
+    setRecordsCustomTo('');
+    setRecordsOnlyPending(false);
+    setRecordsPage(1);
+  };
+
   const { toast } = useToast();
   const { registerHealthForm, registerHealthSave } = useStudentFormContext();
   
