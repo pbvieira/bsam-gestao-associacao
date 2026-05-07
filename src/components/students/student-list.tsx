@@ -400,16 +400,18 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             </Button>
                           )}
 
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={!canDelete}
-                            onClick={() => handlePermanentDelete(student.id, student.nome_completo)}
-                            className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                            Excluir
-                          </Button>
+                          {profile?.role === 'administrador' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!canDelete}
+                              onClick={() => handlePermanentDelete(student.id, student.nome_completo)}
+                              className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              Excluir
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
