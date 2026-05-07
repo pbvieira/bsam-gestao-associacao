@@ -96,6 +96,7 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
     }).catch(() => {
       toast({ title: 'Erro', description: 'Não foi possível copiar os dados.', variant: 'destructive' });
     });
+  };
 
   if (!studentId) {
     return (
