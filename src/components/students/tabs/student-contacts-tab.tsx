@@ -72,14 +72,7 @@ export function StudentContactsTab({ studentId }: StudentContactsTabProps) {
   const handleCopyAllContacts = () => {
     if (contacts.length === 0) return;
 
-    const text = contacts.map((c, i) => {
-      const lines = [`*${i + 1}. ${c.nome}*`];
-      lines.push(`📞 Telefone: ${c.telefone}`);
-      if (c.parentesco) lines.push(`👤 Parentesco: ${c.parentesco}`);
-      if (c.endereco) lines.push(`📍 Endereço: ${c.endereco}`);
-      if (c.avisar_contato) lines.push(`⚠️ Avisar em emergências`);
-      return lines.join('\n');
-    }).join('\n\n');
+    const text = contacts.map((c, i) => `${i + 1}. ${formatContactText(c)}`).join('\n\n');
 
     const header = `*Contatos de Emergência*\n${'—'.repeat(20)}\n\n`;
 
