@@ -46,6 +46,7 @@ export interface MedicalRecordsFilters {
   dateTo?: string;
   onlyPendingReturn?: boolean;
   sortDir?: 'asc' | 'desc';
+  all?: boolean;
 }
 
 export function useStudentMedicalRecords(studentId?: string, filters: MedicalRecordsFilters = {}) {
