@@ -293,124 +293,310 @@ export function StudentHealthTab({ studentId }: StudentHealthTabProps) {
                 </p>
               )}
 
-              {studentId && loadingRecords && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Carregando prontuário...</span>
-                </div>
-              )}
+              {studentId && (
+                <>
+                  {/* Filtros */}
+                  <div className="space-y-3 pb-3 border-b">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+                      <div className="md:col-span-5 relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Buscar por profissional, local, motivo, diagnóstico..."
+                          value={recordsSearchInput}
+                          onChange={(e) => setRecordsSearchInput(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                      <div className="md:col-span-3">
+                        <Select value={recordsTipo} onValueChange={setRecordsTipo}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todos os tipos</SelectItem>
+                            {MEDICAL_RECORD_TYPES.map((t) => (
+                              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Select value={recordsPeriod} onValueChange={setRecordsPeriod}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Período" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Todo o período</SelectItem>
+                            <SelectItem value="30">Últimos 30 dias</SelectItem>
+                            <SelectItem value="90">Últimos 90 dias</SelectItem>
+                            <SelectItem value="180">Últimos 6 meses</SelectItem>
+                            <SelectItem value="custom">Personalizado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Select value={recordsSortDir} onValueChange={(v) => setRecordsSortDir(v as 'asc' | 'desc')}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="desc">Mais recentes</SelectItem>
+                            <SelectItem value="asc">Mais antigos</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
 
-              {studentId && !loadingRecords && medicalRecords.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhum atendimento registrado.
-                </p>
-              )}
-
-              {studentId && !loadingRecords && medicalRecords.length > 0 && (
-                <div className="space-y-3">
-                  {/* Estatísticas */}
-                  <div className="flex gap-4 text-sm text-muted-foreground pb-2 border-b flex-wrap">
-                    <span>Total: <strong className="text-foreground">{medicalRecords.length}</strong></span>
-                    <span>Retornos pendentes: <strong className="text-foreground">
-                      {medicalRecords.filter(r => r.data_retorno && new Date(r.data_retorno) >= new Date()).length}
-                    </strong></span>
-                  </div>
-
-                  {medicalRecords.map((record) => {
-                    const hasUpcomingReturn = record.data_retorno && new Date(record.data_retorno) >= new Date();
-                    const isPastReturn = record.data_retorno && new Date(record.data_retorno) < new Date();
-                    
-                    return (
-                      <div 
-                        key={record.id} 
-                        className={`border rounded-lg p-4 ${hasUpcomingReturn ? 'border-blue-300 bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-2">
-                              <Badge variant="secondary">
-                                {getMedicalRecordTypeLabel(record.tipo_atendimento)}
-                              </Badge>
-                              {record.tipo_atendimento === 'consulta_psicologica' && (
-                                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-200">
-                                  <Lock className="h-3 w-3 mr-1" />
-                                  Privado
-                                </Badge>
-                              )}
-                              {record.especialidade && (
-                                <Badge variant="outline">{record.especialidade}</Badge>
-                              )}
-                              <span className="text-sm text-muted-foreground">
-                                {format(new Date(record.data_atendimento), 'dd/MM/yyyy', { locale: ptBR })}
-                              </span>
-                              {hasUpcomingReturn && (
-                                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-200">
-                                  <CalendarClock className="h-3 w-3 mr-1" />
-                                  Retorno: {format(new Date(record.data_retorno!), 'dd/MM/yyyy', { locale: ptBR })}
-                                </Badge>
-                              )}
-                              {isPastReturn && (
-                                <Badge variant="outline" className="bg-gray-500/10 text-gray-600 border-gray-200">
-                                  Retorno vencido
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            <div className="space-y-1">
-                              {record.profissional && (
-                                <p className="text-sm font-medium">{record.profissional}</p>
-                              )}
-                              {record.local && (
-                                <p className="text-sm text-muted-foreground">{record.local}</p>
-                              )}
-                              {record.motivo && (
-                                <p className="text-sm text-muted-foreground">
-                                  <strong>Motivo:</strong> {record.motivo}
-                                </p>
-                              )}
-                              {record.diagnostico && (
-                                <p className="text-sm text-muted-foreground">
-                                  <strong>Diagnóstico:</strong> {record.diagnostico}
-                                </p>
-                              )}
-                              {record.prescricao && (
-                                <p className="text-sm text-muted-foreground">
-                                  <strong>Prescrição:</strong> {record.prescricao}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingMedicalRecord(record);
-                                setMedicalRecordDialogOpen(true);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={async () => {
-                                if (confirm('Excluir este registro de atendimento?')) {
-                                  await deleteMedicalRecord(record.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
+                    {recordsPeriod === 'custom' && (
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                        <div>
+                          <label className="text-xs text-muted-foreground">De</label>
+                          <Input
+                            type="date"
+                            value={recordsCustomFrom}
+                            onChange={(e) => setRecordsCustomFrom(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Até</label>
+                          <Input
+                            type="date"
+                            value={recordsCustomTo}
+                            onChange={(e) => setRecordsCustomTo(e.target.value)}
+                          />
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    )}
+
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="only-pending-return"
+                          checked={recordsOnlyPending}
+                          onCheckedChange={setRecordsOnlyPending}
+                        />
+                        <label htmlFor="only-pending-return" className="text-sm cursor-pointer">
+                          Apenas com retorno pendente
+                        </label>
+                      </div>
+                      {recordsHasFilters && (
+                        <Button type="button" variant="ghost" size="sm" onClick={clearRecordsFilters}>
+                          <X className="h-4 w-4 mr-1" />
+                          Limpar filtros
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Estatísticas */}
+                  <div className="flex gap-4 text-sm text-muted-foreground flex-wrap">
+                    <span>
+                      Exibindo: <strong className="text-foreground">{medicalRecords.length}</strong> de{' '}
+                      <strong className="text-foreground">{recordsTotal}</strong>
+                      {recordsHasFilters && recordsTotalAll !== recordsTotal && (
+                        <> (total geral: {recordsTotalAll})</>
+                      )}
+                    </span>
+                  </div>
+
+                  {loadingRecords && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Carregando prontuário...</span>
+                    </div>
+                  )}
+
+                  {!loadingRecords && medicalRecords.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      {recordsHasFilters
+                        ? 'Nenhum atendimento encontrado com os filtros aplicados.'
+                        : 'Nenhum atendimento registrado.'}
+                    </p>
+                  )}
+
+                  {!loadingRecords && medicalRecords.length > 0 && (
+                    <div className="space-y-3">
+                      {medicalRecords.map((record) => {
+                        const hasUpcomingReturn = record.data_retorno && new Date(record.data_retorno) >= new Date();
+                        const isPastReturn = record.data_retorno && new Date(record.data_retorno) < new Date();
+
+                        return (
+                          <div
+                            key={record.id}
+                            className={`border rounded-lg p-4 ${hasUpcomingReturn ? 'border-blue-300 bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                  <Badge variant="secondary">
+                                    {getMedicalRecordTypeLabel(record.tipo_atendimento)}
+                                  </Badge>
+                                  {record.tipo_atendimento === 'consulta_psicologica' && (
+                                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-200">
+                                      <Lock className="h-3 w-3 mr-1" />
+                                      Privado
+                                    </Badge>
+                                  )}
+                                  {record.especialidade && (
+                                    <Badge variant="outline">{record.especialidade}</Badge>
+                                  )}
+                                  <span className="text-sm text-muted-foreground">
+                                    {format(new Date(record.data_atendimento), 'dd/MM/yyyy', { locale: ptBR })}
+                                  </span>
+                                  {hasUpcomingReturn && (
+                                    <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-200">
+                                      <CalendarClock className="h-3 w-3 mr-1" />
+                                      Retorno: {format(new Date(record.data_retorno!), 'dd/MM/yyyy', { locale: ptBR })}
+                                    </Badge>
+                                  )}
+                                  {isPastReturn && (
+                                    <Badge variant="outline" className="bg-gray-500/10 text-gray-600 border-gray-200">
+                                      Retorno vencido
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                <div className="space-y-1">
+                                  {record.profissional && (
+                                    <p className="text-sm font-medium">{record.profissional}</p>
+                                  )}
+                                  {record.local && (
+                                    <p className="text-sm text-muted-foreground">{record.local}</p>
+                                  )}
+                                  {record.motivo && (
+                                    <p className="text-sm text-muted-foreground">
+                                      <strong>Motivo:</strong> {record.motivo}
+                                    </p>
+                                  )}
+                                  {record.diagnostico && (
+                                    <p className="text-sm text-muted-foreground">
+                                      <strong>Diagnóstico:</strong> {record.diagnostico}
+                                    </p>
+                                  )}
+                                  {record.prescricao && (
+                                    <p className="text-sm text-muted-foreground">
+                                      <strong>Prescrição:</strong> {record.prescricao}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingMedicalRecord(record);
+                                    setMedicalRecordDialogOpen(true);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={async () => {
+                                    if (confirm('Excluir este registro de atendimento?')) {
+                                      await deleteMedicalRecord(record.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Paginação */}
+                  {!loadingRecords && recordsTotal > 0 && (
+                    <div className="flex items-center justify-between flex-wrap gap-3 pt-2 border-t">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Por página:</span>
+                        <Select
+                          value={String(recordsPageSize)}
+                          onValueChange={(v) => setRecordsPageSize(Number(v))}
+                        >
+                          <SelectTrigger className="w-20 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {recordsTotalPages > 1 && (
+                        <Pagination className="mx-0 w-auto justify-end">
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (recordsPage > 1) setRecordsPage(recordsPage - 1);
+                                }}
+                                className={recordsPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              />
+                            </PaginationItem>
+                            {(() => {
+                              const items: JSX.Element[] = [];
+                              const addPage = (n: number) => {
+                                items.push(
+                                  <PaginationItem key={n}>
+                                    <PaginationLink
+                                      isActive={n === recordsPage}
+                                      onClick={(e) => { e.preventDefault(); setRecordsPage(n); }}
+                                      className="cursor-pointer"
+                                    >
+                                      {n}
+                                    </PaginationLink>
+                                  </PaginationItem>
+                                );
+                              };
+                              const addEllipsis = (key: string) => {
+                                items.push(
+                                  <PaginationItem key={key}>
+                                    <PaginationEllipsis />
+                                  </PaginationItem>
+                                );
+                              };
+                              const tp = recordsTotalPages;
+                              const cp = recordsPage;
+                              if (tp <= 7) {
+                                for (let i = 1; i <= tp; i++) addPage(i);
+                              } else {
+                                addPage(1);
+                                if (cp > 3) addEllipsis('e1');
+                                const start = Math.max(2, cp - 1);
+                                const end = Math.min(tp - 1, cp + 1);
+                                for (let i = start; i <= end; i++) addPage(i);
+                                if (cp < tp - 2) addEllipsis('e2');
+                                addPage(tp);
+                              }
+                              return items;
+                            })()}
+                            <PaginationItem>
+                              <PaginationNext
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (recordsPage < recordsTotalPages) setRecordsPage(recordsPage + 1);
+                                }}
+                                className={recordsPage >= recordsTotalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
