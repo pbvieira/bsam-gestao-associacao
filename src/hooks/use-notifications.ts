@@ -196,10 +196,10 @@ export function useNotifications() {
           description: "Convite aceito com sucesso",
         });
       } else {
-        // Recusar = remover participante
+        // Recusar = atualizar status para 'recusado' (preserva histórico)
         const { error } = await supabase
           .from('event_participants')
-          .delete()
+          .update({ status: 'recusado' })
           .eq('event_id', eventId)
           .eq('user_id', user.id);
 
