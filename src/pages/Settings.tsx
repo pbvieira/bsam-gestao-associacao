@@ -45,7 +45,7 @@ const settingsCategories: SettingsCategory[] = [
     description: "Parâmetros globais do sistema",
     icon: SettingsIcon,
     items: [
-      { name: "Sistema", href: "/configuracoes/sistema", icon: SettingsIcon, module: "students", description: "Capacidade de alunos e demais parâmetros gerais" },
+      { name: "Sistema", href: "/configuracoes/sistema", icon: SettingsIcon, module: "dashboard", capability: "system_settings.read", description: "Capacidade de alunos e demais parâmetros gerais" },
     ]
   },
   {
