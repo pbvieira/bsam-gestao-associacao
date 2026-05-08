@@ -196,42 +196,52 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
     );
   }
 
-  return (
-    <StudentListContent
-      students={students}
-      filteredStudents={filteredStudents}
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      statusFilter={statusFilter}
-      setStatusFilter={setStatusFilter}
-      sortBy={sortBy}
-      setSortBy={setSortBy}
-      canRead={canRead}
-      canCreate={canCreate}
-      canUpdate={canUpdate}
-      canDelete={canDelete}
-      canPermanentDelete={canPermanentDelete}
-      onCreateStudent={onCreateStudent}
-      onEditStudent={onEditStudent}
-      onViewStudent={onViewStudent}
-      handleDeactivate={handleDeactivate}
-      handleActivateClick={handleActivateClick}
-      handlePermanentDelete={handlePermanentDelete}
-      calculateAge={calculateAge}
-      calculatePermanence={calculatePermanence}
-      activationDialogOpen={activationDialogOpen}
-      setActivationDialogOpen={setActivationDialogOpen}
-      studentToActivate={studentToActivate}
-      handleActivateConfirm={handleActivateConfirm}
-    />
-  );
-}
+  const totalVagas = getTotalVagas();
+  const internados = students.filter((s) => s.ativo).length;
+  const vagasDisponiveis = Math.max(totalVagas - internados, 0);
 
-// Helper component split — keep file readable. Inline render below to avoid larger refactor.
-// Actually simpler to inline directly. Reverting the wrapper:
-function StudentListContent(_props: any): JSX.Element {
-  return null as any;
-}
+  return (
+    <div className="space-y-6">
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-primary" />
+              <div>
+                <p className="text-sm font-medium">Capacidade Total</p>
+                <p className="text-2xl font-bold">{totalVagas}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <BedDouble className="h-4 w-4 text-blue-500" />
+              <div>
+                <p className="text-sm font-medium">Internados</p>
+                <p className="text-2xl font-bold">{internados}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <DoorOpen className="h-4 w-4 text-green-500" />
+              <div>
+                <p className="text-sm font-medium">Vagas Disponíveis</p>
+                <p className="text-2xl font-bold">{vagasDisponiveis}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Table */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
