@@ -173,7 +173,7 @@ export function RoleCapabilitiesModal({ role, onClose }: RoleCapabilitiesModalPr
 
   return (
     <Dialog open={!!role} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-3xl h-[85vh] max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-3 border-b">
           <DialogTitle className="flex items-center gap-2">
             Permissões — {role.label}
