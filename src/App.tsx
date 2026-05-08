@@ -244,6 +244,11 @@ const App = () => {
               <DocumentTemplates />
             </UnifiedRoute>
           } />
+          <Route path="/configuracoes/sistema" element={
+            <UnifiedRoute module="students">
+              <SystemSettingsPage />
+            </UnifiedRoute>
+          } />
           <Route path="/convites-pendentes" element={
             <UnifiedRoute module="calendar">
               <PendingInvitations />
