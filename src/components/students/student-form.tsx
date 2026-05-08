@@ -104,6 +104,7 @@ interface StudentFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   onRefreshPhoto?: () => void;
+  readOnly?: boolean;
 }
 
 export function StudentForm(props: StudentFormProps) {
@@ -114,7 +115,7 @@ export function StudentForm(props: StudentFormProps) {
   );
 }
 
-function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto }: StudentFormProps) {
+function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, readOnly = false }: StudentFormProps) {
   const { createStudent, updateStudent } = useStudents();
   const { createTask } = useTasks();
   const { user } = useAuth();
