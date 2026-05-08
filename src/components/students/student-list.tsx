@@ -24,6 +24,7 @@ interface StudentListProps {
 export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: StudentListProps) {
   const { students, loading, deactivateStudent, activateStudent, deleteStudent } = useStudents();
   const { hasCapability } = useAuth();
+  const { getTotalVagas } = useSystemSettings();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
