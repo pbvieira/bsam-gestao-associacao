@@ -1,9 +1,10 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/main-layout";
 import { UnifiedRoute } from "@/components/auth/unified-route";
 import { PageLayout } from "@/components/layout/page-layout";
 import { RolePermissionsTable } from "@/components/roles/role-permissions-table";
-import { RoleAuditLog } from "@/components/roles/role-audit-log";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { History } from "lucide-react";
 
 export default function RoleManagement() {
   return (
@@ -11,20 +12,17 @@ export default function RoleManagement() {
       <MainLayout>
         <PageLayout
           title="Gestão de Funções e Permissões"
-          subtitle="Crie funções personalizadas, ajuste permissões granulares e acompanhe a trilha de auditoria"
+          subtitle="Crie funções personalizadas e ajuste permissões granulares"
+          actions={
+            <Button asChild variant="outline" size="sm">
+              <Link to="/gestao-roles/auditoria">
+                <History className="h-4 w-4 mr-2" />
+                Trilha de auditoria
+              </Link>
+            </Button>
+          }
         >
-          <Tabs defaultValue="roles" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="roles">Funções e permissões</TabsTrigger>
-              <TabsTrigger value="audit">Trilha de auditoria</TabsTrigger>
-            </TabsList>
-            <TabsContent value="roles">
-              <RolePermissionsTable />
-            </TabsContent>
-            <TabsContent value="audit">
-              <RoleAuditLog />
-            </TabsContent>
-          </Tabs>
+          <RolePermissionsTable />
         </PageLayout>
       </MainLayout>
     </UnifiedRoute>
