@@ -65,11 +65,11 @@ const priorityLabels = {
 
 export function TaskTable({ tasks, onEditTask, onStatusChange }: TaskTableProps) {
   const { updateTask, deleteTask } = useTasks();
-  const { canAccess } = useAuth();
+  const { hasCapability } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const canEditTask = canAccess('tasks');
-  const canDeleteTask = canAccess('tasks');
+  const canEditTask = hasCapability('tasks.write');
+  const canDeleteTask = hasCapability('tasks.delete');
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     setLoading(taskId);
