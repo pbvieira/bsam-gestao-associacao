@@ -36,11 +36,11 @@ export function PurchaseWorkflow({ order, onUpdate }: PurchaseWorkflowProps) {
   const { approveOrder, receiveOrder, updateOrder } = usePurchases();
   const { items } = usePurchaseItems(order.id);
   const { createMovement } = useInventory();
-  const { canAccess, user } = useAuth();
+  const { hasCapability, user } = useAuth();
   const { toast } = useToast();
 
-  const canApprove = canAccess('purchases');
-  const canReceive = canAccess('purchases');
+  const canApprove = hasCapability('purchases.approve');
+  const canReceive = hasCapability('purchases.approve');
 
   const handleApprove = async () => {
     const { error } = await approveOrder(order.id);
