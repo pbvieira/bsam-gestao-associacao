@@ -236,7 +236,19 @@ export function useCalendar() {
     }
   };
 
-  const updateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
+  const updateEvent = async (
+    id: string,
+    updates: Partial<CalendarEvent>,
+    options?: {
+      addedParticipantIds?: string[];
+      removedParticipantIds?: string[];
+      addedExternalParticipants?: Array<{ name: string; email: string }>;
+      removedExternalEmails?: string[];
+      keptParticipantIds?: string[];
+      keptExternalEmails?: string[];
+      significantChange?: boolean;
+    }
+  ) => {
     try {
       const { error } = await supabase
         .from('calendar_events')
@@ -245,12 +257,59 @@ export function useCalendar() {
 
       if (error) throw error;
 
+      const opts = options || {};
+
+      // Notificar participantes mantidos sobre mudança significativa
+      if (opts.significantChange && ((opts.keptParticipantIds && opts.keptParticipantIds.length > 0) || (opts.keptExternalEmails && opts.keptExternalEmails.length > 0))) {
+        try {
+          await supabase.functions.invoke('send-event-update', {
+            body: {
+              eventId: id,
+              type: 'update',
+              targetParticipantUserIds: opts.keptParticipantIds || [],
+              targetExternalEmails: opts.keptExternalEmails || [],
+            },
+          });
+        } catch (e) {
+          console.error('send-event-update failed:', e);
+        }
+      }
+
+      // Enviar convite para participantes novos
+      if ((opts.addedParticipantIds && opts.addedParticipantIds.length > 0) || (opts.addedExternalParticipants && opts.addedExternalParticipants.length > 0)) {
+        try {
+          await supabase.functions.invoke('send-event-invitation', {
+            body: {
+              eventId: id,
+              participantIds: opts.addedParticipantIds || [],
+              externalParticipants: opts.addedExternalParticipants || [],
+            },
+          });
+        } catch (e) {
+          console.error('send-event-invitation (added) failed:', e);
+        }
+      }
+
+      // Enviar cancelamento para removidos
+      if ((opts.removedParticipantIds && opts.removedParticipantIds.length > 0) || (opts.removedExternalEmails && opts.removedExternalEmails.length > 0)) {
+        try {
+          await supabase.functions.invoke('send-event-update', {
+            body: {
+              eventId: id,
+              type: 'cancellation',
+              targetParticipantUserIds: opts.removedParticipantIds || [],
+              targetExternalEmails: opts.removedExternalEmails || [],
+            },
+          });
+        } catch (e) {
+          console.error('send-event-update (cancellation) failed:', e);
+        }
+      }
+
       toast({
         title: "Sucesso",
         description: "Evento atualizado com sucesso",
       });
-
-      // Não chamar fetchEvents() aqui - deixar o realtime cuidar da atualização
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar evento';
       setError(errorMessage);
@@ -265,6 +324,28 @@ export function useCalendar() {
 
   const deleteEvent = async (id: string) => {
     try {
+      // Capturar snapshot antes de excluir
+      const { data: snapshot } = await supabase
+        .from('calendar_events')
+        .select('titulo, descricao, data_inicio, data_fim, location, all_day, created_by')
+        .eq('id', id)
+        .maybeSingle();
+
+      // Notificar participantes ANTES da exclusão
+      if (snapshot) {
+        try {
+          await supabase.functions.invoke('send-event-update', {
+            body: {
+              eventId: id,
+              type: 'cancellation',
+              eventSnapshot: snapshot,
+            },
+          });
+        } catch (e) {
+          console.error('cancellation notify failed:', e);
+        }
+      }
+
       const { error } = await supabase
         .from('calendar_events')
         .delete()
