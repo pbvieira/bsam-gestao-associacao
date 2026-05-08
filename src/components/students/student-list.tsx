@@ -401,7 +401,7 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                             </Button>
                           )}
 
-                          {profile?.role === 'administrador' && (
+                          {canPermanentDelete && (
                             <Button
                               variant="ghost"
                               size="sm"
