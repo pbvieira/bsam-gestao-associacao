@@ -138,12 +138,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchCapabilities = async (roleId: string | null | undefined) => {
+    if (!roleId) {
+      setCapabilities([]);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('role_capabilities')
+        .select('capability')
+        .eq('role_id', roleId)
+        .eq('allowed', true);
+      if (error) {
+        console.error('❌ Error fetching capabilities:', error);
+        setCapabilities([]);
+        return;
+      }
+      setCapabilities((data ?? []).map((r: any) => r.capability));
+    } catch (e) {
+      console.error('❌ Failed to fetch capabilities:', e);
+      setCapabilities([]);
+    }
+  };
+
   // Função simplificada para verificar acesso a módulos baseado no cache local
   const canAccess = (module: string): boolean => {
-    const access = accessibleModules.includes(module);
-    console.log(`🔍 Role-based access check - ${profile?.role} can access ${module}:`, access);
-    return access;
+    return accessibleModules.includes(module);
   };
+
+  const hasCapability = (cap: string): boolean => capabilities.includes(cap);
+  const hasAnyCapability = (caps: string[]): boolean =>
+    caps.some((c) => capabilities.includes(c));
 
   const signIn = async (email: string, password: string) => {
     console.log('🔑 Attempting sign in for:', email);
