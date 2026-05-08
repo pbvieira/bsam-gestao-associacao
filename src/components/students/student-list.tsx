@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
-import { Search, Plus, Edit, Eye, UserCheck, BedDouble, DoorOpen, Filter, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Eye, UserCheck, UserX, BedDouble, DoorOpen, Filter, Trash2 } from "lucide-react";
 import { format, differenceInYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { StayActivationDialog } from "./stay-activation-dialog";
