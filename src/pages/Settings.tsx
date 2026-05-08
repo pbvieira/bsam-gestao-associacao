@@ -28,6 +28,7 @@ interface SettingItem {
   href: string;
   icon: LucideIcon;
   module: string;
+  capability?: string;
   description?: string;
 }
 
