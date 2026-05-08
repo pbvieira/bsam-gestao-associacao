@@ -105,6 +105,29 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate caller and verify capability
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user: caller }, error: authErr } = await supabase.auth.getUser(token);
+    if (authErr || !caller) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: canWrite } = await supabase.rpc('has_capability', {
+      _user_id: caller.id, _cap: 'calendar.write',
+    });
+    if (!canWrite) {
+      return new Response(JSON.stringify({ error: 'Forbidden: missing capability calendar.write' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { eventId, participantIds = [], externalParticipants = [] }: InvitationRequest = await req.json();
 
     console.log('Processing invitation request for event:', eventId);
