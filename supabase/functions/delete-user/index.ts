@@ -78,21 +78,15 @@ Deno.serve(async (req) => {
       throw new Error('Não é possível excluir este usuário pois ele está vinculado a um cadastro de aluno. Os dados do aluno devem ser preservados.');
     }
 
-    // 2. Check if this is the last admin
-    const { data: targetProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
+    // 2. Check if target is a system admin and would leave us without any
+    const { data: targetIsAdmin } = await supabaseAdmin
+      .rpc('has_capability', { _user_id: userId, _cap: 'system.admin' });
 
-    if (targetProfile?.role === 'administrador') {
-      const { count } = await supabaseAdmin
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'administrador')
-        .eq('active', true);
+    if (targetIsAdmin) {
+      const { data: adminCount } = await supabaseAdmin
+        .rpc('count_active_system_admins');
 
-      if (count && count <= 1) {
+      if ((adminCount ?? 0) <= 1) {
         throw new Error('Não é possível excluir o último administrador do sistema');
       }
     }
