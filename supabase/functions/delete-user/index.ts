@@ -39,20 +39,17 @@ Deno.serve(async (req) => {
 
     console.log('Delete user request from:', currentUser.id);
 
-    // Get the current user's profile to check permissions
-    const { data: currentProfile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('user_id', currentUser.id)
-      .single();
+    // Verificar capability users.manage via RPC (server-side, baseada em role_capabilities)
+    const { data: canManage, error: capError } = await supabaseAdmin
+      .rpc('has_capability', { _user_id: currentUser.id, _cap: 'users.manage' });
 
-    if (profileError || !currentProfile) {
-      throw new Error('Perfil não encontrado');
+    if (capError) {
+      console.error('Erro ao verificar capability:', capError);
+      throw new Error('Falha ao verificar permissão');
     }
 
-    // Check if user is admin
-    if (currentProfile.role !== 'administrador') {
-      throw new Error('Apenas administradores podem excluir usuários');
+    if (!canManage) {
+      throw new Error('Apenas usuários com permissão de gerenciar usuários podem excluir usuários');
     }
 
     // Get the userId from request body
@@ -81,21 +78,15 @@ Deno.serve(async (req) => {
       throw new Error('Não é possível excluir este usuário pois ele está vinculado a um cadastro de aluno. Os dados do aluno devem ser preservados.');
     }
 
-    // 2. Check if this is the last admin
-    const { data: targetProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
+    // 2. Check if target is a system admin and would leave us without any
+    const { data: targetIsAdmin } = await supabaseAdmin
+      .rpc('has_capability', { _user_id: userId, _cap: 'system.admin' });
 
-    if (targetProfile?.role === 'administrador') {
-      const { count } = await supabaseAdmin
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'administrador')
-        .eq('active', true);
+    if (targetIsAdmin) {
+      const { data: adminCount } = await supabaseAdmin
+        .rpc('count_active_system_admins');
 
-      if (count && count <= 1) {
+      if ((adminCount ?? 0) <= 1) {
         throw new Error('Não é possível excluir o último administrador do sistema');
       }
     }
