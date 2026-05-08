@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/main-layout';
 import { PageLayout } from '@/components/layout/page-layout';
+import { UnifiedRoute } from '@/components/auth/unified-route';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSystemSettings } from '@/hooks/use-system-settings';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import { Loader2, Save } from 'lucide-react';
 
 export default function SystemSettingsPage() {
   const { settings, loading, updateSetting } = useSystemSettings();
   const { toast } = useToast();
+  const { hasCapability } = useAuth();
+  const canWrite = hasCapability('system_settings.write');
   const [totalVagas, setTotalVagas] = useState('');
   const [saving, setSaving] = useState(false);
 
