@@ -40,6 +40,7 @@ import DisabilityTypes from "./pages/DisabilityTypes";
 import Medications from "./pages/Medications";
 import Appointments from "./pages/Appointments";
 import Settings from "./pages/Settings";
+import SystemSettingsPage from "./pages/SystemSettingsPage";
 import DocumentTemplates from "./pages/DocumentTemplates";
 import PendingInvitations from "./pages/PendingInvitations";
 import NotFound from "./pages/NotFound";
@@ -241,6 +242,11 @@ const App = () => {
           <Route path="/configuracoes/templates-documentos" element={
             <UnifiedRoute module="students">
               <DocumentTemplates />
+            </UnifiedRoute>
+          } />
+          <Route path="/configuracoes/sistema" element={
+            <UnifiedRoute module="students">
+              <SystemSettingsPage />
             </UnifiedRoute>
           } />
           <Route path="/convites-pendentes" element={

@@ -2,14 +2,15 @@ import { useState } from "react";
 import { useStudents, Student } from "@/hooks/use-students";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useSystemSettings } from "@/hooks/use-system-settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Edit, Eye, UserCheck, UserX, Calendar, Phone, Filter, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import { Search, Plus, Edit, Eye, UserCheck, UserX, BedDouble, DoorOpen, Filter, Trash2 } from "lucide-react";
 import { format, differenceInYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { StayActivationDialog } from "./stay-activation-dialog";
@@ -23,6 +24,7 @@ interface StudentListProps {
 export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: StudentListProps) {
   const { students, loading, deactivateStudent, activateStudent, deleteStudent } = useStudents();
   const { hasCapability } = useAuth();
+  const { getTotalVagas } = useSystemSettings();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -195,17 +197,21 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
     );
   }
 
+  const totalVagas = getTotalVagas();
+  const internados = students.filter((s) => s.ativo).length;
+  const vagasDisponiveis = Math.max(totalVagas - internados, 0);
+
   return (
     <div className="space-y-6">
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <UserCheck className="h-4 w-4 text-primary" />
               <div>
-                <p className="text-sm font-medium">Total Ativos</p>
-                <p className="text-2xl font-bold">{students.filter((s) => s.ativo).length}</p>
+                <p className="text-sm font-medium">Capacidade Total</p>
+                <p className="text-2xl font-bold">{totalVagas}</p>
               </div>
             </div>
           </CardContent>
@@ -214,16 +220,10 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-blue-500" />
+              <BedDouble className="h-4 w-4 text-blue-500" />
               <div>
-                <p className="text-sm font-medium">Este Mês</p>
-                <p className="text-2xl font-bold">
-                  {
-                    students.filter(
-                      (s) => format(new Date(s.data_abertura), "yyyy-MM") === format(new Date(), "yyyy-MM"),
-                    ).length
-                  }
-                </p>
+                <p className="text-sm font-medium">Internados</p>
+                <p className="text-2xl font-bold">{internados}</p>
               </div>
             </div>
           </CardContent>
@@ -232,22 +232,10 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <UserX className="h-4 w-4 text-orange-500" />
+              <DoorOpen className="h-4 w-4 text-green-500" />
               <div>
-                <p className="text-sm font-medium">Inativos</p>
-                <p className="text-2xl font-bold">{students.filter((s) => !s.ativo).length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-green-500" />
-              <div>
-                <p className="text-sm font-medium">Resultados</p>
-                <p className="text-2xl font-bold">{filteredStudents.length}</p>
+                <p className="text-sm font-medium">Vagas Disponíveis</p>
+                <p className="text-2xl font-bold">{vagasDisponiveis}</p>
               </div>
             </div>
           </CardContent>

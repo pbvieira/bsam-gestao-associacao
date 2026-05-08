@@ -18,6 +18,7 @@ import {
   Accessibility,
   Table2,
   FileText,
+  Settings as SettingsIcon,
   LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,6 +39,14 @@ interface SettingsCategory {
 }
 
 const settingsCategories: SettingsCategory[] = [
+  {
+    title: "Configurações Gerais",
+    description: "Parâmetros globais do sistema",
+    icon: SettingsIcon,
+    items: [
+      { name: "Sistema", href: "/configuracoes/sistema", icon: SettingsIcon, module: "students", description: "Capacidade de alunos e demais parâmetros gerais" },
+    ]
+  },
   {
     title: "Tabelas Auxiliares",
     description: "Gerencie os cadastros auxiliares do sistema",

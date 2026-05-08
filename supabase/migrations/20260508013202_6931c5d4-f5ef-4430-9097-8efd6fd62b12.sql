@@ -1,0 +1,1 @@
+UPDATE public.system_settings SET value = '79', updated_at = now() WHERE key = 'total_vagas';
