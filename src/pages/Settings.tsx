@@ -28,6 +28,7 @@ interface SettingItem {
   href: string;
   icon: LucideIcon;
   module: string;
+  capability?: string;
   description?: string;
 }
 
@@ -44,7 +45,7 @@ const settingsCategories: SettingsCategory[] = [
     description: "Parâmetros globais do sistema",
     icon: SettingsIcon,
     items: [
-      { name: "Sistema", href: "/configuracoes/sistema", icon: SettingsIcon, module: "students", description: "Capacidade de alunos e demais parâmetros gerais" },
+      { name: "Sistema", href: "/configuracoes/sistema", icon: SettingsIcon, module: "dashboard", capability: "system_settings.read", description: "Capacidade de alunos e demais parâmetros gerais" },
     ]
   },
   {
@@ -78,7 +79,7 @@ const settingsCategories: SettingsCategory[] = [
 ];
 
 export default function Settings() {
-  const { canAccess } = useAuth();
+  const { canAccess, hasCapability } = useAuth();
 
   return (
     <MainLayout>
@@ -89,7 +90,9 @@ export default function Settings() {
         <div className="space-y-8">
           {settingsCategories.map((category) => {
             const CategoryIcon = category.icon;
-            const filteredItems = category.items.filter(item => canAccess(item.module));
+            const filteredItems = category.items.filter(item =>
+              canAccess(item.module) && (!item.capability || hasCapability(item.capability))
+            );
             
             if (filteredItems.length === 0) return null;
 

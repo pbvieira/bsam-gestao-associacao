@@ -209,7 +209,7 @@ export function RoleCapabilitiesModal({ role, onClose }: RoleCapabilitiesModalPr
           </div>
         </div>
 
-        <ScrollArea className="flex-1 px-6 py-4">
+        <ScrollArea className="flex-1 min-h-0 px-6 py-4">
           {isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (

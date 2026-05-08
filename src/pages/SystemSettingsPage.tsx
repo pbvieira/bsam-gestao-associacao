@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
 import { PageLayout } from '@/components/layout/page-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSystemSettings } from '@/hooks/use-system-settings';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import { Loader2, Save } from 'lucide-react';
 
 export default function SystemSettingsPage() {
   const { settings, loading, updateSetting } = useSystemSettings();
   const { toast } = useToast();
+  const { hasCapability } = useAuth();
+  const canRead = hasCapability('system_settings.read');
+  const canWrite = hasCapability('system_settings.write');
   const [totalVagas, setTotalVagas] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -29,6 +34,10 @@ export default function SystemSettingsPage() {
       toast({ title: 'Configuração salva', description: 'A capacidade foi atualizada.' });
     }
   };
+
+  if (!canRead) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <MainLayout>
@@ -59,9 +68,10 @@ export default function SystemSettingsPage() {
                     value={totalVagas}
                     onChange={(e) => setTotalVagas(e.target.value)}
                     className="max-w-xs"
+                    disabled={!canWrite}
                   />
                 </div>
-                <Button onClick={handleSave} disabled={saving}>
+                <Button onClick={handleSave} disabled={saving || !canWrite}>
                   {saving ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
@@ -69,6 +79,11 @@ export default function SystemSettingsPage() {
                   )}
                   Salvar
                 </Button>
+                {!canWrite && (
+                  <p className="text-xs text-muted-foreground">
+                    Você não tem permissão para editar configurações do sistema.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

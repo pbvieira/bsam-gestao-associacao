@@ -245,6 +245,24 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     ],
   },
   {
+    id: "system-settings",
+    label: "Configurações do sistema",
+    description: "Parâmetros globais da aplicação (capacidade de alunos etc.)",
+    icon: "Settings",
+    capabilities: [
+      {
+        key: "system_settings.read",
+        label: "Visualizar configurações",
+        description: "Acessar a tela de Configurações Gerais e ler parâmetros globais",
+      },
+      {
+        key: "system_settings.write",
+        label: "Editar configurações",
+        description: "Alterar parâmetros globais do sistema (ex.: capacidade de vagas)",
+      },
+    ],
+  },
+  {
     id: "system",
     label: "Sistema e administração",
     description: "Permissões críticas — conceder com cautela",
