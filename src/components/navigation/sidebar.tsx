@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
@@ -83,14 +83,35 @@ export function AppSidebar() {
     .map(g => ({ ...g, items: g.items.filter(i => canAccess(i.module)) }))
     .filter(g => g.items.length > 0);
 
-  // Expand groups containing the active route by default
+  const STORAGE_KEY = "sidebar:openGroups";
+
+  // Expand groups containing the active route by default; persist user toggles
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    let stored: Record<string, boolean> = {};
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+      if (raw) stored = JSON.parse(raw) ?? {};
+    } catch {
+      stored = {};
+    }
     const initial: Record<string, boolean> = {};
     visibleGroups.forEach(g => {
-      initial[g.id] = g.items.some(i => i.href === location.pathname) || g.id === "principal";
+      if (typeof stored[g.id] === "boolean") {
+        initial[g.id] = stored[g.id];
+      } else {
+        initial[g.id] = g.items.some(i => i.href === location.pathname) || g.id === "principal";
+      }
     });
     return initial;
   });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(openGroups));
+    } catch {
+      // ignore quota / privacy mode errors
+    }
+  }, [openGroups]);
 
   const toggleGroup = (id: string) =>
     setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
