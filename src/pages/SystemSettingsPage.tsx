@@ -15,6 +15,7 @@ export default function SystemSettingsPage() {
   const { settings, loading, updateSetting } = useSystemSettings();
   const { toast } = useToast();
   const { hasCapability } = useAuth();
+  const canRead = hasCapability('system_settings.read');
   const canWrite = hasCapability('system_settings.write');
   const [totalVagas, setTotalVagas] = useState('');
   const [saving, setSaving] = useState(false);
