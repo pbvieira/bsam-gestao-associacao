@@ -17,7 +17,7 @@ const Tasks = () => {
   const location = useLocation();
 
   const { tasks, loading, refetch } = useTasks();
-  const { canAccess } = useAuth();
+  const { hasCapability } = useAuth();
 
   // Abrir formulário automaticamente se vier do dashboard
   useEffect(() => {
@@ -28,7 +28,7 @@ const Tasks = () => {
     }
   }, [location]);
 
-  const canCreateTasks = canAccess('tasks');
+  const canCreateTasks = hasCapability('tasks.write');
 
   const handleTaskCreated = () => {
     setIsFormOpen(false);

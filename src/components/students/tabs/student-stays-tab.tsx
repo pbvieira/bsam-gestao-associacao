@@ -95,7 +95,7 @@ const calculatePermanencia = (dataEntrada: string, dataSaida: string): string =>
 
 export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
   const { stays, loading, getMotivoLabel, updateStay, deleteStay } = useStudentStays(studentId);
-  const { canAccess } = useAuth();
+  const { hasCapability } = useAuth();
   const { toast } = useToast();
   
   const [editingStay, setEditingStay] = useState<any>(null);
@@ -105,7 +105,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
     observacoes: '',
   });
 
-  const canEdit = canAccess("students");
+  const canEdit = hasCapability("students.write");
 
   const handleEdit = (stay: any) => {
     setEditingStay(stay);

@@ -37,10 +37,10 @@ export function InventoryList({ onCreateItem, onEditItem, onViewMovements }: Inv
   const [showFilters, setShowFilters] = useState(false);
   
   const { items, loading, getLowStockItems, fetchItems, getCategories, getUnits } = useInventory();
-  const { canAccess } = useAuth();
+  const { hasCapability } = useAuth();
 
-  const canCreate = canAccess('inventory');
-  const canUpdate = canAccess('inventory');
+  const canCreate = hasCapability('inventory.manage');
+  const canUpdate = hasCapability('inventory.manage');
 
   const categories = getCategories();
   const units = getUnits();
