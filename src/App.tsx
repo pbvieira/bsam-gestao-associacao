@@ -43,6 +43,7 @@ import Settings from "./pages/Settings";
 import SystemSettingsPage from "./pages/SystemSettingsPage";
 import DocumentTemplates from "./pages/DocumentTemplates";
 import PendingInvitations from "./pages/PendingInvitations";
+import InvitationsHistory from "./pages/InvitationsHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -252,6 +253,11 @@ const App = () => {
           <Route path="/convites-pendentes" element={
             <UnifiedRoute module="calendar">
               <PendingInvitations />
+            </UnifiedRoute>
+          } />
+          <Route path="/convites-historico" element={
+            <UnifiedRoute module="calendar">
+              <InvitationsHistory />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
