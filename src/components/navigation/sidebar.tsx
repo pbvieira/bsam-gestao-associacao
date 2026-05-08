@@ -1,127 +1,114 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Package, BarChart3, Home, User, ShoppingCart, Warehouse, LogOut, CheckSquare, Calendar, Shield, Pill, Settings, Stethoscope, CalendarCheck, History } from "lucide-react";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { Users, Package, BarChart3, Home, User, ShoppingCart, Warehouse, LogOut, CheckSquare, Calendar, Shield, Pill, Settings, Stethoscope, CalendarCheck, History, ChevronDown, LayoutDashboard, GraduationCap, BarChart2, ShieldCheck } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { usePendingInvitationsCount } from "@/hooks/use-pending-invitations-count";
 
-const mainNavigationItems = [{
-  name: "Dashboard",
-  href: "/",
-  icon: Home,
-  module: "dashboard"
-}, {
-  name: "Tarefas",
-  href: "/tarefas",
-  icon: CheckSquare,
-  module: "tasks"
-}, {
-  name: "Calendário",
-  href: "/calendario",
-  icon: Calendar,
-  module: "calendar"
-}, {
-  name: "Convites Pendentes",
-  href: "/convites-pendentes",
-  icon: CalendarCheck,
-  module: "calendar"
-}, {
-  name: "Histórico de Convites",
-  href: "/convites-historico",
-  icon: History,
-  module: "calendar"
-}, {
-  name: "Alunos",
-  href: "/alunos",
-  icon: Users,
-  module: "students"
-}, {
-  name: "Medicamentos",
-  href: "/medicacoes",
-  icon: Pill,
-  module: "students"
-}, {
-  name: "Consultas",
-  href: "/consultas",
-  icon: Stethoscope,
-  module: "students"
-}, {
-  name: "Usuários",
-  href: "/usuarios",
-  icon: User,
-  module: "users"
-}, {
-  name: "Estoque",
-  href: "/estoque",
-  icon: Warehouse,
-  module: "inventory"
-}, {
-  name: "Fornecedores",
-  href: "/fornecedores",
-  icon: Package,
-  module: "suppliers"
-}, {
-  name: "Compras",
-  href: "/compras",
-  icon: ShoppingCart,
-  module: "purchases"
-}, {
-  name: "Relatórios",
-  href: "/relatorios",
-  icon: BarChart3,
-  module: "reports"
-}, {
-  name: "Gestão de Permissões",
-  href: "/gestao-roles",
-  icon: Shield,
-  module: "users"
-}, {
-  name: "Configurações",
-  href: "/configuracoes",
-  icon: Settings,
-  module: "students"
-}];
+type NavItem = { name: string; href: string; icon: any; module: string };
+type NavGroup = { id: string; label: string; icon: any; items: NavItem[] };
+
+const navGroups: NavGroup[] = [
+  {
+    id: "principal",
+    label: "Principal",
+    icon: LayoutDashboard,
+    items: [
+      { name: "Dashboard", href: "/", icon: Home, module: "dashboard" },
+      { name: "Tarefas", href: "/tarefas", icon: CheckSquare, module: "tasks" },
+    ],
+  },
+  {
+    id: "calendario",
+    label: "Calendário",
+    icon: Calendar,
+    items: [
+      { name: "Calendário", href: "/calendario", icon: Calendar, module: "calendar" },
+      { name: "Convites Pendentes", href: "/convites-pendentes", icon: CalendarCheck, module: "calendar" },
+      { name: "Histórico de Convites", href: "/convites-historico", icon: History, module: "calendar" },
+    ],
+  },
+  {
+    id: "alunos",
+    label: "Alunos",
+    icon: GraduationCap,
+    items: [
+      { name: "Alunos", href: "/alunos", icon: Users, module: "students" },
+      { name: "Medicamentos", href: "/medicacoes", icon: Pill, module: "students" },
+      { name: "Consultas", href: "/consultas", icon: Stethoscope, module: "students" },
+    ],
+  },
+  {
+    id: "suprimentos",
+    label: "Suprimentos",
+    icon: Warehouse,
+    items: [
+      { name: "Estoque", href: "/estoque", icon: Warehouse, module: "inventory" },
+      { name: "Fornecedores", href: "/fornecedores", icon: Package, module: "suppliers" },
+      { name: "Compras", href: "/compras", icon: ShoppingCart, module: "purchases" },
+    ],
+  },
+  {
+    id: "analise",
+    label: "Análise",
+    icon: BarChart2,
+    items: [
+      { name: "Relatórios", href: "/relatorios", icon: BarChart3, module: "reports" },
+    ],
+  },
+  {
+    id: "admin",
+    label: "Administração",
+    icon: ShieldCheck,
+    items: [
+      { name: "Usuários", href: "/usuarios", icon: User, module: "users" },
+      { name: "Gestão de Permissões", href: "/gestao-roles", icon: Shield, module: "users" },
+      { name: "Configurações", href: "/configuracoes", icon: Settings, module: "students" },
+    ],
+  },
+];
 
 export function AppSidebar() {
-  const {
-    profile,
-    canAccess,
-    signOut
-  } = useAuth();
+  const { profile, canAccess, signOut } = useAuth();
   const location = useLocation();
-  const {
-    open
-  } = useSidebar();
+  const { open } = useSidebar();
   const pendingInvites = usePendingInvitationsCount();
 
-  // Filter navigation items based on user role access
-  const mainNavigation = mainNavigationItems.filter(item => canAccess(item.module));
+  const visibleGroups = navGroups
+    .map(g => ({ ...g, items: g.items.filter(i => canAccess(i.module)) }))
+    .filter(g => g.items.length > 0);
 
-  // Debug log para diagnóstico
-  console.log('🔍 Sidebar Debug:', {
-    userRole: profile?.role,
-    mainItems: mainNavigation.length
+  // Expand groups containing the active route by default
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    visibleGroups.forEach(g => {
+      initial[g.id] = g.items.some(i => i.href === location.pathname) || g.id === "principal";
+    });
+    return initial;
   });
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+  const toggleGroup = (id: string) =>
+    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const handleSignOut = async () => { await signOut(); };
 
   const getUserInitials = () => {
     if (!profile?.full_name) return 'U';
     return profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   };
 
-  const renderMenuItem = (item: typeof mainNavigationItems[0]) => {
+  const renderMenuItem = (item: NavItem) => {
     const Icon = item.icon;
     const isActive = location.pathname === item.href;
     const showBadge = item.href === '/convites-pendentes' && pendingInvites > 0;
     const menuButton = (
       <SidebarMenuButton asChild className={cn(
-        "h-11 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200",
+        "h-10 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200",
         isActive && "bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/20"
       )}>
         <Link to={item.href} className="flex items-center gap-3">
@@ -140,29 +127,18 @@ export function AppSidebar() {
       return (
         <SidebarMenuItem key={item.name}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              {menuButton}
-            </TooltipTrigger>
-            <TooltipContent side="right" className="font-medium">
-              {item.name}
-            </TooltipContent>
+            <TooltipTrigger asChild>{menuButton}</TooltipTrigger>
+            <TooltipContent side="right" className="font-medium">{item.name}</TooltipContent>
           </Tooltip>
         </SidebarMenuItem>
       );
     }
-
-    return (
-      <SidebarMenuItem key={item.name}>
-        {menuButton}
-      </SidebarMenuItem>
-    );
+    return <SidebarMenuItem key={item.name}>{menuButton}</SidebarMenuItem>;
   };
 
   return (
     <TooltipProvider>
-      <Sidebar collapsible="icon" className="border-r-0" style={{
-        background: 'var(--sidebar-gradient)'
-      }}>
+      <Sidebar collapsible="icon" className="border-r-0" style={{ background: 'var(--sidebar-gradient)' }}>
         <SidebarHeader className="border-b border-white/10 pb-4">
           <div className="flex items-center gap-2 px-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
@@ -177,13 +153,52 @@ export function AppSidebar() {
         </SidebarHeader>
 
         <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {mainNavigation.map(renderMenuItem)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {visibleGroups.map(group => {
+            // When collapsed (icon mode), render items flat without group header
+            if (!open) {
+              return (
+                <SidebarGroup key={group.id}>
+                  <SidebarGroupContent>
+                    <SidebarMenu>{group.items.map(renderMenuItem)}</SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              );
+            }
+
+            const isOpen = openGroups[group.id] ?? false;
+            const GroupIcon = group.icon;
+            const hasActive = group.items.some(i => i.href === location.pathname);
+            const groupBadgeCount = group.items.some(i => i.href === '/convites-pendentes') ? pendingInvites : 0;
+
+            return (
+              <Collapsible key={group.id} open={isOpen} onOpenChange={() => toggleGroup(group.id)}>
+                <SidebarGroup>
+                  <CollapsibleTrigger asChild>
+                    <SidebarGroupLabel
+                      className={cn(
+                        "flex items-center gap-2 cursor-pointer text-white/70 hover:text-white hover:bg-white/5 rounded-md px-2 h-9 transition-colors",
+                        hasActive && "text-white"
+                      )}
+                    >
+                      <GroupIcon className="h-4 w-4 flex-shrink-0" />
+                      <span className="flex-1 text-xs font-semibold uppercase tracking-wide">{group.label}</span>
+                      {groupBadgeCount > 0 && !isOpen && (
+                        <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                          {groupBadgeCount}
+                        </Badge>
+                      )}
+                      <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")} />
+                    </SidebarGroupLabel>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
+                    <SidebarGroupContent>
+                      <SidebarMenu>{group.items.map(renderMenuItem)}</SidebarMenu>
+                    </SidebarGroupContent>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            );
+          })}
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 pt-4">
@@ -205,7 +220,7 @@ export function AppSidebar() {
                   </div>}
               </div>
             </SidebarMenuItem>
-            
+
             <SidebarMenuItem>
               {!open ? <Tooltip>
                   <TooltipTrigger asChild>
@@ -213,9 +228,7 @@ export function AppSidebar() {
                       <LogOut className="h-4 w-4" />
                     </SidebarMenuButton>
                   </TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
-                    Sair
-                  </TooltipContent>
+                  <TooltipContent side="right" className="font-medium">Sair</TooltipContent>
                 </Tooltip> : <SidebarMenuButton onClick={handleSignOut} className="h-9 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 justify-start gap-3">
                   <LogOut className="h-4 w-4" />
                   <span>Sair</span>
