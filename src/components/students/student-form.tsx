@@ -388,12 +388,12 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, read
 
   const globalSaving = isSubmitting || isSaving;
 
-  const readOnlyFieldsClass = readOnly
-    ? "[&_input]:pointer-events-none [&_input]:bg-muted [&_textarea]:pointer-events-none [&_textarea]:bg-muted [&_[role=combobox]]:pointer-events-none [&_[role=combobox]]:bg-muted [&_[role=checkbox]]:pointer-events-none [&_[role=radio]]:pointer-events-none [&_[role=switch]]:pointer-events-none"
+  const readOnlyContentClass = readOnly
+    ? "[&_[role=tabpanel]]:pointer-events-none [&_[role=tabpanel]_input]:bg-muted [&_[role=tabpanel]_textarea]:bg-muted [&_[role=tabpanel]_[role=combobox]]:bg-muted [&_[role=tabpanel]]:opacity-95"
     : "";
 
   return (
-    <div className={`space-y-6 ${readOnlyFieldsClass}`}>
+    <div className={`space-y-6 ${readOnlyContentClass}`}>
       {readOnly && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
