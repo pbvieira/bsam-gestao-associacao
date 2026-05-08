@@ -7,15 +7,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Loader2 } from "lucide-react";
 import { useStudentPhoto } from "@/hooks/use-student-photo";
 
-type ViewMode = 'list' | 'create' | 'edit';
+type ViewMode = 'list' | 'create' | 'edit' | 'view';
 
 export default function Students() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   
-  // Hook para foto do aluno - usado apenas no modo de edição
+  // Hook para foto do aluno - usado em modos de edição/visualização
   const { photoUrl, loading: photoLoading, refreshPhoto } = useStudentPhoto(
-    viewMode === 'edit' ? selectedStudent?.id : undefined
+    viewMode === 'edit' || viewMode === 'view' ? selectedStudent?.id : undefined
   );
 
   const handleCreateStudent = () => {
@@ -26,6 +26,11 @@ export default function Students() {
   const handleEditStudent = (student: any) => {
     setSelectedStudent(student);
     setViewMode('edit');
+  };
+
+  const handleViewStudent = (student: any) => {
+    setSelectedStudent(student);
+    setViewMode('view');
   };
 
   const handleBackToList = () => {
