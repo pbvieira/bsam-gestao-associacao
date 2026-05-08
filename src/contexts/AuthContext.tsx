@@ -97,8 +97,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('✅ Profile fetched successfully:', data);
       setProfile(data);
       
-      // Buscar módulos acessíveis após definir o profile
-      await fetchAccessibleModules(data.role);
+      // Buscar módulos acessíveis e capabilities após definir o profile
+      await Promise.all([
+        fetchAccessibleModules(data.role),
+        fetchCapabilities(data.role_id),
+      ]);
       
       return data;
     } catch (error) {
