@@ -388,9 +388,12 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, read
 
   const globalSaving = isSubmitting || isSaving;
 
+  const readOnlyFieldsClass = readOnly
+    ? "[&_input]:pointer-events-none [&_input]:bg-muted [&_textarea]:pointer-events-none [&_textarea]:bg-muted [&_[role=combobox]]:pointer-events-none [&_[role=combobox]]:bg-muted [&_[role=checkbox]]:pointer-events-none [&_[role=radio]]:pointer-events-none [&_[role=switch]]:pointer-events-none"
+    : "";
+
   return (
-    <fieldset disabled={readOnly} className="space-y-6 disabled:opacity-100">
-    <div className="space-y-6">
+    <div className={`space-y-6 ${readOnlyFieldsClass}`}>
       {readOnly && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
@@ -721,6 +724,5 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, read
         </div>
       </div>
     </div>
-    </fieldset>
   );
 }
