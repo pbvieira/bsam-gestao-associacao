@@ -105,7 +105,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
     observacoes: '',
   });
 
-  const canEdit = canAccess("students");
+  const canEdit = hasCapability("students.write");
 
   const handleEdit = (stay: any) => {
     setEditingStay(stay);
