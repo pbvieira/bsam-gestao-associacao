@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
 import { PageLayout } from '@/components/layout/page-layout';
-import { UnifiedRoute } from '@/components/auth/unified-route';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
