@@ -1,55 +1,46 @@
-import { useState } from "react";
-import { UserRole } from "@/contexts/AuthContext";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useRoleAccess } from "@/hooks/use-role-access";
-import { RolePermissionsModal } from "./role-permissions-modal";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Settings } from "lucide-react";
-
-const ROLES = [
-  { value: 'diretor' as UserRole, label: 'Diretor', color: 'bg-red-500' },
-  { value: 'coordenador' as UserRole, label: 'Coordenador', color: 'bg-blue-500' },
-  { value: 'auxiliar' as UserRole, label: 'Auxiliar', color: 'bg-green-500' },
-  { value: 'aluno' as UserRole, label: 'Aluno', color: 'bg-gray-500' },
-  { value: 'administrador' as UserRole, label: 'Administrador', color: 'bg-purple-500' }
-];
-
-const MODULES = [
-  { value: 'annotation_categories', label: 'Categorias de Anotações' },
-  { value: 'calendar', label: 'Calendário' },
-  { value: 'dashboard', label: 'Dashboard' },
-  { value: 'inventory', label: 'Inventário' },
-  { value: 'purchases', label: 'Compras' },
-  { value: 'reports', label: 'Relatórios' },
-  { value: 'students', label: 'Alunos' },
-  { value: 'suppliers', label: 'Fornecedores' },
-  { value: 'tasks', label: 'Tarefas' },
-  { value: 'users', label: 'Usuários' }
-];
+import { useRoles, useUsersCountByRole, type Role } from "@/hooks/use-roles";
+import { useCapabilityCounts } from "@/hooks/use-role-capabilities";
+import { RoleCapabilitiesModal } from "./role-capabilities-modal";
+import { ALL_CAPABILITIES } from "@/lib/capabilities-catalog";
 
 export function RolePermissionsTable() {
-  const { data: permissions = [], isLoading } = useRoleAccess();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const { data: roles = [], isLoading } = useRoles();
+  const { data: capCounts = {} } = useCapabilityCounts();
+  const { data: userCounts = {} } = useUsersCountByRole();
+  const [selected, setSelected] = useState<Role | null>(null);
 
-  const getPermissionCount = (role: UserRole) => {
-    const rolePermissions = permissions.filter(p => p.role === role && p.allowed);
-    return `${rolePermissions.length} de ${MODULES.length}`;
-  };
+  const totalCaps = ALL_CAPABILITIES.length;
 
-  const getRoleBadgeColor = (role: UserRole) => {
-    return ROLES.find(r => r.value === role)?.color || 'bg-gray-500';
-  };
+  const sortedRoles = useMemo(
+    () =>
+      [...roles].sort(
+        (a, b) =>
+          a.ordem - b.ordem || a.label.localeCompare(b.label, "pt-BR")
+      ),
+    [roles]
+  );
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Gestão de Permissões por Role</CardTitle>
+          <CardTitle>Funções e permissões</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-4">
+          <div className="animate-pulse space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-12 bg-muted rounded" />
             ))}
@@ -63,53 +54,72 @@ export function RolePermissionsTable() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Gestão de Permissões por Role</CardTitle>
+          <CardTitle>Funções e permissões</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Role</TableHead>
-                <TableHead>Módulos Permitidos</TableHead>
-                <TableHead className="w-[150px]">Ações</TableHead>
+                <TableHead>Função</TableHead>
+                <TableHead className="w-[140px]">Tipo</TableHead>
+                <TableHead className="w-[160px]">Permissões</TableHead>
+                <TableHead className="w-[120px]">Usuários</TableHead>
+                <TableHead className="w-[140px] text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ROLES.map((role) => (
-                <TableRow key={role.value}>
-                  <TableCell>
-                    <Badge 
-                      variant="secondary" 
-                      className={`${getRoleBadgeColor(role.value)} text-white`}
-                    >
-                      {role.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {getPermissionCount(role.value)} módulos
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedRole(role.value)}
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Gerenciar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {sortedRoles.map((role) => {
+                const granted = capCounts[role.id] ?? 0;
+                const users = userCounts[role.id] ?? 0;
+                return (
+                  <TableRow key={role.id}>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{role.label}</span>
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {role.key}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {role.is_system ? (
+                        <Badge variant="secondary">Sistema</Badge>
+                      ) : (
+                        <Badge variant="outline">Personalizada</Badge>
+                      )}
+                      {!role.ativo && (
+                        <Badge variant="destructive" className="ml-2">
+                          Inativa
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {granted} de {totalCaps}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {users}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelected(role)}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Gerenciar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      <RolePermissionsModal
-        role={selectedRole}
-        onClose={() => setSelectedRole(null)}
-        modules={MODULES}
-        roles={ROLES}
+      <RoleCapabilitiesModal
+        role={selected}
+        onClose={() => setSelected(null)}
       />
     </>
   );
