@@ -389,7 +389,16 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, read
   const globalSaving = isSubmitting || isSaving;
 
   return (
+    <fieldset disabled={readOnly} className="space-y-6 disabled:opacity-100">
     <div className="space-y-6">
+      {readOnly && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Modo de visualização: os dados deste aluno estão em somente leitura.
+          </AlertDescription>
+        </Alert>
+      )}
       {isCreationMode && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
@@ -700,15 +709,18 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, read
         <div className="flex gap-3">
           <Button type="button" variant="outline" onClick={handleCancel} disabled={globalSaving}>
             <X className="h-4 w-4 mr-2" />
-            Cancelar
+            {readOnly ? "Voltar" : "Cancelar"}
           </Button>
-          <Button onClick={handleSaveAll} disabled={globalSaving}>
-            {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            <Save className="h-4 w-4 mr-2" />
-            Salvar
-          </Button>
+          {!readOnly && (
+            <Button onClick={handleSaveAll} disabled={globalSaving}>
+              {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              <Save className="h-4 w-4 mr-2" />
+              Salvar
+            </Button>
+          )}
         </div>
       </div>
     </div>
+    </fieldset>
   );
 }
