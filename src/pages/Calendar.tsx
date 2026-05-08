@@ -15,9 +15,9 @@ const Calendar = () => {
   const calendarRef = useRef<CalendarViewRef>(null);
 
   const { events, loading } = useCalendar();
-  const { canAccess } = useAuth();
+  const { hasCapability } = useAuth();
 
-  const canCreateEvents = canAccess('calendar');
+  const canCreateEvents = hasCapability('calendar.write');
 
   const handleEventCreated = async () => {
     console.log('⏳ Aguardando atualização do realtime...');
