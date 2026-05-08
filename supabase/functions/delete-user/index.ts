@@ -39,20 +39,17 @@ Deno.serve(async (req) => {
 
     console.log('Delete user request from:', currentUser.id);
 
-    // Get the current user's profile to check permissions
-    const { data: currentProfile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('user_id', currentUser.id)
-      .single();
+    // Verificar capability users.manage via RPC (server-side, baseada em role_capabilities)
+    const { data: canManage, error: capError } = await supabaseAdmin
+      .rpc('has_capability', { _user_id: currentUser.id, _cap: 'users.manage' });
 
-    if (profileError || !currentProfile) {
-      throw new Error('Perfil não encontrado');
+    if (capError) {
+      console.error('Erro ao verificar capability:', capError);
+      throw new Error('Falha ao verificar permissão');
     }
 
-    // Check if user is admin
-    if (currentProfile.role !== 'administrador') {
-      throw new Error('Apenas administradores podem excluir usuários');
+    if (!canManage) {
+      throw new Error('Apenas usuários com permissão de gerenciar usuários podem excluir usuários');
     }
 
     // Get the userId from request body
