@@ -21,7 +21,7 @@ interface StudentListProps {
 
 export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
   const { students, loading, deactivateStudent, activateStudent, deleteStudent } = useStudents();
-  const { canAccess, profile } = useAuth();
+  const { canAccess, hasCapability } = useAuth();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -29,9 +29,10 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
   const [activationDialogOpen, setActivationDialogOpen] = useState(false);
   const [studentToActivate, setStudentToActivate] = useState<Student | null>(null);
 
-  const canCreate = canAccess("students");
-  const canUpdate = canAccess("students");
-  const canDelete = canAccess("students");
+  const canCreate = canAccess("students") && hasCapability("students.write");
+  const canUpdate = canAccess("students") && hasCapability("students.write");
+  const canDelete = canAccess("students") && hasCapability("students.delete");
+  const canPermanentDelete = hasCapability("students.delete");
 
   const filteredStudents = students
     .filter((student) => {
