@@ -17,7 +17,7 @@ const Tasks = () => {
   const location = useLocation();
 
   const { tasks, loading, refetch } = useTasks();
-  const { canAccess } = useAuth();
+  const { hasCapability } = useAuth();
 
   // Abrir formulário automaticamente se vier do dashboard
   useEffect(() => {
