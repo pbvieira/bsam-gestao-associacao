@@ -42,7 +42,7 @@ interface ExternalParticipant {
 
 export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) {
   const { createEvent, updateEvent, deleteEvent, events } = useCalendar();
-  const { user } = useAuth();
+  const { user, hasCapability } = useAuth();
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -67,6 +67,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
   const isEdit = !!eventId;
   const currentEvent = isEdit ? events.find(e => e.id === eventId) : null;
   const isOrganizer = !!currentEvent && currentEvent.created_by === user?.id;
+  const canManage = isOrganizer || hasCapability('calendar.manage.all');
 
   useEffect(() => {
     if (selectedDate && !isEdit) {
@@ -491,7 +492,7 @@ export function EventForm({ eventId, selectedDate, onSuccess }: EventFormProps) 
 
         <div className="flex justify-between items-center gap-2 mt-4 pt-4 border-t flex-shrink-0">
           <div>
-            {isEdit && isOrganizer && (
+            {isEdit && canManage && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button type="button" variant="destructive" disabled={deleting || loading}>
