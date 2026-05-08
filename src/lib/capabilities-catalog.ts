@@ -108,13 +108,23 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     capabilities: [
       {
         key: "calendar.read",
-        label: "Visualizar calendário",
-        description: "Ver eventos e participantes",
+        label: "Acesso ao calendário",
+        description: "Acessar a página do calendário (vê apenas eventos próprios e convites recebidos)",
       },
       {
         key: "calendar.write",
-        label: "Gerenciar calendário",
-        description: "Criar, editar e cancelar eventos e convites",
+        label: "Criar eventos",
+        description: "Criar novos eventos e convidar participantes",
+      },
+      {
+        key: "calendar.read.all",
+        label: "Visualizar todos os eventos",
+        description: "Ver eventos criados por qualquer usuário, mesmo sem ser participante",
+      },
+      {
+        key: "calendar.manage.all",
+        label: "Controle total do calendário",
+        description: "Editar, cancelar e gerenciar participantes de qualquer evento",
       },
     ],
   },
