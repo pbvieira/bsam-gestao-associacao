@@ -6,5 +6,8 @@ verify_jwt = false
 [functions.send-event-invitation]
 verify_jwt = true
 
+[functions.send-event-update]
+verify_jwt = true
+
 [functions.process-invitation-response]
 verify_jwt = false
