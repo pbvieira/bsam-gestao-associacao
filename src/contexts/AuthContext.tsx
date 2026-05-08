@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [accessibleModules, setAccessibleModules] = useState<string[]>([]);
+  const [capabilities, setCapabilities] = useState<string[]>([]);
 
   const initializeAuth = async () => {
     try {
