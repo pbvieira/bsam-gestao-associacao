@@ -65,14 +65,6 @@ const settingsCategories: SettingsCategory[] = [
     items: [
       { name: "Templates de Documentos", href: "/configuracoes/templates-documentos", icon: FileText, module: "students", description: "Edite o conteúdo dos documentos impressos" },
     ]
-  },
-  {
-    title: "Permissões e Acessos",
-    description: "Gerencie os acessos e permissões do sistema",
-    icon: Shield,
-    items: [
-      { name: "Gestão de Permissões", href: "/gestao-roles", icon: Shield, module: "users", description: "Permissões por perfil de usuário" },
-    ]
   }
 ];
 
