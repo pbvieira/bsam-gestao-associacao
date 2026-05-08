@@ -18,6 +18,7 @@ import {
   Accessibility,
   Table2,
   FileText,
+  Settings as SettingsIcon,
   LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
