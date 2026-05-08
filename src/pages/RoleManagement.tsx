@@ -13,7 +13,7 @@ export default function RoleManagement() {
         <PageLayout
           title="Gestão de Funções e Permissões"
           subtitle="Crie funções personalizadas e ajuste permissões granulares"
-          actions={
+          actionButton={
             <Button asChild variant="outline" size="sm">
               <Link to="/gestao-roles/auditoria">
                 <History className="h-4 w-4 mr-2" />
