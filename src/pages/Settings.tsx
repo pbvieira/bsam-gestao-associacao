@@ -17,7 +17,6 @@ import {
   HeartPulse, 
   Accessibility,
   Table2,
-  Shield,
   FileText,
   LucideIcon
 } from 'lucide-react';
