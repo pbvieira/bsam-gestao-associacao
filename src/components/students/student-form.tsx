@@ -104,6 +104,7 @@ interface StudentFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   onRefreshPhoto?: () => void;
+  readOnly?: boolean;
 }
 
 export function StudentForm(props: StudentFormProps) {
@@ -114,7 +115,7 @@ export function StudentForm(props: StudentFormProps) {
   );
 }
 
-function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto }: StudentFormProps) {
+function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, readOnly = false }: StudentFormProps) {
   const { createStudent, updateStudent } = useStudents();
   const { createTask } = useTasks();
   const { user } = useAuth();
@@ -387,8 +388,20 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto }: St
 
   const globalSaving = isSubmitting || isSaving;
 
+  const readOnlyContentClass = readOnly
+    ? "[&_[role=tabpanel]]:pointer-events-none [&_[role=tabpanel]_input]:bg-muted [&_[role=tabpanel]_textarea]:bg-muted [&_[role=tabpanel]_[role=combobox]]:bg-muted [&_[role=tabpanel]]:opacity-95"
+    : "";
+
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${readOnlyContentClass}`}>
+      {readOnly && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Modo de visualização: os dados deste aluno estão em somente leitura.
+          </AlertDescription>
+        </Alert>
+      )}
       {isCreationMode && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
@@ -699,13 +712,15 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto }: St
         <div className="flex gap-3">
           <Button type="button" variant="outline" onClick={handleCancel} disabled={globalSaving}>
             <X className="h-4 w-4 mr-2" />
-            Cancelar
+            {readOnly ? "Voltar" : "Cancelar"}
           </Button>
-          <Button onClick={handleSaveAll} disabled={globalSaving}>
-            {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            <Save className="h-4 w-4 mr-2" />
-            Salvar
-          </Button>
+          {!readOnly && (
+            <Button onClick={handleSaveAll} disabled={globalSaving}>
+              {globalSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              <Save className="h-4 w-4 mr-2" />
+              Salvar
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Edit, UserCheck, UserX, Calendar, Phone, Filter, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Eye, UserCheck, UserX, Calendar, Phone, Filter, Trash2 } from "lucide-react";
 import { format, differenceInYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { StayActivationDialog } from "./stay-activation-dialog";
@@ -17,9 +17,10 @@ import { StayActivationDialog } from "./stay-activation-dialog";
 interface StudentListProps {
   onCreateStudent: () => void;
   onEditStudent: (student: any) => void;
+  onViewStudent?: (student: any) => void;
 }
 
-export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps) {
+export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: StudentListProps) {
   const { students, loading, deactivateStudent, activateStudent, deleteStudent } = useStudents();
   const { hasCapability } = useAuth();
   const { toast } = useToast();
@@ -366,6 +367,17 @@ export function StudentList({ onCreateStudent, onEditStudent }: StudentListProps
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
+                          {onViewStudent && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onViewStudent(student)}
+                              className="gap-1"
+                            >
+                              <Eye className="h-3 w-3" />
+                              Visualizar
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"

@@ -7,15 +7,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Loader2 } from "lucide-react";
 import { useStudentPhoto } from "@/hooks/use-student-photo";
 
-type ViewMode = 'list' | 'create' | 'edit';
+type ViewMode = 'list' | 'create' | 'edit' | 'view';
 
 export default function Students() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   
-  // Hook para foto do aluno - usado apenas no modo de edição
+  // Hook para foto do aluno - usado em modos de edição/visualização
   const { photoUrl, loading: photoLoading, refreshPhoto } = useStudentPhoto(
-    viewMode === 'edit' ? selectedStudent?.id : undefined
+    viewMode === 'edit' || viewMode === 'view' ? selectedStudent?.id : undefined
   );
 
   const handleCreateStudent = () => {
@@ -26,6 +26,11 @@ export default function Students() {
   const handleEditStudent = (student: any) => {
     setSelectedStudent(student);
     setViewMode('edit');
+  };
+
+  const handleViewStudent = (student: any) => {
+    setSelectedStudent(student);
+    setViewMode('view');
   };
 
   const handleBackToList = () => {
@@ -54,16 +59,18 @@ export default function Students() {
                 {viewMode === 'list' && 'Alunos'}
                 {viewMode === 'create' && 'Novo Aluno'}
                 {viewMode === 'edit' && `Editar: ${selectedStudent?.nome_completo}`}
+                {viewMode === 'view' && `Visualizar: ${selectedStudent?.nome_completo}`}
               </h1>
               <p className="text-muted-foreground">
                 {viewMode === 'list' && 'Gestão completa dos assistidos da associação'}
                 {viewMode === 'create' && 'Cadastre um novo assistido da associação'}
                 {viewMode === 'edit' && 'Edite as informações do assistido'}
+                {viewMode === 'view' && 'Visualização somente leitura do cadastro'}
               </p>
             </div>
             
-            {/* Foto do Aluno - exibida no header no modo edição */}
-            {viewMode === 'edit' && (
+            {/* Foto do Aluno - exibida no header no modo edição/visualização */}
+            {(viewMode === 'edit' || viewMode === 'view') && (
               <div className="w-20 h-20 rounded-lg border overflow-hidden bg-muted flex items-center justify-center shrink-0">
                 {photoLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -84,15 +91,17 @@ export default function Students() {
             <StudentList 
               onCreateStudent={handleCreateStudent}
               onEditStudent={handleEditStudent}
+              onViewStudent={handleViewStudent}
             />
           )}
           
-          {(viewMode === 'create' || viewMode === 'edit') && (
+          {(viewMode === 'create' || viewMode === 'edit' || viewMode === 'view') && (
             <StudentForm 
               student={selectedStudent}
               onSuccess={handleBackToList}
               onCancel={handleBackToList}
               onRefreshPhoto={refreshPhoto}
+              readOnly={viewMode === 'view'}
             />
           )}
         </div>
