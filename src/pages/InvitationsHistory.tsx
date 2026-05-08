@@ -53,7 +53,7 @@ export default function InvitationsHistory() {
   }, [tab, debouncedSearch]);
 
   const fetchCounts = useCallback(async (userId: string) => {
-    const statuses: TabValue[] = ['aceito', 'recusado'];
+    const statuses = ['aceito', 'recusado'] as const;
     const results = await Promise.all(
       statuses.map((s) =>
         supabase
