@@ -9,7 +9,7 @@ export interface UserProfile {
   user_id: string;
   full_name: string;
   role: UserRole;
-  role_id: string | null;
+  role_id?: string | null;
   active: boolean;
   area_id: string | null;
   setor_id: string | null;
