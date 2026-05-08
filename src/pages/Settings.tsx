@@ -79,7 +79,7 @@ const settingsCategories: SettingsCategory[] = [
 ];
 
 export default function Settings() {
-  const { canAccess } = useAuth();
+  const { canAccess, hasCapability } = useAuth();
 
   return (
     <MainLayout>
@@ -90,7 +90,9 @@ export default function Settings() {
         <div className="space-y-8">
           {settingsCategories.map((category) => {
             const CategoryIcon = category.icon;
-            const filteredItems = category.items.filter(item => canAccess(item.module));
+            const filteredItems = category.items.filter(item =>
+              canAccess(item.module) && (!item.capability || hasCapability(item.capability))
+            );
             
             if (filteredItems.length === 0) return null;
 
