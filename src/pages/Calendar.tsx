@@ -63,8 +63,8 @@ const Calendar = () => {
                     Novo Evento
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
-                  <DialogHeader>
+                <DialogContent className="max-w-2xl h-[85vh] flex flex-col overflow-hidden">
+                  <DialogHeader className="flex-shrink-0">
                     <DialogTitle>
                       {editingEvent ? 'Editar Evento' : 'Novo Evento'}
                     </DialogTitle>
