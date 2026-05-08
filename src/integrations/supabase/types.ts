@@ -1143,6 +1143,51 @@ export type Database = {
           },
         ]
       }
+      role_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_name: string | null
+          after_data: Json | null
+          before_data: Json | null
+          capability: string | null
+          created_at: string
+          entity: string
+          id: string
+          role_id: string | null
+          role_key: string | null
+          role_label: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_name?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          capability?: string | null
+          created_at?: string
+          entity: string
+          id?: string
+          role_id?: string | null
+          role_key?: string | null
+          role_label?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_name?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          capability?: string | null
+          created_at?: string
+          entity?: string
+          id?: string
+          role_id?: string | null
+          role_key?: string | null
+          role_label?: string | null
+        }
+        Relationships: []
+      }
       role_capabilities: {
         Row: {
           allowed: boolean
@@ -2691,6 +2736,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      audit_current_actor_name: { Args: never; Returns: string }
       can_view_event: {
         Args: { creator_uuid: string; event_uuid: string }
         Returns: boolean
