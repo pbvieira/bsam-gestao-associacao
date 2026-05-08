@@ -79,10 +79,9 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
         status: newStatus,
         data_conclusao: newStatus === "realizada" ? new Date().toISOString() : null,
       });
-      await new Promise((resolve) => setTimeout(resolve, 300));
       if (onStatusChange) onStatusChange();
     } catch (error) {
-      console.error("Erro ao atualizar status:", error);
+      // toast já tratado no hook
     } finally {
       setLoading(false);
     }
@@ -92,20 +91,24 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
     setLoading(true);
     try {
       await deleteTask(task.id);
-    } catch (error) {
-      console.error("Erro ao excluir tarefa:", error);
+    } catch {
+      // toast já tratado
     } finally {
       setLoading(false);
     }
   };
 
-  const isActive = task.status !== "realizada" && task.status !== "cancelada";
+  const isActive = task.status !== "realizada" && task.status !== "cancelada" && task.status !== "transferida";
+  const isOverdue =
+    !!task.data_vencimento && isActive &&
+    new Date(task.data_vencimento) < new Date(new Date().setHours(0, 0, 0, 0));
 
   return (
     <Card
       className={cn(
         "transition-all hover:shadow-md w-full border-l-4",
         priorityBorder[task.prioridade],
+        isOverdue && "ring-1 ring-destructive/30",
       )}
     >
       <div className="flex items-center gap-3 px-3 py-2.5">
@@ -119,6 +122,11 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
             <Badge variant="outline" className={cn("text-xs px-1.5 py-0 h-5", statusColors[task.status])}>
               {statusLabels[task.status]}
             </Badge>
+            {isOverdue && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-destructive/10 text-destructive border-destructive/30">
+                ATRASADA
+              </Badge>
+            )}
             {task.categoria && (
               <Badge variant="accent" className="text-xs px-1.5 py-0 h-5 font-medium">
                 {task.categoria}
