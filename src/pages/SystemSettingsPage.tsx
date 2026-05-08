@@ -35,58 +35,60 @@ export default function SystemSettingsPage() {
     }
   };
 
+  if (!canRead) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
-    <UnifiedRoute module="system_settings" action="read">
-      <MainLayout>
-        <PageLayout
-          title="Configurações Gerais"
-          subtitle="Gerencie parâmetros globais do sistema"
-        >
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="grid gap-6 max-w-2xl">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Capacidade de Alunos</CardTitle>
-                  <CardDescription>
-                    Defina o número total de vagas disponíveis para alunos internados na instituição.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="total_vagas">Total de vagas</Label>
-                    <Input
-                      id="total_vagas"
-                      type="number"
-                      min="0"
-                      value={totalVagas}
-                      onChange={(e) => setTotalVagas(e.target.value)}
-                      className="max-w-xs"
-                      disabled={!canWrite}
-                    />
-                  </div>
-                  <Button onClick={handleSave} disabled={saving || !canWrite}>
-                    {saving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Salvar
-                  </Button>
-                  {!canWrite && (
-                    <p className="text-xs text-muted-foreground">
-                      Você não tem permissão para editar configurações do sistema.
-                    </p>
+    <MainLayout>
+      <PageLayout
+        title="Configurações Gerais"
+        subtitle="Gerencie parâmetros globais do sistema"
+      >
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="grid gap-6 max-w-2xl">
+            <Card>
+              <CardHeader>
+                <CardTitle>Capacidade de Alunos</CardTitle>
+                <CardDescription>
+                  Defina o número total de vagas disponíveis para alunos internados na instituição.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="total_vagas">Total de vagas</Label>
+                  <Input
+                    id="total_vagas"
+                    type="number"
+                    min="0"
+                    value={totalVagas}
+                    onChange={(e) => setTotalVagas(e.target.value)}
+                    className="max-w-xs"
+                    disabled={!canWrite}
+                  />
+                </div>
+                <Button onClick={handleSave} disabled={saving || !canWrite}>
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
                   )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </PageLayout>
-      </MainLayout>
-    </UnifiedRoute>
+                  Salvar
+                </Button>
+                {!canWrite && (
+                  <p className="text-xs text-muted-foreground">
+                    Você não tem permissão para editar configurações do sistema.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </PageLayout>
+    </MainLayout>
   );
 }
