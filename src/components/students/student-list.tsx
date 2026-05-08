@@ -30,6 +30,7 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
   const [activationDialogOpen, setActivationDialogOpen] = useState(false);
   const [studentToActivate, setStudentToActivate] = useState<Student | null>(null);
 
+  const canRead = hasCapability("students.read");
   const canCreate = hasCapability("students.write");
   const canUpdate = hasCapability("students.write");
   const canDelete = hasCapability("students.delete");
@@ -367,7 +368,7 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          {onViewStudent && (
+                          {onViewStudent && canRead && (
                             <Button
                               variant="ghost"
                               size="sm"
