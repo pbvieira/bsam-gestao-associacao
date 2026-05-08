@@ -23,6 +23,7 @@ import Suppliers from "./pages/Suppliers";
 import Purchases from "./pages/Purchases";
 import Reports from "./pages/Reports";
 import RoleManagement from "./pages/RoleManagement";
+import RoleAuditLogPage from "./pages/RoleAuditLogPage";
 import AnnotationCategories from "./pages/AnnotationCategories";
 import InventoryCategories from "./pages/InventoryCategories";
 import FiliationStatus from "./pages/FiliationStatus";
@@ -150,6 +151,11 @@ const App = () => {
           <Route path="/gestao-roles" element={
             <UnifiedRoute module="users">
               <RoleManagement />
+            </UnifiedRoute>
+          } />
+          <Route path="/gestao-roles/auditoria" element={
+            <UnifiedRoute module="users">
+              <RoleAuditLogPage />
             </UnifiedRoute>
           } />
           <Route path="/categorias-anotacoes" element={
