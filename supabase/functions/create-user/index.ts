@@ -38,24 +38,21 @@ serve(async (req) => {
 
     console.log('🔥 create-user: Usuário autenticado', user.id);
 
-    // Verificar se é admin
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('user_id', user.id)
-      .single()
-    
-    if (profileError || !profile) {
-      console.error('🔥 create-user: Erro ao obter perfil', profileError);
-      throw new Error('Forbidden: Profile not found')
+    // Verificar capability users.manage via RPC (server-side)
+    const { data: canManage, error: capError } = await supabaseAdmin
+      .rpc('has_capability', { _user_id: user.id, _cap: 'users.manage' });
+
+    if (capError) {
+      console.error('🔥 create-user: Erro ao verificar capability', capError);
+      throw new Error('Forbidden: capability check failed');
     }
 
-    if (!['administrador', 'diretor', 'coordenador'].includes(profile.role)) {
-      console.error('🔥 create-user: Usuário sem permissão', profile.role);
-      throw new Error('Forbidden: Only admins can create users')
+    if (!canManage) {
+      console.error('🔥 create-user: Usuário sem capability users.manage');
+      throw new Error('Forbidden: missing capability users.manage');
     }
 
-    console.log('🔥 create-user: Permissão verificada, role:', profile.role);
+    console.log('🔥 create-user: Capability users.manage verificada');
 
     // Obter dados do body
     const { email, password, full_name, role, active = true, area_id = null, setor_id = null } = await req.json()
