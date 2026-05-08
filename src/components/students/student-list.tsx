@@ -368,7 +368,7 @@ export function StudentList({ onCreateStudent, onEditStudent, onViewStudent }: S
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          {onViewStudent && (
+                          {onViewStudent && canRead && (
                             <Button
                               variant="ghost"
                               size="sm"
