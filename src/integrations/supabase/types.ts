@@ -2710,7 +2710,12 @@ export type Database = {
       is_admin_user: { Args: { check_user_id: string }; Returns: boolean }
       is_event_participant: { Args: { event_uuid: string }; Returns: boolean }
       is_system_admin: { Args: { _user_id: string }; Returns: boolean }
+      module_to_capability: { Args: { _module: string }; Returns: string }
       process_event_reminders: { Args: never; Returns: undefined }
+      sync_role_module_access: {
+        Args: { _role_id: string }
+        Returns: undefined
+      }
       update_external_participant_status: {
         Args: {
           p_invite_token: string
