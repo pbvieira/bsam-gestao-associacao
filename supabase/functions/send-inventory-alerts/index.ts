@@ -31,6 +31,38 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Authenticate caller and verify capability inventory.read
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user: caller }, error: authErr } = await supabase.auth.getUser(token);
+    if (authErr || !caller) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // Only allow sending alerts to self, unless caller manages inventory
+    const { data: canManage } = await supabase.rpc('has_capability', {
+      _user_id: caller.id, _cap: 'inventory.manage',
+    });
+    if (caller.id !== user_id && !canManage) {
+      return new Response(JSON.stringify({ error: 'Forbidden: cannot send alerts for other users' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: canRead } = await supabase.rpc('has_capability', {
+      _user_id: user_id, _cap: 'inventory.read',
+    });
+    if (!canRead) {
+      return new Response(JSON.stringify({ error: 'Forbidden: target user lacks inventory.read' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get user email and profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
