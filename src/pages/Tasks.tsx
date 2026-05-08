@@ -42,7 +42,7 @@ const Tasks = () => {
   };
 
   const actionButton = canCreateTasks ? (
-    <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+    <Dialog open={isFormOpen} onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingTask(null); }}>
       <DialogTrigger asChild>
         <Button onClick={() => setEditingTask(null)} className="gap-2">
           <Plus className="w-4 h-4" />
