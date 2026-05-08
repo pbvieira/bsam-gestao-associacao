@@ -5,6 +5,8 @@ import { Users, Package, BarChart3, Home, User, ShoppingCart, Warehouse, LogOut,
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { usePendingInvitationsCount } from "@/hooks/use-pending-invitations-count";
 
 const mainNavigationItems = [{
   name: "Dashboard",
@@ -88,6 +90,7 @@ export function AppSidebar() {
   const {
     open
   } = useSidebar();
+  const pendingInvites = usePendingInvitationsCount();
 
   // Filter navigation items based on user role access
   const mainNavigation = mainNavigationItems.filter(item => canAccess(item.module));
@@ -110,6 +113,7 @@ export function AppSidebar() {
   const renderMenuItem = (item: typeof mainNavigationItems[0]) => {
     const Icon = item.icon;
     const isActive = location.pathname === item.href;
+    const showBadge = item.href === '/convites-pendentes' && pendingInvites > 0;
     const menuButton = (
       <SidebarMenuButton asChild className={cn(
         "h-11 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200",
@@ -117,7 +121,12 @@ export function AppSidebar() {
       )}>
         <Link to={item.href} className="flex items-center gap-3">
           <Icon className="h-5 w-5 flex-shrink-0" />
-          {open && <span className="font-medium">{item.name}</span>}
+          {open && <span className="font-medium flex-1">{item.name}</span>}
+          {showBadge && (
+            <Badge variant="destructive" className={cn("h-5 min-w-5 px-1.5 text-xs", !open && "absolute -top-1 -right-1")}>
+              {pendingInvites}
+            </Badge>
+          )}
         </Link>
       </SidebarMenuButton>
     );

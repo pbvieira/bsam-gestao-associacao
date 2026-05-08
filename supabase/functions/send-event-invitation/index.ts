@@ -165,6 +165,20 @@ serve(async (req) => {
     let emailsSent = 0;
     let emailsFailed = 0;
 
+    // Create in-app calendar_invite notifications for internal participants
+    if (participantIds.length > 0) {
+      const notifRows = participantIds.map((uid) => ({
+        user_id: uid,
+        type: 'calendar_invite' as const,
+        reference_id: eventData.id,
+        title: 'Convite para evento',
+        message: `Você foi convidado para o evento "${eventData.titulo}".`,
+        read: false,
+      }));
+      const { error: notifError } = await supabase.from('notifications').insert(notifRows);
+      if (notifError) console.error('Failed to insert calendar_invite notifications:', notifError);
+    }
+
     // Process internal participants - ONLY SEND EMAILS (participants already inserted by hook)
     if (participantIds.length > 0) {
       console.log('Sending emails to internal participants...');
