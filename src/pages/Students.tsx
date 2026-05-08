@@ -59,16 +59,18 @@ export default function Students() {
                 {viewMode === 'list' && 'Alunos'}
                 {viewMode === 'create' && 'Novo Aluno'}
                 {viewMode === 'edit' && `Editar: ${selectedStudent?.nome_completo}`}
+                {viewMode === 'view' && `Visualizar: ${selectedStudent?.nome_completo}`}
               </h1>
               <p className="text-muted-foreground">
                 {viewMode === 'list' && 'Gestão completa dos assistidos da associação'}
                 {viewMode === 'create' && 'Cadastre um novo assistido da associação'}
                 {viewMode === 'edit' && 'Edite as informações do assistido'}
+                {viewMode === 'view' && 'Visualização somente leitura do cadastro'}
               </p>
             </div>
             
-            {/* Foto do Aluno - exibida no header no modo edição */}
-            {viewMode === 'edit' && (
+            {/* Foto do Aluno - exibida no header no modo edição/visualização */}
+            {(viewMode === 'edit' || viewMode === 'view') && (
               <div className="w-20 h-20 rounded-lg border overflow-hidden bg-muted flex items-center justify-center shrink-0">
                 {photoLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -89,15 +91,17 @@ export default function Students() {
             <StudentList 
               onCreateStudent={handleCreateStudent}
               onEditStudent={handleEditStudent}
+              onViewStudent={handleViewStudent}
             />
           )}
           
-          {(viewMode === 'create' || viewMode === 'edit') && (
+          {(viewMode === 'create' || viewMode === 'edit' || viewMode === 'view') && (
             <StudentForm 
               student={selectedStudent}
               onSuccess={handleBackToList}
               onCancel={handleBackToList}
               onRefreshPhoto={refreshPhoto}
+              readOnly={viewMode === 'view'}
             />
           )}
         </div>
