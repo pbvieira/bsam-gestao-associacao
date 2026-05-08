@@ -24,6 +24,9 @@ interface AuthContextType {
   isInitialized: boolean;
   permissionsLoading: boolean;
   canAccess: (module: string) => boolean;
+  hasCapability: (cap: string) => boolean;
+  hasAnyCapability: (caps: string[]) => boolean;
+  capabilities: string[];
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
