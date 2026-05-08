@@ -67,11 +67,11 @@ export function UserList() {
   const [adminCount, setAdminCount] = useState<number>(0);
   const { handleError } = useErrorHandler();
   const { toast } = useToast();
-  const { canAccess, profile } = useAuth();
+  const { hasCapability, profile } = useAuth();
 
-  const canCreate = canAccess('users');
-  const canUpdate = canAccess('users');
-  const canDelete = canAccess('users');
+  const canCreate = hasCapability('users.manage');
+  const canUpdate = hasCapability('users.manage');
+  const canDelete = hasCapability('users.manage');
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users', searchTerm],
