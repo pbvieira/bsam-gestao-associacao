@@ -28,7 +28,7 @@ const Tasks = () => {
     }
   }, [location]);
 
-  const canCreateTasks = canAccess('tasks');
+  const canCreateTasks = hasCapability('tasks.write');
 
   const handleTaskCreated = () => {
     setIsFormOpen(false);
