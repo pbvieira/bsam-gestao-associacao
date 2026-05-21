@@ -6,10 +6,12 @@ interface Child {
   nome_completo: string;
   data_nascimento: string;
   student_children_id: string;
+  tipo_filiacao?: string | null;
 }
 
 interface ChildrenInfo {
   convive_filhos: boolean;
+  tem_contato_filhos: boolean;
   paga_pensao: boolean;
   valor_pensao: number | null;
 }
@@ -20,6 +22,7 @@ export function useStudentChildren(studentId?: string) {
   const [childrenRecordId, setChildrenRecordId] = useState<string | null>(null);
   const [childrenInfo, setChildrenInfo] = useState<ChildrenInfo>({
     convive_filhos: false,
+    tem_contato_filhos: false,
     paga_pensao: false,
     valor_pensao: null,
   });
