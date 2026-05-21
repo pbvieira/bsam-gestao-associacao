@@ -56,11 +56,22 @@ export function useVaccinationTrips() {
         *,
         vaccine_type:vaccine_types(id, nome, cor),
         setor:setores(id, nome),
-        responsavel:profiles!vaccination_trips_responsavel_id_fkey(full_name),
         queue_items:vaccination_queue(id, student_id, student:students(id, nome_completo, codigo_cadastro))
       `)
       .order('created_at', { ascending: false });
-    if (!error) setTrips((data as any) || []);
+    if (error) {
+      console.error('Error loading trips', error);
+      setTrips([]);
+    } else {
+      // Enrich with responsavel name from profiles
+      const responsavelIds = Array.from(new Set((data as any[] || []).map(t => t.responsavel_id).filter(Boolean)));
+      let profileMap: Record<string, string> = {};
+      if (responsavelIds.length > 0) {
+        const { data: profs } = await supabase.from('profiles').select('user_id, full_name').in('user_id', responsavelIds);
+        profileMap = Object.fromEntries((profs || []).map((p: any) => [p.user_id, p.full_name]));
+      }
+      setTrips((data as any[]).map(t => ({ ...t, responsavel: t.responsavel_id ? { full_name: profileMap[t.responsavel_id] || '—' } : null })));
+    }
     setLoading(false);
   }, []);
 
