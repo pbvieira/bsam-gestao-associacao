@@ -66,12 +66,14 @@ export function useStudentChildren(studentId?: string) {
         recordId = newRecord.id;
         setChildrenInfo({
           convive_filhos: false,
+          tem_contato_filhos: false,
           paga_pensao: false,
           valor_pensao: null,
         });
       } else {
         setChildrenInfo({
           convive_filhos: childrenData.convive_filhos ?? false,
+          tem_contato_filhos: (childrenData as any).tem_contato_filhos ?? false,
           paga_pensao: (childrenData as any).paga_pensao ?? false,
           valor_pensao: (childrenData as any).valor_pensao ?? null,
         });
