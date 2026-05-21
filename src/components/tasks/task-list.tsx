@@ -130,7 +130,7 @@ export function TaskList({ tasks, loading, onEditTask, refetch }: TaskListProps)
     <Card>
       <CardHeader className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <CardTitle className="flex-1">Lista de Tarefas</CardTitle>
+          <CardTitle className="flex-1">Lista de TAREFAS</CardTitle>
           <div className="flex rounded-lg border">
             <Button variant={viewMode === "list" ? "default" : "ghost"} size="sm"
               onClick={() => setViewMode("list")} className="rounded-r-none">

@@ -373,7 +373,7 @@ export function WorkspaceArea() {
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-destructive flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                ⚠️ Tarefas Atrasadas ({overdueTasks.length})
+                ⚠️ TAREFAS Atrasadas ({overdueTasks.length})
               </h4>
               <div className="space-y-2">
                 {overdueTasks.map(task => (
@@ -388,7 +388,7 @@ export function WorkspaceArea() {
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
-                Tarefas ({upcomingTasks.length})
+                TAREFAS ({upcomingTasks.length})
               </h4>
               <div className="space-y-2">
                 {upcomingTasks.map(task => (

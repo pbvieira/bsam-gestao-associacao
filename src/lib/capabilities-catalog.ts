@@ -130,23 +130,23 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
   },
   {
     id: "tasks",
-    label: "Tarefas",
+    label: "TAREFAS",
     description: "Quadro e atribuição de tarefas",
     icon: "CheckSquare",
     capabilities: [
       {
         key: "tasks.read",
-        label: "Visualizar tarefas",
+        label: "Visualizar TAREFAS",
         description: "Listar e consultar tarefas",
       },
       {
         key: "tasks.write",
-        label: "Editar tarefas",
+        label: "Editar TAREFAS",
         description: "Criar, atribuir e atualizar tarefas",
       },
       {
         key: "tasks.delete",
-        label: "Excluir tarefas",
+        label: "Excluir TAREFAS",
         description: "Remover tarefas",
         sensitive: true,
       },

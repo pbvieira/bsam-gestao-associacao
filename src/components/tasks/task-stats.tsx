@@ -15,7 +15,7 @@ export function TaskStats({ tasks }: TaskStatsProps) {
   return (
     <StatsGrid>
       <StatsCard
-        title="Total de Tarefas"
+        title="Total de TAREFAS"
         value={totalTasks}
         icon={CheckSquare}
         colorClass="text-primary"

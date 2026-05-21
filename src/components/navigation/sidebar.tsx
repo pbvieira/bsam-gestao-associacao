@@ -20,7 +20,7 @@ const navGroups: NavGroup[] = [
     icon: LayoutDashboard,
     items: [
       { name: "Dashboard", href: "/", icon: Home, module: "dashboard" },
-      { name: "Tarefas", href: "/tarefas", icon: CheckSquare, module: "tasks" },
+      { name: "TAREFAS", href: "/tarefas", icon: CheckSquare, module: "tasks" },
     ],
   },
   {
