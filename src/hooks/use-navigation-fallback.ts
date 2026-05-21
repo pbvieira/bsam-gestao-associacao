@@ -5,7 +5,7 @@ import { useAccessibleModules } from '@/hooks/use-role-access';
 
 const routes = [
   { path: '/', module: 'dashboard', name: 'Dashboard' },
-  { path: '/tarefas', module: 'tasks', name: 'Tarefas' },
+  { path: '/tarefas', module: 'tasks', name: 'TAREFAS' },
   { path: '/calendario', module: 'calendar', name: 'Calendário' },
   { path: '/alunos', module: 'students', name: 'Alunos' },
   { path: '/usuarios', module: 'users', name: 'Usuários' },

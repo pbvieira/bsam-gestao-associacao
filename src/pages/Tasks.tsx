@@ -66,7 +66,7 @@ const Tasks = () => {
   return (
     <MainLayout>
       <PageLayout
-        title="Gestão de Tarefas"
+        title="Gestão de TAREFAS"
         subtitle="Organize e acompanhe o progresso das tarefas da equipe"
         actionButton={actionButton}
         statsCards={<TaskStats tasks={tasks} />}
