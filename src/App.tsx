@@ -236,6 +236,11 @@ const App = () => {
               <Appointments />
             </UnifiedRoute>
           } />
+          <Route path="/vacinacao-pendente" element={
+            <UnifiedRoute module="students">
+              <VaccinationPending />
+            </UnifiedRoute>
+          } />
           <Route path="/configuracoes" element={
             <UnifiedRoute module="students">
               <Settings />
