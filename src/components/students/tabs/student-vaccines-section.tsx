@@ -17,8 +17,32 @@ interface StudentVaccinesSectionProps {
 
 export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProps) {
   const { vaccines, vaccineTypes, loading, saveVaccine, deleteVaccine, getVaccineStatus } = useStudentVaccines(studentId || undefined);
+  const { items: queueItems, addToQueue, removeFromQueue } = useVaccinationQueue(studentId || undefined);
   const { toast } = useToast();
   const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
+  const [queueLoading, setQueueLoading] = useState<Record<string, boolean>>({});
+
+  const getQueueItem = (vaccineTypeId: string) =>
+    queueItems.find(q => q.vaccine_type_id === vaccineTypeId && q.status !== 'cancelada');
+
+  const handleToggleQueue = async (vaccineTypeId: string) => {
+    if (!studentId) return;
+    setQueueLoading(prev => ({ ...prev, [vaccineTypeId]: true }));
+    try {
+      const existing = getQueueItem(vaccineTypeId);
+      if (existing) {
+        const res = await removeFromQueue(existing.id);
+        if (res.error) toast({ title: 'Erro', description: res.error, variant: 'destructive' });
+        else toast({ title: 'Removido', description: 'Aluno removido da fila de vacinação.' });
+      } else {
+        const res = await addToQueue({ student_id: studentId, vaccine_type_id: vaccineTypeId });
+        if (res.error) toast({ title: 'Erro', description: res.error, variant: 'destructive' });
+        else toast({ title: 'Adicionado à fila', description: 'Aluno aguardando vacinação.' });
+      }
+    } finally {
+      setQueueLoading(prev => ({ ...prev, [vaccineTypeId]: false }));
+    }
+  };
 
   const stats = vaccineTypes.reduce(
     (acc, type) => {
