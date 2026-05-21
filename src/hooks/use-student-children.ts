@@ -103,14 +103,9 @@ export function useStudentChildren(studentId?: string) {
     try {
       const updateData: any = {};
       if (info.convive_filhos !== undefined) updateData.convive_filhos = info.convive_filhos;
+      if (info.tem_contato_filhos !== undefined) updateData.tem_contato_filhos = info.tem_contato_filhos;
       if (info.paga_pensao !== undefined) updateData.paga_pensao = info.paga_pensao;
       if (info.valor_pensao !== undefined) updateData.valor_pensao = info.valor_pensao;
-
-      // If switching to convive_filhos=true, reset pensão fields
-      if (info.convive_filhos === true) {
-        updateData.paga_pensao = false;
-        updateData.valor_pensao = null;
-      }
 
       // If switching paga_pensao to false, reset valor
       if (info.paga_pensao === false) {
