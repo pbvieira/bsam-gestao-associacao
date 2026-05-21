@@ -39,6 +39,7 @@ import DiseaseTypes from "./pages/DiseaseTypes";
 import DisabilityTypes from "./pages/DisabilityTypes";
 import Medications from "./pages/Medications";
 import Appointments from "./pages/Appointments";
+import VaccinationPending from "./pages/VaccinationPending";
 import Settings from "./pages/Settings";
 import SystemSettingsPage from "./pages/SystemSettingsPage";
 import DocumentTemplates from "./pages/DocumentTemplates";
