@@ -60,7 +60,7 @@ export function useStudentBenefits(studentId?: string) {
         .single();
 
       if (error) throw error;
-      await fetchBenefitsList();
+      await fetchBenefitsList(false);
       return { data: result, error: null };
     } catch (err: any) {
       return { data: null, error: err.message };
@@ -79,7 +79,7 @@ export function useStudentBenefits(studentId?: string) {
         .single();
 
       if (error) throw error;
-      await fetchBenefitsList();
+      await fetchBenefitsList(false);
       return { data: result, error: null };
     } catch (err: any) {
       return { data: null, error: err.message };
@@ -96,7 +96,7 @@ export function useStudentBenefits(studentId?: string) {
         .eq('id', id);
 
       if (error) throw error;
-      await fetchBenefitsList();
+      await fetchBenefitsList(false);
       return { error: null };
     } catch (err: any) {
       return { error: err.message };
