@@ -2692,10 +2692,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "vaccination_queue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vaccination_queue_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "vaccination_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_queue_vaccine_type_id_fkey"
+            columns: ["vaccine_type_id"]
+            isOneToOne: false
+            referencedRelation: "vaccine_types"
             referencedColumns: ["id"]
           },
         ]
@@ -2743,7 +2757,29 @@ export type Database = {
           updated_at?: string
           vaccine_type_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vaccination_trips_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_trips_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_trips_vaccine_type_id_fkey"
+            columns: ["vaccine_type_id"]
+            isOneToOne: false
+            referencedRelation: "vaccine_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vaccine_types: {
         Row: {
