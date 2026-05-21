@@ -1050,7 +1050,7 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                   name="estado_conjuge"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estado Filiação Esposa</FormLabel>
+                      <FormLabel>Regime de casamento</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -1058,8 +1058,10 @@ export function StudentBasicDataTab({ studentId }: StudentBasicDataTabProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="presente">Presente</SelectItem>
-                          <SelectItem value="falecida">Falecida</SelectItem>
+                          <SelectItem value="casado">Casado</SelectItem>
+                          <SelectItem value="amasiado">Amasiado</SelectItem>
+                          <SelectItem value="uniao_estavel">União Estável</SelectItem>
+                          <SelectItem value="outros">Outros</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
