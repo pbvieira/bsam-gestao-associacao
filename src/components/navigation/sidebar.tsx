@@ -41,6 +41,7 @@ const navGroups: NavGroup[] = [
       { name: "Alunos", href: "/alunos", icon: Users, module: "students" },
       { name: "Medicamentos", href: "/medicacoes", icon: Pill, module: "students" },
       { name: "Consultas", href: "/consultas", icon: Stethoscope, module: "students" },
+      { name: "Vacinação Pendente", href: "/vacinacao-pendente", icon: Syringe, module: "students" },
     ],
   },
   {
