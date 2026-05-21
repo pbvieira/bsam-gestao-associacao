@@ -2656,6 +2656,95 @@ export type Database = {
           },
         ]
       }
+      vaccination_queue: {
+        Row: {
+          added_by: string
+          created_at: string
+          id: string
+          observacoes: string | null
+          status: string
+          student_id: string
+          trip_id: string | null
+          updated_at: string
+          vaccine_type_id: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          student_id: string
+          trip_id?: string | null
+          updated_at?: string
+          vaccine_type_id: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          status?: string
+          student_id?: string
+          trip_id?: string | null
+          updated_at?: string
+          vaccine_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccination_queue_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "vaccination_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vaccination_trips: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_prevista: string | null
+          data_realizada: string | null
+          id: string
+          observacoes: string | null
+          responsavel_id: string | null
+          setor_id: string | null
+          status: string
+          task_id: string | null
+          updated_at: string
+          vaccine_type_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_prevista?: string | null
+          data_realizada?: string | null
+          id?: string
+          observacoes?: string | null
+          responsavel_id?: string | null
+          setor_id?: string | null
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+          vaccine_type_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_prevista?: string | null
+          data_realizada?: string | null
+          id?: string
+          observacoes?: string | null
+          responsavel_id?: string | null
+          setor_id?: string | null
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+          vaccine_type_id?: string
+        }
+        Relationships: []
+      }
       vaccine_types: {
         Row: {
           ativo: boolean

@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStudentVaccines } from '@/hooks/use-student-vaccines';
+import { useVaccinationQueue } from '@/hooks/use-vaccination-queue';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Syringe, Info, Check, X, Minus, HelpCircle } from 'lucide-react';
+import { Loader2, Syringe, Info, Check, X, Minus, HelpCircle, Send, Clock } from 'lucide-react';
 
 interface StudentVaccinesSectionProps {
   studentId?: string | null;
@@ -15,8 +17,32 @@ interface StudentVaccinesSectionProps {
 
 export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProps) {
   const { vaccines, vaccineTypes, loading, saveVaccine, deleteVaccine, getVaccineStatus } = useStudentVaccines(studentId || undefined);
+  const { items: queueItems, addToQueue, removeFromQueue } = useVaccinationQueue(studentId || undefined);
   const { toast } = useToast();
   const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
+  const [queueLoading, setQueueLoading] = useState<Record<string, boolean>>({});
+
+  const getQueueItem = (vaccineTypeId: string) =>
+    queueItems.find(q => q.vaccine_type_id === vaccineTypeId && q.status !== 'cancelada');
+
+  const handleToggleQueue = async (vaccineTypeId: string) => {
+    if (!studentId) return;
+    setQueueLoading(prev => ({ ...prev, [vaccineTypeId]: true }));
+    try {
+      const existing = getQueueItem(vaccineTypeId);
+      if (existing) {
+        const res = await removeFromQueue(existing.id);
+        if (res.error) toast({ title: 'Erro', description: res.error, variant: 'destructive' });
+        else toast({ title: 'Removido', description: 'Aluno removido da fila de vacinação.' });
+      } else {
+        const res = await addToQueue({ student_id: studentId, vaccine_type_id: vaccineTypeId });
+        if (res.error) toast({ title: 'Erro', description: res.error, variant: 'destructive' });
+        else toast({ title: 'Adicionado à fila', description: 'Aluno aguardando vacinação.' });
+      }
+    } finally {
+      setQueueLoading(prev => ({ ...prev, [vaccineTypeId]: false }));
+    }
+  };
 
   const stats = vaccineTypes.reduce(
     (acc, type) => {
@@ -127,6 +153,7 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
                   <TableHead>Vacina</TableHead>
                   <TableHead className="w-[140px]">Status</TableHead>
                   <TableHead className="w-[140px]">Data</TableHead>
+                  <TableHead className="w-[180px]">Encaminhamento</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -192,6 +219,43 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {(() => {
+                          const queueItem = getQueueItem(type.id);
+                          const qLoading = queueLoading[type.id];
+                          if (status.tomou === true) {
+                            return <span className="text-xs text-muted-foreground">—</span>;
+                          }
+                          if (queueItem) {
+                            return (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1"
+                                onClick={() => handleToggleQueue(type.id)}
+                                disabled={qLoading || queueItem.status === 'agendada'}
+                              >
+                                {qLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Clock className="h-3.5 w-3.5 text-amber-600" />}
+                                {queueItem.status === 'agendada' ? 'Agendada' : 'Na fila'}
+                              </Button>
+                            );
+                          }
+                          return (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 gap-1"
+                              onClick={() => handleToggleQueue(type.id)}
+                              disabled={qLoading}
+                            >
+                              {qLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                              Encaminhar
+                            </Button>
+                          );
+                        })()}
                       </TableCell>
                     </TableRow>
                   );
