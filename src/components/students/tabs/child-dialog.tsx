@@ -98,6 +98,30 @@ export function ChildDialog({ child, onSave, trigger }: ChildDialogProps) {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="tipo_filiacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de filiação</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="legitimo">Filho legítimo</SelectItem>
+                      <SelectItem value="adotivo">Filho adotivo</SelectItem>
+                      <SelectItem value="socioafetivo">Filho socioafetivo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancelar
