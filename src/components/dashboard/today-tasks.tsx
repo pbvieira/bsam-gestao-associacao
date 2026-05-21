@@ -149,7 +149,7 @@ export function TodayTasks() {
         <div className="flex items-center justify-between mb-3">
           <CardTitle className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
-            Minhas Tarefas
+            Minhas TAREFAS
           </CardTitle>
         </div>
         <Tabs value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
