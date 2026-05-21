@@ -32,6 +32,7 @@ export function ChildDialog({ child, onSave, trigger }: ChildDialogProps) {
     defaultValues: {
       nome_completo: child?.nome_completo || '',
       data_nascimento: child?.data_nascimento || '',
+      tipo_filiacao: child?.tipo_filiacao || '',
     },
   });
 
