@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStudentVaccines } from '@/hooks/use-student-vaccines';
+import { useVaccinationQueue } from '@/hooks/use-vaccination-queue';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Syringe, Info, Check, X, Minus, HelpCircle } from 'lucide-react';
+import { Loader2, Syringe, Info, Check, X, Minus, HelpCircle, Send, Clock } from 'lucide-react';
 
 interface StudentVaccinesSectionProps {
   studentId?: string | null;
