@@ -220,6 +220,43 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </TableCell>
+                      <TableCell className="py-2">
+                        {(() => {
+                          const queueItem = getQueueItem(type.id);
+                          const qLoading = queueLoading[type.id];
+                          if (status.tomou === true) {
+                            return <span className="text-xs text-muted-foreground">—</span>;
+                          }
+                          if (queueItem) {
+                            return (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1"
+                                onClick={() => handleToggleQueue(type.id)}
+                                disabled={qLoading || queueItem.status === 'agendada'}
+                              >
+                                {qLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Clock className="h-3.5 w-3.5 text-amber-600" />}
+                                {queueItem.status === 'agendada' ? 'Agendada' : 'Na fila'}
+                              </Button>
+                            );
+                          }
+                          return (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 gap-1"
+                              onClick={() => handleToggleQueue(type.id)}
+                              disabled={qLoading}
+                            >
+                              {qLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                              Encaminhar
+                            </Button>
+                          );
+                        })()}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
