@@ -14,6 +14,7 @@ interface Child {
   id: string;
   nome_completo: string;
   data_nascimento: string;
+  tipo_filiacao?: string | null;
 }
 
 interface ChildDialogProps {
