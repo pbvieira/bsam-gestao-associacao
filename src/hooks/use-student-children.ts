@@ -6,10 +6,12 @@ interface Child {
   nome_completo: string;
   data_nascimento: string;
   student_children_id: string;
+  tipo_filiacao?: string | null;
 }
 
 interface ChildrenInfo {
   convive_filhos: boolean;
+  tem_contato_filhos: boolean;
   paga_pensao: boolean;
   valor_pensao: number | null;
 }
@@ -20,6 +22,7 @@ export function useStudentChildren(studentId?: string) {
   const [childrenRecordId, setChildrenRecordId] = useState<string | null>(null);
   const [childrenInfo, setChildrenInfo] = useState<ChildrenInfo>({
     convive_filhos: false,
+    tem_contato_filhos: false,
     paga_pensao: false,
     valor_pensao: null,
   });
@@ -63,12 +66,14 @@ export function useStudentChildren(studentId?: string) {
         recordId = newRecord.id;
         setChildrenInfo({
           convive_filhos: false,
+          tem_contato_filhos: false,
           paga_pensao: false,
           valor_pensao: null,
         });
       } else {
         setChildrenInfo({
           convive_filhos: childrenData.convive_filhos ?? false,
+          tem_contato_filhos: (childrenData as any).tem_contato_filhos ?? false,
           paga_pensao: (childrenData as any).paga_pensao ?? false,
           valor_pensao: (childrenData as any).valor_pensao ?? null,
         });
@@ -98,14 +103,9 @@ export function useStudentChildren(studentId?: string) {
     try {
       const updateData: any = {};
       if (info.convive_filhos !== undefined) updateData.convive_filhos = info.convive_filhos;
+      if (info.tem_contato_filhos !== undefined) updateData.tem_contato_filhos = info.tem_contato_filhos;
       if (info.paga_pensao !== undefined) updateData.paga_pensao = info.paga_pensao;
       if (info.valor_pensao !== undefined) updateData.valor_pensao = info.valor_pensao;
-
-      // If switching to convive_filhos=true, reset pensão fields
-      if (info.convive_filhos === true) {
-        updateData.paga_pensao = false;
-        updateData.valor_pensao = null;
-      }
 
       // If switching paga_pensao to false, reset valor
       if (info.paga_pensao === false) {

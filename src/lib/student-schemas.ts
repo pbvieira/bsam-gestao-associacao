@@ -56,6 +56,7 @@ export const studentChildrenSchema = z.object({
   tem_filhos: z.boolean().default(false),
   quantidade_filhos: z.number().default(0),
   convive_filhos: z.boolean().default(false),
+  tem_contato_filhos: z.boolean().default(false),
   paga_pensao: z.boolean().default(false),
   valor_pensao: z.number().nullish(),
 });
@@ -63,6 +64,7 @@ export const studentChildrenSchema = z.object({
 export const childSchema = z.object({
   nome_completo: z.string().min(1, 'Nome é obrigatório'),
   data_nascimento: z.string().min(1, 'Data de nascimento é obrigatória'),
+  tipo_filiacao: z.string().nullish(),
 });
 
 // Work situation schema

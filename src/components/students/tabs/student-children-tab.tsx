@@ -123,37 +123,44 @@ export function StudentChildrenTab({ studentId }: StudentChildrenTabProps) {
               />
             </div>
 
-            {!childrenInfo.convive_filhos && (
-              <>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="paga_pensao" className="cursor-pointer">
-                    Paga pensão?
-                  </Label>
-                  <Switch
-                    id="paga_pensao"
-                    checked={childrenInfo.paga_pensao}
-                    onCheckedChange={(checked) => handleInfoChange('paga_pensao', checked)}
-                  />
-                </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tem_contato_filhos" className="cursor-pointer">
+                Tem contato com os filhos?
+              </Label>
+              <Switch
+                id="tem_contato_filhos"
+                checked={childrenInfo.tem_contato_filhos}
+                onCheckedChange={(checked) => handleInfoChange('tem_contato_filhos', checked)}
+              />
+            </div>
 
-                {childrenInfo.paga_pensao && (
-                  <div className="space-y-2">
-                    <Label htmlFor="valor_pensao">Valor da pensão (R$)</Label>
-                    <Input
-                      id="valor_pensao"
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      placeholder="0,00"
-                      value={childrenInfo.valor_pensao ?? ''}
-                      onChange={(e) => {
-                        const val = e.target.value === '' ? null : parseFloat(e.target.value);
-                        handleInfoChange('valor_pensao', val);
-                      }}
-                    />
-                  </div>
-                )}
-              </>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="paga_pensao" className="cursor-pointer">
+                Paga pensão?
+              </Label>
+              <Switch
+                id="paga_pensao"
+                checked={childrenInfo.paga_pensao}
+                onCheckedChange={(checked) => handleInfoChange('paga_pensao', checked)}
+              />
+            </div>
+
+            {childrenInfo.paga_pensao && (
+              <div className="space-y-2">
+                <Label htmlFor="valor_pensao">Valor da pensão (R$)</Label>
+                <Input
+                  id="valor_pensao"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  placeholder="0,00"
+                  value={childrenInfo.valor_pensao ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? null : parseFloat(e.target.value);
+                    handleInfoChange('valor_pensao', val);
+                  }}
+                />
+              </div>
             )}
           </CardContent>
         </Card>

@@ -1594,6 +1594,7 @@ export type Database = {
           paga_pensao: boolean | null
           quantidade_filhos: number | null
           student_id: string
+          tem_contato_filhos: boolean
           tem_filhos: boolean | null
           updated_at: string
           valor_pensao: number | null
@@ -1605,6 +1606,7 @@ export type Database = {
           paga_pensao?: boolean | null
           quantidade_filhos?: number | null
           student_id: string
+          tem_contato_filhos?: boolean
           tem_filhos?: boolean | null
           updated_at?: string
           valor_pensao?: number | null
@@ -1616,6 +1618,7 @@ export type Database = {
           paga_pensao?: boolean | null
           quantidade_filhos?: number | null
           student_id?: string
+          tem_contato_filhos?: boolean
           tem_filhos?: boolean | null
           updated_at?: string
           valor_pensao?: number | null
@@ -1637,6 +1640,7 @@ export type Database = {
           id: string
           nome_completo: string
           student_children_id: string
+          tipo_filiacao: string | null
         }
         Insert: {
           created_at?: string
@@ -1644,6 +1648,7 @@ export type Database = {
           id?: string
           nome_completo: string
           student_children_id: string
+          tipo_filiacao?: string | null
         }
         Update: {
           created_at?: string
@@ -1651,6 +1656,7 @@ export type Database = {
           id?: string
           nome_completo?: string
           student_children_id?: string
+          tipo_filiacao?: string | null
         }
         Relationships: [
           {

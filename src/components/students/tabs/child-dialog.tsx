@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface Child {
   id: string;
   nome_completo: string;
   data_nascimento: string;
+  tipo_filiacao?: string | null;
 }
 
 interface ChildDialogProps {
@@ -30,6 +32,7 @@ export function ChildDialog({ child, onSave, trigger }: ChildDialogProps) {
     defaultValues: {
       nome_completo: child?.nome_completo || '',
       data_nascimento: child?.data_nascimento || '',
+      tipo_filiacao: child?.tipo_filiacao || '',
     },
   });
 
@@ -94,6 +97,30 @@ export function ChildDialog({ child, onSave, trigger }: ChildDialogProps) {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="tipo_filiacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de filiação</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="legitimo">Filho legítimo</SelectItem>
+                      <SelectItem value="adotivo">Filho adotivo</SelectItem>
+                      <SelectItem value="socioafetivo">Filho socioafetivo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
 
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
