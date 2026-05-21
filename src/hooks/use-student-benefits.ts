@@ -17,14 +17,14 @@ export function useStudentBenefits(studentId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBenefitsList = useCallback(async () => {
+  const fetchBenefitsList = useCallback(async (showLoading = true) => {
     if (!user || !studentId) {
       setLoading(false);
       return;
     }
     
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const { data, error } = await supabase
         .from('student_benefits_list')
         .select('*')
@@ -36,7 +36,7 @@ export function useStudentBenefits(studentId?: string) {
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, [user, studentId]);
 
