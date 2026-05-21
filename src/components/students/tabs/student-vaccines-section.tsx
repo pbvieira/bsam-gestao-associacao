@@ -180,8 +180,13 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
                           <Input
                             type="date"
                             className="h-8 w-[130px]"
-                            value={status.data || ''}
-                            onChange={(e) => handleDateChange(type.id, e.target.value)}
+                            defaultValue={status.data || ''}
+                            key={status.data || 'empty'}
+                            onBlur={(e) => {
+                              if ((e.target.value || null) !== (status.data || null)) {
+                                handleDateChange(type.id, e.target.value);
+                              }
+                            }}
                             disabled={isSaving}
                           />
                         ) : (
