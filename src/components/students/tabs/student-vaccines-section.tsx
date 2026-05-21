@@ -153,6 +153,7 @@ export function StudentVaccinesSection({ studentId }: StudentVaccinesSectionProp
                   <TableHead>Vacina</TableHead>
                   <TableHead className="w-[140px]">Status</TableHead>
                   <TableHead className="w-[140px]">Data</TableHead>
+                  <TableHead className="w-[180px]">Encaminhamento</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
