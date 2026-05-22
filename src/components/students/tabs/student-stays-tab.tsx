@@ -326,9 +326,9 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
       <Dialog open={!!editingStay} onOpenChange={() => setEditingStay(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Registro de Estadia</DialogTitle>
+            <DialogTitle>Editar Registro de Internação</DialogTitle>
             <DialogDescription>
-              Altere as informações do registro de estadia.
+              Altere as informações do registro de internação.
             </DialogDescription>
           </DialogHeader>
           
