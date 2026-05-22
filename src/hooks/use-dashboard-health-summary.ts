@@ -48,9 +48,14 @@ const getDateRange = (date: Date, period: TimeFilter) => {
   }
 };
 
-export function useDashboardHealthSummary(timeFilter: TimeFilter = 'day') {
+export function useDashboardHealthSummary(
+  timeFilterOrRange: TimeFilter | { start: Date; end: Date } = 'day'
+) {
   const today = new Date();
-  const { start, end } = getDateRange(today, timeFilter);
+  const { start, end } =
+    typeof timeFilterOrRange === 'string'
+      ? getDateRange(today, timeFilterOrRange)
+      : timeFilterOrRange;
 
   const { data: medicationStats, isLoading: isMedicationsLoading } = useQuery({
     queryKey: ['dashboard-medication-stats', timeFilter, start.toISOString()],
