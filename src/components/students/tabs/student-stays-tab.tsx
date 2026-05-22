@@ -378,9 +378,9 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Registro de Estadia</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Registro de Internação</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este registro de estadia? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir este registro de internação? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
