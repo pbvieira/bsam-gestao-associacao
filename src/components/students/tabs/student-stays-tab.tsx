@@ -357,7 +357,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
               <Textarea
                 value={editForm.observacoes}
                 onChange={(e) => setEditForm({ ...editForm, observacoes: e.target.value })}
-                placeholder="Observações sobre a estadia..."
+                placeholder="Observações sobre a internação..."
                 rows={3}
               />
             </div>
