@@ -128,7 +128,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Registro de estadia atualizado.',
+        description: 'Registro de internação atualizado.',
       });
       setEditingStay(null);
     }
@@ -147,7 +147,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Registro de estadia excluído.',
+        description: 'Registro de internação excluído.',
       });
     }
     setDeleteConfirmId(null);
@@ -166,7 +166,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
           <div className="text-center py-8">
             <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              Salve o cadastro do aluno para visualizar o histórico de estadias.
+              Salve o cadastro do aluno para visualizar o histórico de internações.
             </p>
           </div>
         </CardContent>
@@ -203,7 +203,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
                 <History className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Estadias Anteriores</p>
+                <p className="text-sm text-muted-foreground">Internações Anteriores</p>
                 <p className="text-2xl font-bold">{stays.length}</p>
               </div>
             </div>
@@ -230,17 +230,17 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Histórico de Estadias
+            Histórico de Internações
           </CardTitle>
           <CardDescription>
-            Registro de todas as estadias anteriores do aluno na associação
+            Registro de todas as internações anteriores do aluno na associação
           </CardDescription>
         </CardHeader>
         <CardContent>
           {stays.length === 0 ? (
             <div className="text-center py-8">
               <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhuma estadia anterior</h3>
+              <h3 className="text-lg font-medium mb-2">Nenhuma internação anterior</h3>
               <p className="text-muted-foreground">
                 O histórico será preenchido automaticamente quando o aluno for reativado após uma saída.
               </p>
@@ -326,9 +326,9 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
       <Dialog open={!!editingStay} onOpenChange={() => setEditingStay(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Registro de Estadia</DialogTitle>
+            <DialogTitle>Editar Registro de Internação</DialogTitle>
             <DialogDescription>
-              Altere as informações do registro de estadia.
+              Altere as informações do registro de internação.
             </DialogDescription>
           </DialogHeader>
           
@@ -357,7 +357,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
               <Textarea
                 value={editForm.observacoes}
                 onChange={(e) => setEditForm({ ...editForm, observacoes: e.target.value })}
-                placeholder="Observações sobre a estadia..."
+                placeholder="Observações sobre a internação..."
                 rows={3}
               />
             </div>
@@ -378,9 +378,9 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Registro de Estadia</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Registro de Internação</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este registro de estadia? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir este registro de internação? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
