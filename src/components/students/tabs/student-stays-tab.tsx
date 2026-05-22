@@ -147,7 +147,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Registro de estadia excluído.',
+        description: 'Registro de internação excluído.',
       });
     }
     setDeleteConfirmId(null);
