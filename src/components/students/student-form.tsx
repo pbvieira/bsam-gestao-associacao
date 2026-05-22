@@ -422,7 +422,7 @@ function StudentFormContent({ student, onSuccess, onCancel, onRefreshPhoto, read
           <TabsTrigger value="health">Saúde</TabsTrigger>
           <TabsTrigger value="cashbook">Financeiro</TabsTrigger>
           <TabsTrigger value="annotations">Anotações</TabsTrigger>
-          <TabsTrigger value="stays">Estadias</TabsTrigger>
+          <TabsTrigger value="stays">Internações</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
 
