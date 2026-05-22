@@ -5,16 +5,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, Target, Calendar } from "lucide-react";
+import { Clock, Target, Calendar, AlertCircle } from "lucide-react";
+import { isPast } from "date-fns";
 
 export function WorkspaceHeader() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { tasks } = useTasks();
   const { events } = useCalendar();
 
   const today = new Date();
-  const pendingTasks = tasks.filter(task => task.status === 'pendente').length;
-  const todayEvents = events.filter(event => {
+  const myTasks = tasks.filter(
+    (t) => user && (t.assigned_to === user.id || t.created_by === user.id)
+  );
+  const pendingTasks = myTasks.filter((t) => t.status === 'pendente' || t.status === 'em_andamento').length;
+  const overdueTasks = myTasks.filter(
+    (t) => t.data_vencimento && isPast(new Date(t.data_vencimento)) && t.status !== 'realizada' && t.status !== 'cancelada'
+  ).length;
+  const todayEvents = events.filter((event) => {
     const eventDate = new Date(event.data_inicio);
     return eventDate.toDateString() === today.toDateString();
   }).length;
@@ -51,6 +58,12 @@ export function WorkspaceHeader() {
 
           {/* Status do Trabalho */}
           <div className="flex flex-wrap gap-2">
+            {overdueTasks > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {overdueTasks} atrasadas
+              </Badge>
+            )}
             <Badge variant="secondary" className="text-xs">
               <Target className="h-3 w-3 mr-1" />
               {pendingTasks} pendentes

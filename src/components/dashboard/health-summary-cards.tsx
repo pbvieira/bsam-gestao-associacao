@@ -8,17 +8,21 @@ import { useDashboardHealthSummary, TimeFilter } from '@/hooks/use-dashboard-hea
 import { cn } from '@/lib/utils';
 
 interface HealthSummaryCardsProps {
-  timeFilter: TimeFilter;
+  timeFilter?: TimeFilter;
+  range?: { start: Date; end: Date };
+  label?: string;
 }
 
-export function HealthSummaryCards({ timeFilter }: HealthSummaryCardsProps) {
-  const { medications, appointments, isLoading } = useDashboardHealthSummary(timeFilter);
+export function HealthSummaryCards({ timeFilter, range, label }: HealthSummaryCardsProps) {
+  const { medications, appointments, isLoading } = useDashboardHealthSummary(range ?? timeFilter ?? 'day');
 
   const getTimeLabel = () => {
+    if (label) return label;
     switch (timeFilter) {
       case 'day': return 'Hoje';
       case 'week': return 'Esta Semana';
       case 'month': return 'Este Mês';
+      default: return 'Período';
     }
   };
 
