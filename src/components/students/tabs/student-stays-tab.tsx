@@ -128,7 +128,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Registro de estadia atualizado.',
+        description: 'Registro de internação atualizado.',
       });
       setEditingStay(null);
     }
