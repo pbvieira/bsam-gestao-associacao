@@ -29,7 +29,7 @@ interface Props {
 
 export function DashboardFilters({ filters, setFilters, range, onReset, counts }: Props) {
   const { profile } = useAuth();
-  const isAdmin = profile?.role === 'administrador' || profile?.role === 'gestor';
+  const isAdmin = profile?.role === 'administrador' || profile?.role === 'diretor' || profile?.role === 'coordenador';
   const [customOpen, setCustomOpen] = useState(false);
 
   const periodOptions: PeriodPreset[] = [
