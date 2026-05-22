@@ -58,6 +58,12 @@ export function WorkspaceHeader() {
 
           {/* Status do Trabalho */}
           <div className="flex flex-wrap gap-2">
+            {overdueTasks > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {overdueTasks} atrasadas
+              </Badge>
+            )}
             <Badge variant="secondary" className="text-xs">
               <Target className="h-3 w-3 mr-1" />
               {pendingTasks} pendentes
