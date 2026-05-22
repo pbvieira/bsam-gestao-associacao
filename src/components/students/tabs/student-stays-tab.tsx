@@ -240,7 +240,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
           {stays.length === 0 ? (
             <div className="text-center py-8">
               <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhuma estadia anterior</h3>
+              <h3 className="text-lg font-medium mb-2">Nenhuma internação anterior</h3>
               <p className="text-muted-foreground">
                 O histórico será preenchido automaticamente quando o aluno for reativado após uma saída.
               </p>
