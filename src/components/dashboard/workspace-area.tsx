@@ -84,7 +84,7 @@ export function WorkspaceArea() {
 
     return tasks
       .filter(task => {
-        if (task.assigned_to !== user.id) return false;
+        if (task.assigned_to !== user.id && task.created_by !== user.id) return false;
         if (task.status === 'realizada') return false;
         
         if (!task.data_vencimento) return true;
