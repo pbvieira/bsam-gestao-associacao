@@ -58,7 +58,7 @@ export function useDashboardHealthSummary(
       : timeFilterOrRange;
 
   const { data: medicationStats, isLoading: isMedicationsLoading } = useQuery({
-    queryKey: ['dashboard-medication-stats', timeFilter, start.toISOString()],
+    queryKey: ['dashboard-medication-stats', start.toISOString(), end.toISOString()],
     queryFn: async () => {
       // 1. Get active medication schedules
       const { data: schedules, error } = await supabase
@@ -168,7 +168,7 @@ export function useDashboardHealthSummary(
   });
 
   const { data: appointmentStats, isLoading: isAppointmentsLoading } = useQuery({
-    queryKey: ['dashboard-appointment-stats', timeFilter, start.toISOString()],
+    queryKey: ['dashboard-appointment-stats', start.toISOString(), end.toISOString()],
     queryFn: async () => {
       const startStr = format(start, 'yyyy-MM-dd');
       const endStr = format(end, 'yyyy-MM-dd');
