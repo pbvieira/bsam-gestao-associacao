@@ -203,7 +203,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
                 <History className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Estadias Anteriores</p>
+                <p className="text-sm text-muted-foreground">Internações Anteriores</p>
                 <p className="text-2xl font-bold">{stays.length}</p>
               </div>
             </div>
