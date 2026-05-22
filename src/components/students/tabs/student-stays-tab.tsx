@@ -230,10 +230,10 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            Histórico de Estadias
+            Histórico de Internações
           </CardTitle>
           <CardDescription>
-            Registro de todas as estadias anteriores do aluno na associação
+            Registro de todas as internações anteriores do aluno na associação
           </CardDescription>
         </CardHeader>
         <CardContent>
