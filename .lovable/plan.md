@@ -1,98 +1,77 @@
 
-# Vacinação em grupo — fluxo proposto
+# Dashboard com filtros funcionais
 
-## Visão geral
+## Problema atual
+- O filtro só tem 3 opções fixas (Hoje / Esta Semana / Este Mês) ancoradas em "hoje".
+- Quando o mês vira, eventos/tarefas do mês anterior somem.
+- Não há como ver itens passados, futuros próximos, nem alternar entre "minhas" e "de toda a equipe".
+- Sem indicação visual de quantos itens existem em cada período.
 
-Três etapas claras: **Encaminhar → Agrupar/Agendar → Concluir em lote**.
+## Proposta de interface
+
+### 1. Barra de filtros no topo do card "Minha Área de Trabalho"
 
 ```text
-Aba Saúde do aluno          Página "Vacinação pendente"        Tarefa de ida ao posto
-─────────────────────       ────────────────────────────       ──────────────────────
-[Encaminhar p/ vacina] ──►  Fila agrupada por tipo de vacina   ──►  Concluir em lote
-                            Selecionar alunos + data + setor        Marca data_vacinacao
-                            Gera 1 tarefa vinculada                 nos alunos presentes
+┌──────────────────────────────────────────────────────────────────┐
+│ 📅 Minha Área de Trabalho                                        │
+├──────────────────────────────────────────────────────────────────┤
+│ Período: [Próximos 7 dias ▼]   Escopo: [Minhas ▼]   [⚙ Filtros] │
+│ ─────────────────────────────────────────────────────────────── │
+│ 📌 Mostrando: 23/maio → 29/maio · 5 tarefas · 2 eventos          │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-## 1. Encaminhar (aba Saúde › Vacinas)
+**Período** (select com presets + intervalo custom):
+- Hoje
+- Amanhã
+- Próximos 7 dias *(padrão)*
+- Próximos 30 dias
+- Esta semana
+- Este mês
+- Mês passado
+- Intervalo personalizado → abre date range picker
 
-- Na tabela de vacinas, adicionar coluna **Ação** com botão **"Encaminhar para vacinação"** (ícone seta) na linha de cada vacina cujo status é `Não` ou `-`.
-- Ao clicar: insere registro em `vaccination_queue` (aluno + vaccine_type) com status `pendente`. Toast confirma "Aluno adicionado à fila de vacinação".
-- Se já estiver na fila, o botão mostra estado **"Na fila"** (desabilitado, com opção de remover).
-- Indicador visual discreto (badge amarelo "Aguardando vacinação") na linha enquanto pendente.
+**Escopo** (select):
+- Minhas (atribuídas a mim OU criadas por mim) *(padrão)*
+- Que criei
+- Atribuídas a mim
+- Da equipe (somente admin/gestor)
 
-## 2. Página "Vacinação pendente"
+**Filtros avançados** (popover):
+- Tipo: ☑ Eventos ☑ Tarefas ☑ Saúde
+- Prioridade: Alta / Média / Baixa
+- Status: Pendente / Em andamento
+- Setor (para admin/gestor)
 
-Nova página em **Saúde › Vacinação pendente** (sidebar) e atalho no Dashboard quando há pendências.
+### 2. Regra de visibilidade fixa
+**Tarefas atrasadas e eventos do dia sempre aparecem**, independente do filtro de período — com aviso claro no topo. Isso garante que virar o mês nunca esconde compromissos críticos.
 
-Layout:
-- **Lista agrupada por tipo de vacina**, cada grupo expansível:
-  - Cabeçalho: nome da vacina + cor + contador ("3 alunos aguardando")
-  - Linhas: foto/nome do aluno, código_cadastro, data de inclusão na fila, botão remover
-  - Botão do grupo: **"Agendar ida ao posto"**
-- Filtros: por vacina, por período de inclusão, busca por nome.
+### 3. Resumo contextual
+Linha de subtítulo mostra o intervalo ativo + contagens, para o usuário entender exatamente o que está vendo.
 
-Diálogo "Agendar ida ao posto":
-- Checkbox para selecionar quais alunos do grupo entram nessa ida (default: todos)
-- **Data prevista** (opcional — se vazio, tarefa fica sem vencimento)
-- **Setor responsável** (Saúde por padrão)
-- **Responsável** (assigned_to)
-- Observações
-- Botão **Criar tarefa** → cria 1 registro em `vaccination_trips` + 1 `task` vinculada (reference_type `vaccination_trip`), e marca os itens da fila com `trip_id`.
+### 4. Persistência
+Filtros escolhidos ficam salvos em `localStorage` por usuário, então ao voltar amanhã ele continua na mesma visão.
 
-A tarefa criada tem título tipo `"Vacinação: Febre Amarela (3 alunos)"` e descrição listando os alunos.
+### 5. Estado vazio melhorado
+Quando o filtro não retorna nada, mostrar:
+- "Nada em [período]. Ver próximos 30 dias →" (link rápido para ampliar)
 
-## 3. Conclusão em lote
+## Detalhes técnicos
 
-Dois pontos de acesso para concluir:
-- Botão **"Registrar vacinação"** na própria página de Vacinação Pendente (no card da viagem agendada).
-- Botão na tarefa correspondente (na página de Tarefas), substituindo o "Concluir" padrão quando `reference_type = 'vaccination_trip'`.
+- Novo componente `DashboardFilters` em `src/components/dashboard/dashboard-filters.tsx` com estado `{ period, scope, types, priorities, statuses }`.
+- Hook `useDashboardFilters` encapsula presets, conversão para `{startDate, endDate}` e persistência em `localStorage` (`dashboard-filters-v1`).
+- `WorkspaceArea` consome o hook em vez de manter `timeFilter` local; lógica de filtragem de tarefas/eventos passa a usar os novos campos.
+- Date range picker custom usa o Shadcn `Calendar` (mode="range") dentro de `Popover` com `pointer-events-auto`.
+- `HealthSummaryCards` continua respeitando o período (converte intervalo para o seu próprio cálculo).
+- `WorkspaceHeader` ganha badge extra "X atrasadas" quando houver, em vermelho.
 
-Diálogo de conclusão:
-- **Data da vacinação** (default: hoje)
-- Lista dos alunos vinculados com switch **Foi vacinado?** (default: Sim) e campo opcional "Motivo" quando Não.
-- Botão **Confirmar**:
-  - Para cada aluno marcado como vacinado: upsert em `student_vaccines` com `tomou=true` e `data_vacinacao=<data>`.
-  - Para não vacinados: volta para a fila (mantém pendente) com observação.
-  - Marca `vaccination_trips.status='realizada'` e `task.status='realizada'`.
-  - Remove os itens vacinados da fila.
+## Arquivos a alterar/criar
+- **Novo** `src/components/dashboard/dashboard-filters.tsx`
+- **Novo** `src/hooks/use-dashboard-filters.ts`
+- **Editar** `src/components/dashboard/workspace-area.tsx` (substituir Tabs por DashboardFilters; atualizar lógica de filtragem)
+- **Editar** `src/components/dashboard/workspace-header.tsx` (badge de atrasadas)
+- **Editar** `src/hooks/use-dashboard-health-summary.ts` (aceitar `{start, end}` em vez de só `TimeFilter`)
 
-## 4. Detalhes técnicos
-
-### Banco
-
-- **`vaccination_queue`**: `id`, `student_id`, `vaccine_type_id`, `trip_id` (nullable), `status` (`pendente`/`agendada`/`cancelada`), `added_by`, `observacoes`, timestamps. UNIQUE(student_id, vaccine_type_id) WHERE status != 'cancelada'.
-- **`vaccination_trips`**: `id`, `vaccine_type_id`, `data_prevista`, `data_realizada`, `setor_id`, `responsavel_id`, `task_id`, `status` (`agendada`/`realizada`/`cancelada`), `observacoes`, timestamps.
-- RLS: leitura via `students.health.read`; escrita via `students.health.write`. Mesma capability já usada nas vacinas.
-- Cascade: deletar `vaccination_trip` libera itens da fila de volta a `pendente`.
-
-### Frontend
-
-- Hook `use-vaccination-queue.ts` — list, addToQueue, removeFromQueue.
-- Hook `use-vaccination-trips.ts` — create, completeTrip (lote), cancel.
-- Componentes:
-  - `vaccination-queue-button.tsx` (botão na tabela de vacinas, em `student-vaccines-section.tsx`).
-  - `pages/VaccinationPending.tsx` (nova página com MainLayout).
-  - `schedule-vaccination-trip-dialog.tsx`.
-  - `complete-vaccination-trip-dialog.tsx`.
-- Sidebar: novo item "Vacinação pendente" sob seção Saúde (com badge contador de pendentes).
-- Dashboard: card opcional "Vacinações aguardando agendamento" mostrando contagem por tipo.
-
-### Tarefa integrada (sem evento de calendário obrigatório)
-
-- Tarefa criada com `reference_type = 'vaccination_trip'`, `reference_id = trip.id`.
-- Quando o usuário abre a tarefa, mostra link "Abrir registro da vacinação" que leva ao diálogo de conclusão em lote.
-- Calendário fica opcional: usuário pode criar evento manualmente se quiser (não bloquear o fluxo).
-
-## 5. Por que esse fluxo é eficiente
-
-- **Zero fricção no momento certo**: o agente da saúde sinaliza a necessidade sem precisar planejar a logística.
-- **Acúmulo natural**: a fila cresce conforme novos alunos chegam, sem duplicar trabalho.
-- **Decisão única de agendamento**: ao olhar a fila, o coordenador decide "vamos hoje" com base em quantos têm pendência da mesma vacina.
-- **Registro em lote**: uma única ação preenche `data_vacinacao` para vários alunos, evitando 10 cliques separados.
-- **Reaproveita infra existente**: usa tasks, sectors, students.health capabilities, sem inventar paralelo.
-
-## 6. Fora do escopo desta entrega
-
-- Geração automática de evento de calendário (fica como opcional manual).
-- Notificação por e-mail aos responsáveis.
-- Histórico/relatório consolidado de viagens (pode vir depois em Relatórios).
+## Fora do escopo
+- Mudanças em permissões/RLS.
+- Reorganização visual do card (cores, espaçamentos, animações) — só ajustes mínimos para acomodar os filtros.
