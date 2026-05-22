@@ -166,7 +166,7 @@ export function StudentStaysTab({ studentId }: StudentStaysTabProps) {
           <div className="text-center py-8">
             <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              Salve o cadastro do aluno para visualizar o histórico de estadias.
+              Salve o cadastro do aluno para visualizar o histórico de internações.
             </p>
           </div>
         </CardContent>
