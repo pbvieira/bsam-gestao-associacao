@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
-export type NotificationType = 'task' | 'event' | 'reminder' | 'mention' | 'calendar_invite' | 'calendar_reminder' | 'calendar_update' | 'calendar_cancellation';
+export type NotificationType = 'task' | 'event' | 'reminder' | 'mention' | 'calendar_invite' | 'calendar_reminder' | 'calendar_update' | 'calendar_cancellation' | 'pendency_assigned' | 'pendency_accepted' | 'pendency_rejected' | 'pendency_blocked' | 'pendency_completed' | 'pendency_commented';
 
 export interface Notification {
   id: string;

@@ -17,11 +17,11 @@ async function fetchModuleAccess(): Promise<Record<UserRole, string[]>> {
     console.error('Erro ao buscar permissões:', error);
     // Fallback para permissões padrão em caso de erro
     return {
-      diretor: ['dashboard', 'users', 'students', 'tasks', 'calendar', 'inventory', 'suppliers', 'purchases', 'reports'],
-      coordenador: ['dashboard', 'users', 'students', 'tasks', 'calendar', 'inventory', 'suppliers', 'purchases', 'reports'],
-      auxiliar: ['dashboard', 'students', 'tasks', 'calendar', 'inventory'],
-      aluno: ['dashboard', 'tasks', 'calendar'],
-      administrador: ['dashboard', 'users', 'students', 'tasks', 'calendar', 'inventory', 'suppliers', 'purchases', 'reports']
+      diretor: ['dashboard', 'users', 'students', 'tasks', 'calendar', 'inventory', 'suppliers', 'purchases', 'reports', 'pendencies'],
+      coordenador: ['dashboard', 'users', 'students', 'tasks', 'calendar', 'inventory', 'suppliers', 'purchases', 'reports', 'pendencies'],
+      auxiliar: ['dashboard', 'students', 'tasks', 'calendar', 'inventory', 'pendencies'],
+      aluno: ['dashboard', 'tasks', 'calendar', 'pendencies'],
+      administrador: ['dashboard', 'users', 'students', 'tasks', 'calendar', 'inventory', 'suppliers', 'purchases', 'reports', 'pendencies']
     };
   }
 
