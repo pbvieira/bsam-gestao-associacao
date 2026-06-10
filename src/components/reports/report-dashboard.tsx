@@ -153,7 +153,7 @@ export function ReportDashboard() {
 
       {/* Detailed Reports */}
       <Tabs defaultValue="students" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8">
           <TabsTrigger value="students">Alunos</TabsTrigger>
           <TabsTrigger value="inventory">Estoque</TabsTrigger>
           <TabsTrigger value="movements">Movimentações</TabsTrigger>
@@ -161,6 +161,7 @@ export function ReportDashboard() {
           <TabsTrigger value="abc">Curva ABC</TabsTrigger>
           <TabsTrigger value="activities">Atividades</TabsTrigger>
           <TabsTrigger value="categories">Categorias</TabsTrigger>
+          <TabsTrigger value="pendencies">Pendências</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4">
