@@ -977,6 +977,448 @@ export type Database = {
         }
         Relationships: []
       }
+      pendencies: {
+        Row: {
+          area_id: string | null
+          board_id: string
+          categoria_id: string | null
+          column_id: string
+          created_at: string
+          created_by: string | null
+          data_aceite: string | null
+          data_entrega: string | null
+          dep_descricao: string | null
+          dep_responsavel_id: string | null
+          dep_setor_id: string | null
+          descricao: string | null
+          esforco_estimado: number | null
+          id: string
+          motivo_rejeicao: string | null
+          posicao: number
+          prazo: string | null
+          prioridade: Database["public"]["Enums"]["pendency_priority"]
+          responsavel_id: string | null
+          setor_id: string | null
+          solicitante_id: string | null
+          status_aceite: Database["public"]["Enums"]["pendency_acceptance"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          area_id?: string | null
+          board_id: string
+          categoria_id?: string | null
+          column_id: string
+          created_at?: string
+          created_by?: string | null
+          data_aceite?: string | null
+          data_entrega?: string | null
+          dep_descricao?: string | null
+          dep_responsavel_id?: string | null
+          dep_setor_id?: string | null
+          descricao?: string | null
+          esforco_estimado?: number | null
+          id?: string
+          motivo_rejeicao?: string | null
+          posicao?: number
+          prazo?: string | null
+          prioridade?: Database["public"]["Enums"]["pendency_priority"]
+          responsavel_id?: string | null
+          setor_id?: string | null
+          solicitante_id?: string | null
+          status_aceite?: Database["public"]["Enums"]["pendency_acceptance"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          area_id?: string | null
+          board_id?: string
+          categoria_id?: string | null
+          column_id?: string
+          created_at?: string
+          created_by?: string | null
+          data_aceite?: string | null
+          data_entrega?: string | null
+          dep_descricao?: string | null
+          dep_responsavel_id?: string | null
+          dep_setor_id?: string | null
+          descricao?: string | null
+          esforco_estimado?: number | null
+          id?: string
+          motivo_rejeicao?: string | null
+          posicao?: number
+          prazo?: string | null
+          prioridade?: Database["public"]["Enums"]["pendency_priority"]
+          responsavel_id?: string | null
+          setor_id?: string | null
+          solicitante_id?: string | null
+          status_aceite?: Database["public"]["Enums"]["pendency_acceptance"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendencies_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pendencies_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pendencies_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pendencies_column_id_fkey"
+            columns: ["column_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_columns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pendencies_dep_setor_id_fkey"
+            columns: ["dep_setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pendencies_setor_id_fkey"
+            columns: ["setor_id"]
+            isOneToOne: false
+            referencedRelation: "setores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_activity_log: {
+        Row: {
+          acao: string
+          autor_id: string | null
+          created_at: string
+          id: string
+          payload: Json | null
+          pendency_id: string
+        }
+        Insert: {
+          acao: string
+          autor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          pendency_id: string
+        }
+        Update: {
+          acao?: string
+          autor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          pendency_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_activity_log_pendency_id_fkey"
+            columns: ["pendency_id"]
+            isOneToOne: false
+            referencedRelation: "pendencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_attachments: {
+        Row: {
+          created_at: string
+          id: string
+          mime: string | null
+          nome: string
+          pendency_id: string
+          storage_path: string
+          tamanho: number | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mime?: string | null
+          nome: string
+          pendency_id: string
+          storage_path: string
+          tamanho?: number | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mime?: string | null
+          nome?: string
+          pendency_id?: string
+          storage_path?: string
+          tamanho?: number | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_attachments_pendency_id_fkey"
+            columns: ["pendency_id"]
+            isOneToOne: false
+            referencedRelation: "pendencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_boards: {
+        Row: {
+          ativo: boolean
+          cor: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          id: string
+          is_default: boolean
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          is_default?: boolean
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          is_default?: boolean
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pendency_categories: {
+        Row: {
+          ativo: boolean
+          cor: string | null
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pendency_checklist_items: {
+        Row: {
+          concluido: boolean
+          created_at: string
+          id: string
+          pendency_id: string
+          posicao: number
+          texto: string
+          updated_at: string
+        }
+        Insert: {
+          concluido?: boolean
+          created_at?: string
+          id?: string
+          pendency_id: string
+          posicao?: number
+          texto: string
+          updated_at?: string
+        }
+        Update: {
+          concluido?: boolean
+          created_at?: string
+          id?: string
+          pendency_id?: string
+          posicao?: number
+          texto?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_checklist_items_pendency_id_fkey"
+            columns: ["pendency_id"]
+            isOneToOne: false
+            referencedRelation: "pendencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_columns: {
+        Row: {
+          board_id: string
+          cor: string | null
+          created_at: string
+          id: string
+          is_final: boolean
+          kind: Database["public"]["Enums"]["pendency_column_kind"]
+          nome: string
+          posicao: number
+          updated_at: string
+          wip_limit: number | null
+        }
+        Insert: {
+          board_id: string
+          cor?: string | null
+          created_at?: string
+          id?: string
+          is_final?: boolean
+          kind?: Database["public"]["Enums"]["pendency_column_kind"]
+          nome: string
+          posicao?: number
+          updated_at?: string
+          wip_limit?: number | null
+        }
+        Update: {
+          board_id?: string
+          cor?: string | null
+          created_at?: string
+          id?: string
+          is_final?: boolean
+          kind?: Database["public"]["Enums"]["pendency_column_kind"]
+          nome?: string
+          posicao?: number
+          updated_at?: string
+          wip_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_columns_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_comments: {
+        Row: {
+          autor_id: string | null
+          created_at: string
+          id: string
+          pendency_id: string
+          texto: string
+        }
+        Insert: {
+          autor_id?: string | null
+          created_at?: string
+          id?: string
+          pendency_id: string
+          texto: string
+        }
+        Update: {
+          autor_id?: string | null
+          created_at?: string
+          id?: string
+          pendency_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_comments_pendency_id_fkey"
+            columns: ["pendency_id"]
+            isOneToOne: false
+            referencedRelation: "pendencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_tag_links: {
+        Row: {
+          pendency_id: string
+          tag_id: string
+        }
+        Insert: {
+          pendency_id: string
+          tag_id: string
+        }
+        Update: {
+          pendency_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_tag_links_pendency_id_fkey"
+            columns: ["pendency_id"]
+            isOneToOne: false
+            referencedRelation: "pendencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pendency_tag_links_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pendency_tags: {
+        Row: {
+          board_id: string
+          cor: string | null
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          board_id: string
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          board_id?: string
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_tags_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active: boolean
@@ -2893,6 +3335,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin_user: { Args: { check_user_id: string }; Returns: boolean }
+      is_coordinator_or_above: { Args: { _user_id: string }; Returns: boolean }
       is_event_participant: { Args: { event_uuid: string }; Returns: boolean }
       is_system_admin: { Args: { _user_id: string }; Returns: boolean }
       module_to_capability: { Args: { _module: string }; Returns: string }
@@ -2920,7 +3363,16 @@ export type Database = {
         | "calendar_reminder"
         | "calendar_update"
         | "calendar_cancellation"
+        | "pendency_assigned"
+        | "pendency_accepted"
+        | "pendency_rejected"
+        | "pendency_blocked"
+        | "pendency_completed"
+        | "pendency_commented"
       participant_status: "pendente" | "aceito" | "recusado"
+      pendency_acceptance: "pendente" | "aceita" | "rejeitada"
+      pendency_column_kind: "open" | "done" | "rejected" | "blocked"
+      pendency_priority: "baixa" | "media" | "alta" | "urgente"
       recurrence_type: "none" | "daily" | "weekly" | "monthly"
       task_priority: "baixa" | "media" | "alta" | "urgente"
       task_status:
@@ -3072,8 +3524,17 @@ export const Constants = {
         "calendar_reminder",
         "calendar_update",
         "calendar_cancellation",
+        "pendency_assigned",
+        "pendency_accepted",
+        "pendency_rejected",
+        "pendency_blocked",
+        "pendency_completed",
+        "pendency_commented",
       ],
       participant_status: ["pendente", "aceito", "recusado"],
+      pendency_acceptance: ["pendente", "aceita", "rejeitada"],
+      pendency_column_kind: ["open", "done", "rejected", "blocked"],
+      pendency_priority: ["baixa", "media", "alta", "urgente"],
       recurrence_type: ["none", "daily", "weekly", "monthly"],
       task_priority: ["baixa", "media", "alta", "urgente"],
       task_status: [
