@@ -39,8 +39,8 @@ export function PendencyDialog({ open, onOpenChange, boardId, columns, pendency,
   const updateMut = useUpdatePendency();
   const deleteMut = useDeletePendency();
   const { data: categories = [] } = usePendencyCategories();
-  const { data: areas = [] } = useAreas();
-  const { data: setores = [] } = useSetores();
+  const { areas = [] } = useAreas();
+  const { setores = [] } = useSetores();
   const { data: profiles = [] } = useProfilesLite();
 
   const [form, setForm] = useState<Partial<Pendency>>({});
