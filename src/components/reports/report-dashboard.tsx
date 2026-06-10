@@ -22,6 +22,7 @@ import { PurchasesReport } from './purchases-report';
 import { ABCAnalysis } from './abc-analysis';
 import { ActivitiesReport } from './activities-report';
 import { CategoryStatistics } from './category-statistics';
+import { PendenciesReport } from './pendencies-report';
 
 interface DashboardStats {
   totalStudents: number;
