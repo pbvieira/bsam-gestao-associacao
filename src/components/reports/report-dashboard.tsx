@@ -22,6 +22,7 @@ import { PurchasesReport } from './purchases-report';
 import { ABCAnalysis } from './abc-analysis';
 import { ActivitiesReport } from './activities-report';
 import { CategoryStatistics } from './category-statistics';
+import { PendenciesReport } from './pendencies-report';
 
 interface DashboardStats {
   totalStudents: number;
@@ -152,7 +153,7 @@ export function ReportDashboard() {
 
       {/* Detailed Reports */}
       <Tabs defaultValue="students" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8">
           <TabsTrigger value="students">Alunos</TabsTrigger>
           <TabsTrigger value="inventory">Estoque</TabsTrigger>
           <TabsTrigger value="movements">Movimentações</TabsTrigger>
@@ -160,6 +161,7 @@ export function ReportDashboard() {
           <TabsTrigger value="abc">Curva ABC</TabsTrigger>
           <TabsTrigger value="activities">Atividades</TabsTrigger>
           <TabsTrigger value="categories">Categorias</TabsTrigger>
+          <TabsTrigger value="pendencies">Pendências</TabsTrigger>
         </TabsList>
 
         <TabsContent value="students" className="space-y-4">
@@ -188,6 +190,10 @@ export function ReportDashboard() {
 
         <TabsContent value="categories" className="space-y-4">
           <CategoryStatistics />
+        </TabsContent>
+
+        <TabsContent value="pendencies" className="space-y-4">
+          <PendenciesReport />
         </TabsContent>
       </Tabs>
     </div>
