@@ -191,6 +191,10 @@ export function ReportDashboard() {
         <TabsContent value="categories" className="space-y-4">
           <CategoryStatistics />
         </TabsContent>
+
+        <TabsContent value="pendencies" className="space-y-4">
+          <PendenciesReport />
+        </TabsContent>
       </Tabs>
     </div>
   );
