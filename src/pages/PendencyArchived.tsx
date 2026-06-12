@@ -14,9 +14,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, RotateCcw, Trash2, Archive } from "lucide-react";
+import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
 import {
-  useArchivedPendencies, useArchiveOldPendencies, usePendencyBoards,
+  useArchivedPendencies, usePendencyBoards,
   usePendencyColumns, useRestorePendency, useDeletePendency, useProfilesLite,
 } from "@/hooks/use-pendencies";
 
@@ -30,7 +30,6 @@ const PendencyArchivedPage = () => {
 
   const restore = useRestorePendency();
   const remove = useDeletePendency();
-  const archiveOld = useArchiveOldPendencies();
 
   const [search, setSearch] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -52,20 +51,11 @@ const PendencyArchivedPage = () => {
     <MainLayout>
       <PageLayout
         title={`Arquivados — ${board?.nome || "Quadro"}`}
-        subtitle="Pendências concluídas ou rejeitadas removidas do quadro"
+        subtitle="Pendências concluídas há mais de 30 dias ou arquivadas manualmente"
         actionButton={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => navigate(`/pendencias/${boardId}`)}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Voltar ao quadro
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => archiveOld.mutate(boardId)}
-              disabled={archiveOld.isPending}
-            >
-              <Archive className="h-4 w-4 mr-1" /> Arquivar antigas (+30d)
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => navigate(`/pendencias/${boardId}`)}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Voltar ao quadro
+          </Button>
         }
       >
         <div className="mb-4">
@@ -83,6 +73,7 @@ const PendencyArchivedPage = () => {
               <TableRow>
                 <TableHead>Título</TableHead>
                 <TableHead>Coluna de origem</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Responsável</TableHead>
                 <TableHead>Arquivada em</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -90,9 +81,9 @@ const PendencyArchivedPage = () => {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Carregando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Carregando...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                   {pendencies.length === 0 ? "Nenhuma pendência arquivada." : "Nenhum resultado para a busca."}
                 </TableCell></TableRow>
               ) : (
@@ -108,10 +99,15 @@ const PendencyArchivedPage = () => {
                           </Badge>
                         ) : "—"}
                       </TableCell>
+                      <TableCell>
+                        <Badge variant={p.arquivamento_tipo === "manual" ? "default" : "outline"}>
+                          {p.arquivamento_tipo === "manual" ? "Manual" : "Automático"}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{p.responsavel_id ? profileMap[p.responsavel_id] || "—" : "—"}</TableCell>
                       <TableCell>
-                        {p.arquivada_em
-                          ? format(new Date(p.arquivada_em), "dd/MM/yyyy HH:mm", { locale: ptBR })
+                        {p.arquivado_efetivo_em
+                          ? format(new Date(p.arquivado_efetivo_em), "dd/MM/yyyy HH:mm", { locale: ptBR })
                           : "—"}
                       </TableCell>
                       <TableCell className="text-right">

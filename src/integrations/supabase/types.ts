@@ -3366,6 +3366,76 @@ export type Database = {
       count_active_system_admins: { Args: never; Returns: number }
       current_user_has_any: { Args: { _caps: string[] }; Returns: boolean }
       current_user_has_capability: { Args: { _cap: string }; Returns: boolean }
+      get_archived_pendencies: {
+        Args: { _board_id: string }
+        Returns: {
+          area_id: string
+          arquivada_em: string
+          arquivada_por: string
+          arquivado_efetivo_em: string
+          arquivamento_tipo: string
+          board_id: string
+          categoria_id: string
+          column_id: string
+          created_at: string
+          created_by: string
+          data_aceite: string
+          data_entrega: string
+          dep_descricao: string
+          dep_responsavel_id: string
+          dep_setor_id: string
+          descricao: string
+          esforco_estimado: number
+          id: string
+          motivo_rejeicao: string
+          posicao: number
+          prazo: string
+          prioridade: Database["public"]["Enums"]["pendency_priority"]
+          responsavel_id: string
+          setor_id: string
+          solicitante_id: string
+          status_aceite: Database["public"]["Enums"]["pendency_acceptance"]
+          titulo: string
+          updated_at: string
+        }[]
+      }
+      get_board_pendencies: {
+        Args: { _board_id: string }
+        Returns: {
+          area_id: string | null
+          arquivada_em: string | null
+          arquivada_por: string | null
+          board_id: string
+          categoria_id: string | null
+          column_id: string
+          created_at: string
+          created_by: string | null
+          data_aceite: string | null
+          data_entrega: string | null
+          dep_descricao: string | null
+          dep_responsavel_id: string | null
+          dep_setor_id: string | null
+          descricao: string | null
+          esforco_estimado: number | null
+          id: string
+          motivo_rejeicao: string | null
+          posicao: number
+          prazo: string | null
+          prioridade: Database["public"]["Enums"]["pendency_priority"]
+          responsavel_id: string | null
+          setor_id: string | null
+          solicitante_id: string | null
+          status_aceite: Database["public"]["Enums"]["pendency_acceptance"]
+          titulo: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pendencies"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_current_user_role: { Args: never; Returns: string }
       get_current_user_role_key: { Args: never; Returns: string }
       get_pendency_boards_overview: {

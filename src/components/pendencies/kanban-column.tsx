@@ -3,8 +3,8 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, ChevronDown, ChevronRight, Archive } from "lucide-react";
-import { PendencyColumn, Pendency, useArchiveOldPendencies } from "@/hooks/use-pendencies";
+import { Plus, ChevronDown, ChevronRight } from "lucide-react";
+import { PendencyColumn, Pendency } from "@/hooks/use-pendencies";
 import { PendencyCard } from "./pendency-card";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,6 @@ export function KanbanColumn({ column, pendencies, profileNameMap, onCardClick, 
   const isCollapsibleKind = column.kind === "done" || column.kind === "rejected";
   const [collapsed, setCollapsed] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const archiveOld = useArchiveOldPendencies();
 
   const overLimit = column.wip_limit != null && pendencies.length > column.wip_limit;
 
@@ -56,25 +55,11 @@ export function KanbanColumn({ column, pendencies, profileNameMap, onCardClick, 
             {pendencies.length}{column.wip_limit ? `/${column.wip_limit}` : ""}
           </Badge>
         </button>
-        <div className="flex items-center gap-1">
-          {isCollapsibleKind && !collapsed && pendencies.length > 0 && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-6 w-6"
-              title="Arquivar concluídas/rejeitadas há mais de 30 dias"
-              onClick={() => archiveOld.mutate(column.board_id)}
-              disabled={archiveOld.isPending}
-            >
-              <Archive className="h-3.5 w-3.5" />
-            </Button>
-          )}
-          {canAdd && !collapsed && (
-            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onAddCard(column.id)}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        {canAdd && !collapsed && (
+          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onAddCard(column.id)}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       {!collapsed && (
         <div
