@@ -71,5 +71,6 @@ export function useSystemSettings() {
     fetchSettings,
     updateSetting,
     getTotalVagas: () => parseInt(settings.total_vagas || '0', 10),
+    getPendencyAutoArchiveDays: () => parseInt(settings.pendency_auto_archive_days || '30', 10),
   };
 }
