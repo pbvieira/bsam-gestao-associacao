@@ -80,6 +80,8 @@ export interface Pendency {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  arquivada_em: string | null;
+  arquivada_por: string | null;
 }
 
 export interface PendencyComment {
