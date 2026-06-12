@@ -279,6 +279,11 @@ const App = () => {
               <PendencyBoard />
             </UnifiedRoute>
           } />
+          <Route path="/pendencias/:boardId/arquivados" element={
+            <UnifiedRoute module="pendencies">
+              <PendencyArchived />
+            </UnifiedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </BrowserRouter>
