@@ -13,9 +13,28 @@ export interface PendencyBoard {
   cor: string | null;
   is_default: boolean;
   ativo: boolean;
+  arquivado_em: string | null;
+  arquivado_por: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PendencyBoardOverview {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  cor: string | null;
+  is_default: boolean;
+  ativo: boolean;
+  arquivado_em: string | null;
+  created_at: string;
+  updated_at: string;
+  is_favorite: boolean;
+  total_abertas: number;
+  total_atrasadas: number;
+  total_concluidas_mes: number;
+  ultimo_movimento: string;
 }
 
 export interface PendencyColumn {
