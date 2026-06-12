@@ -137,8 +137,8 @@ export function PendencyDialog({ open, onOpenChange, boardId, columns, pendency,
               <TabsTrigger value="historico" disabled={!isEdit}>Histórico</TabsTrigger>
             </TabsList>
 
-            <ScrollArea className="mt-2 px-3 h-[calc(90vh-220px)] min-h-[400px]">
-              <TabsContent value="detalhes" className="space-y-5 mt-0 h-full pb-4">
+            <ScrollArea className="mt-2 h-[calc(90vh-220px)] min-h-[400px]">
+              <TabsContent value="detalhes" className="space-y-5 mt-0 h-full pb-4 px-2">
                 {/* Status atual + trilha de colunas */}
                 {isEdit && (
                   <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
