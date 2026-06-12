@@ -19,6 +19,7 @@ import {
   useArchivedPendencies, usePendencyBoards,
   usePendencyColumns, useRestorePendency, useDeletePendency, useProfilesLite,
 } from "@/hooks/use-pendencies";
+import { useSystemSettings } from "@/hooks/use-system-settings";
 
 const PendencyArchivedPage = () => {
   const { boardId = "" } = useParams();
@@ -27,6 +28,8 @@ const PendencyArchivedPage = () => {
   const { data: columns = [] } = usePendencyColumns(boardId);
   const { data: pendencies = [], isLoading } = useArchivedPendencies(boardId);
   const { data: profiles = [] } = useProfilesLite();
+  const { getPendencyAutoArchiveDays } = useSystemSettings();
+  const archiveDays = getPendencyAutoArchiveDays();
 
   const restore = useRestorePendency();
   const remove = useDeletePendency();
@@ -51,7 +54,7 @@ const PendencyArchivedPage = () => {
     <MainLayout>
       <PageLayout
         title={`Arquivados — ${board?.nome || "Quadro"}`}
-        subtitle="Pendências concluídas há mais de 30 dias ou arquivadas manualmente"
+        subtitle={`Pendências concluídas há mais de ${archiveDays} dias ou arquivadas manualmente`}
         actionButton={
           <Button variant="outline" onClick={() => navigate(`/pendencias/${boardId}`)}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Voltar ao quadro

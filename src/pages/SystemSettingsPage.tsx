@@ -18,11 +18,18 @@ export default function SystemSettingsPage() {
   const canRead = hasCapability('system_settings.read');
   const canWrite = hasCapability('system_settings.write');
   const [totalVagas, setTotalVagas] = useState('');
+  const [archiveDays, setArchiveDays] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savingArchive, setSavingArchive] = useState(false);
 
   useEffect(() => {
     if (settings.total_vagas) setTotalVagas(settings.total_vagas);
   }, [settings.total_vagas]);
+
+  useEffect(() => {
+    if (settings.pendency_auto_archive_days) setArchiveDays(settings.pendency_auto_archive_days);
+    else if (!loading) setArchiveDays('30');
+  }, [settings.pendency_auto_archive_days, loading]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -32,6 +39,22 @@ export default function SystemSettingsPage() {
       toast({ title: 'Erro ao salvar', description: error, variant: 'destructive' });
     } else {
       toast({ title: 'Configuração salva', description: 'A capacidade foi atualizada.' });
+    }
+  };
+
+  const handleSaveArchive = async () => {
+    const n = parseInt(archiveDays, 10);
+    if (isNaN(n) || n < 1) {
+      toast({ title: 'Valor inválido', description: 'Informe um número maior ou igual a 1.', variant: 'destructive' });
+      return;
+    }
+    setSavingArchive(true);
+    const { error } = await updateSetting('pendency_auto_archive_days', String(n));
+    setSavingArchive(false);
+    if (error) {
+      toast({ title: 'Erro ao salvar', description: error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Configuração salva', description: `Cartões serão arquivados após ${n} dias.` });
     }
   };
 
@@ -84,6 +107,37 @@ export default function SystemSettingsPage() {
                     Você não tem permissão para editar configurações do sistema.
                   </p>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Arquivamento de Pendências</CardTitle>
+                <CardDescription>
+                  Cartões nas colunas "Concluída" e "Rejeitada" são ocultados do quadro automaticamente após este número de dias e ficam disponíveis em "Arquivados".
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="archive_days">Dias até o arquivamento automático</Label>
+                  <Input
+                    id="archive_days"
+                    type="number"
+                    min="1"
+                    value={archiveDays}
+                    onChange={(e) => setArchiveDays(e.target.value)}
+                    className="max-w-xs"
+                    disabled={!canWrite}
+                  />
+                </div>
+                <Button onClick={handleSaveArchive} disabled={savingArchive || !canWrite}>
+                  {savingArchive ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Salvar
+                </Button>
               </CardContent>
             </Card>
           </div>
