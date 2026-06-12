@@ -245,13 +245,13 @@ export function PendencyDialog({ open, onOpenChange, boardId, columns, pendency,
               )}
             </TabsContent>
 
-            <TabsContent value="checklist" className="mt-0">
+            <TabsContent value="checklist" className="mt-0 h-full pb-4">
               {pendency && <ChecklistTab pendencyId={pendency.id} />}
             </TabsContent>
-            <TabsContent value="comentarios" className="mt-0">
+            <TabsContent value="comentarios" className="mt-0 h-full pb-4">
               {pendency && <CommentsTab pendencyId={pendency.id} profiles={profiles} />}
             </TabsContent>
-            <TabsContent value="historico" className="mt-0">
+            <TabsContent value="historico" className="mt-0 h-full pb-4">
               {pendency && <HistoryTab pendencyId={pendency.id} profiles={profiles} />}
             </TabsContent>
           </ScrollArea>
