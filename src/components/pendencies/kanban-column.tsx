@@ -75,6 +75,7 @@ export function KanbanColumn({ column, pendencies, profileNameMap, onCardClick, 
             </Button>
           )}
         </div>
+      </div>
       {!collapsed && (
         <div
           ref={setNodeRef}
