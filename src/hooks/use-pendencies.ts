@@ -80,6 +80,8 @@ export interface Pendency {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  arquivada_em: string | null;
+  arquivada_por: string | null;
 }
 
 export interface PendencyComment {
@@ -302,10 +304,90 @@ export function usePendencies(boardId?: string) {
         .from("pendencies")
         .select("*")
         .eq("board_id", boardId!)
+        .is("arquivada_em", null)
         .order("posicao");
       if (error) throw error;
       return (data ?? []) as Pendency[];
     },
+  });
+}
+
+export function useArchivedPendencies(boardId?: string) {
+  return useQuery({
+    queryKey: ["pendencies_archived", boardId],
+    enabled: !!boardId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pendencies")
+        .select("*")
+        .eq("board_id", boardId!)
+        .not("arquivada_em", "is", null)
+        .order("arquivada_em", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Pendency[];
+    },
+  });
+}
+
+export function useArchivePendency() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data: u } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from("pendencies")
+        .update({ arquivada_em: new Date().toISOString(), arquivada_por: u.user?.id })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pendencies"] });
+      qc.invalidateQueries({ queryKey: ["pendencies_archived"] });
+      qc.invalidateQueries({ queryKey: ["pendency_boards_overview"] });
+      toast({ title: "Pendência arquivada" });
+    },
+    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+  });
+}
+
+export function useRestorePendency() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("restore_pendency", { _pendency_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pendencies"] });
+      qc.invalidateQueries({ queryKey: ["pendencies_archived"] });
+      qc.invalidateQueries({ queryKey: ["pendency_boards_overview"] });
+      toast({ title: "Pendência restaurada" });
+    },
+    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+  });
+}
+
+export function useArchiveOldPendencies() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (boardId?: string) => {
+      const { data, error } = await supabase.rpc("archive_old_pendencies", { _board_id: boardId ?? null });
+      if (error) throw error;
+      return (data as number) ?? 0;
+    },
+    onSuccess: (count) => {
+      qc.invalidateQueries({ queryKey: ["pendencies"] });
+      qc.invalidateQueries({ queryKey: ["pendencies_archived"] });
+      qc.invalidateQueries({ queryKey: ["pendency_boards_overview"] });
+      toast({
+        title: count > 0 ? `${count} pendência${count !== 1 ? "s" : ""} arquivada${count !== 1 ? "s" : ""}` : "Nenhuma pendência elegível",
+        description: count > 0 ? "Concluídas/rejeitadas há mais de 30 dias foram movidas para Arquivados." : "Não há cards com mais de 30 dias em colunas de Concluído/Rejeitado.",
+      });
+    },
+    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
   });
 }
 

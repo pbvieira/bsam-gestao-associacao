@@ -47,6 +47,7 @@ import PendingInvitations from "./pages/PendingInvitations";
 import InvitationsHistory from "./pages/InvitationsHistory";
 import Pendencies from "./pages/Pendencies";
 import PendencyBoard from "./pages/PendencyBoard";
+import PendencyArchived from "./pages/PendencyArchived";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -276,6 +277,11 @@ const App = () => {
           <Route path="/pendencias/:boardId" element={
             <UnifiedRoute module="pendencies">
               <PendencyBoard />
+            </UnifiedRoute>
+          } />
+          <Route path="/pendencias/:boardId/arquivados" element={
+            <UnifiedRoute module="pendencies">
+              <PendencyArchived />
             </UnifiedRoute>
           } />
           <Route path="*" element={<NotFound />} />
