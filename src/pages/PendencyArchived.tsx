@@ -19,6 +19,7 @@ import {
   useArchivedPendencies, usePendencyBoards,
   usePendencyColumns, useRestorePendency, useDeletePendency, useProfilesLite,
 } from "@/hooks/use-pendencies";
+import { useSystemSettings } from "@/hooks/use-system-settings";
 
 const PendencyArchivedPage = () => {
   const { boardId = "" } = useParams();
