@@ -79,9 +79,8 @@ export function PendencyCard({ pendency, responsavelName, onClick }: PendencyCar
             <Lock className="h-3 w-3" /> Bloqueada
           </Badge>
         )}
-        {pendency.status_aceite === "rejeitada" && (
-          <Badge variant="secondary" className="text-[10px] h-5">Rejeitada</Badge>
-        )}
+
+
         {isOverdue && (
           <Badge variant="destructive" className="text-[10px] h-5 gap-1">
             <AlertTriangle className="h-3 w-3" /> Atrasada
