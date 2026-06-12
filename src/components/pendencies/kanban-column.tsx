@@ -3,8 +3,8 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, ChevronDown, ChevronRight, Archive } from "lucide-react";
-import { PendencyColumn, Pendency, useArchiveOldPendencies } from "@/hooks/use-pendencies";
+import { Plus, ChevronDown, ChevronRight } from "lucide-react";
+import { PendencyColumn, Pendency } from "@/hooks/use-pendencies";
 import { PendencyCard } from "./pendency-card";
 import { cn } from "@/lib/utils";
 
