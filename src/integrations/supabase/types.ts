@@ -1177,8 +1177,36 @@ export type Database = {
           },
         ]
       }
+      pendency_board_favorites: {
+        Row: {
+          board_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pendency_board_favorites_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "pendency_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pendency_boards: {
         Row: {
+          arquivado_em: string | null
+          arquivado_por: string | null
           ativo: boolean
           cor: string | null
           created_at: string
@@ -1190,6 +1218,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          arquivado_em?: string | null
+          arquivado_por?: string | null
           ativo?: boolean
           cor?: string | null
           created_at?: string
@@ -1201,6 +1231,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          arquivado_em?: string | null
+          arquivado_por?: string | null
           ativo?: boolean
           cor?: string | null
           created_at?: string
@@ -3329,6 +3361,25 @@ export type Database = {
       current_user_has_capability: { Args: { _cap: string }; Returns: boolean }
       get_current_user_role: { Args: never; Returns: string }
       get_current_user_role_key: { Args: never; Returns: string }
+      get_pendency_boards_overview: {
+        Args: { _include_archived?: boolean }
+        Returns: {
+          arquivado_em: string
+          ativo: boolean
+          cor: string
+          created_at: string
+          descricao: string
+          id: string
+          is_default: boolean
+          is_favorite: boolean
+          nome: string
+          total_abertas: number
+          total_atrasadas: number
+          total_concluidas_mes: number
+          ultimo_movimento: string
+          updated_at: string
+        }[]
+      }
       get_user_email: { Args: { user_uuid: string }; Returns: string }
       has_capability: {
         Args: { _cap: string; _user_id: string }
