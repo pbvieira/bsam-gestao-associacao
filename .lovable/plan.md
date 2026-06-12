@@ -1,93 +1,48 @@
+## Correção da Fase 3 — arquivamento automático "+30 dias"
 
-# Pendências — escalabilidade ao longo do tempo
+### Problema
+Hoje o quadro só esconde cards quando `arquivada_em IS NOT NULL`. A regra dos 30 dias só roda se alguém clicar no botão "Arquivar antigas". O plano original definia: *"some do quadro automaticamente"*.
 
-Três frentes implementadas em fases. Cada fase entrega valor isolado e pode ser validada antes da próxima.
+### Solução: derivação na query (sem cron)
+Criar uma RPC `get_board_pendencies(_board_id)` que devolve apenas pendências consideradas "ativas":
 
----
+```text
+arquivada_em IS NULL
+AND NOT (
+  (coluna.kind = 'done'     AND data_entrega < now() - interval '30 days')
+  OR
+  (coluna.kind = 'rejected' AND data_aceite  < now() - interval '30 days')
+)
+```
 
-## Fase 1 — Navegação de quadros (índice + arquivamento)
+Vantagens:
+- Card antigo desaparece do kanban/lista no momento exato em que cruza 30 dias, sem job.
+- `arquivada_em` continua reservado para arquivamento manual e restauração explícita.
+- Tela de Arquivados precisa mostrar os dois casos (manual + derivado).
 
-**Objetivo:** acabar com o `Select` único e permitir convivência saudável com dezenas de quadros.
+### Mudanças
 
-### Mudanças de UX
-- `/pendencias` passa a ser **página índice**: grade de cards de quadros mostrando nome, descrição, contadores (abertas, atrasadas, concluídas no mês), data do último movimento, estrela de favorito.
-- Filtros no topo: busca por nome, filtro por área/setor, toggle "Mostrar arquivados".
-- Botão "Novo quadro" na própria página.
-- Cada card abre `/pendencias/:boardId` — a tela kanban atual vira essa rota, com botão "← Voltar" no topo.
-- No menu de ações do card de quadro: **Configurar**, **Arquivar/Restaurar**, **Excluir** (apenas quadros não-default e vazios).
+**Banco (1 migração)**
+- `get_board_pendencies(_board_id uuid)` — devolve as colunas atuais de `pendencies` filtradas pela regra acima.
+- `get_archived_pendencies(_board_id uuid)` — devolve pendências `arquivada_em IS NOT NULL` **OU** que cruzaram os 30 dias em done/rejected. Inclui um campo derivado `arquivamento_tipo` (`'manual'` | `'automatico'`) e `arquivado_efetivo_em` (coalesce de `arquivada_em` ou `data_entrega + 30d` / `data_aceite + 30d`) para ordenação/exibição.
 
-### Mudanças de dados
-- `pendency_boards`: adicionar `arquivado_em timestamptz null`, `arquivado_por uuid null`, `area_id uuid null` (se ainda não existir referência), `favorito_by uuid[] default '{}'` (ou tabela auxiliar `pendency_board_favorites(board_id, user_id)` — preferida por escalar melhor).
-- Hook `usePendencyBoards` aceita `{ includeArchived?: boolean }` e devolve as métricas agregadas em uma única chamada (view ou RPC `get_boards_overview`).
+**Hooks (`use-pendencies.ts`)**
+- `usePendencies(boardId)` → chama a nova RPC em vez de `from("pendencies").select`.
+- `useArchivedPendencies(boardId)` → chama a nova RPC; tipo de retorno ganha `arquivamento_tipo` e `arquivado_efetivo_em`.
+- `useRestorePendency` permanece (já move para a primeira coluna `open` e zera datas — funciona tanto para manual quanto automático, pois zerar `data_entrega`/`data_aceite` remove o card da regra dos 30 dias).
+- `useArchiveOldPendencies` deixa de fazer sentido como "ação do usuário" (a regra é automática). **Remover** o botão da coluna e o botão "Arquivar antigas (+30d)" da tela de Arquivados.
 
-### Roteamento
-- `src/pages/Pendencies.tsx` vira o índice.
-- Nova rota `src/pages/PendencyBoard.tsx` recebe o kanban atual + dialogs.
-- Atualizar `App.tsx` com `/pendencias/:boardId`.
+**UI**
+- `PendencyArchived.tsx`: adicionar coluna "Tipo" (badge: "Automático" / "Manual") e usar `arquivado_efetivo_em` na coluna "Arquivada em". Remover botão "Arquivar antigas".
+- `kanban-column.tsx`: remover o ícone de Archive do header das colunas done/rejected (não é mais necessário).
+- Atualizar a RPC `get_pendency_boards_overview` para também aplicar a regra dos 30 dias nos contadores `total_concluidas_mes` (cards concluídos no mês mas já passaram 30 dias devem continuar contando se forem do mês corrente — checar) — na prática `total_concluidas_mes` já filtra `data_entrega >= date_trunc('month', now())`, então só os primeiros dias de cada mês podem ter cards do mês passado >30d. Não exige mudança.
 
----
+### O que NÃO muda
+- Schema da tabela `pendencies` (campos `arquivada_em`/`arquivada_por` permanecem para uso manual/restauração).
+- Rotas, layout dos cards, filtros, visão lista.
+- `archive_old_pendencies()` SQL — pode ficar como utilitário interno (usado por scripts/manutenção), mas sem exposição na UI.
 
-## Fase 2 — Filtros e visão lista dentro do quadro
-
-**Objetivo:** quadro com 50–100+ cards continua legível.
-
-### Filtros (barra acima do kanban)
-- **Responsável** (multi-select com avatares)
-- **Prioridade** (chips: Baixa / Média / Alta / Urgente)
-- **Prazo** (chips: Atrasadas / Hoje / Esta semana / Sem prazo)
-- **Tag** (multi-select usando `pendency_tags`)
-- **Busca** (já existe — mover para a barra)
-- **Limpar filtros** (aparece quando há algum ativo)
-- Estado dos filtros persistido em querystring (`?resp=...&pri=...`) para compartilhar link.
-
-### Visão alternativa
-- Toggle no topo: **Kanban | Lista**.
-- Modo lista: tabela com colunas Título, Status (coluna atual com cor), Responsável, Prioridade, Prazo, Tag, Atualizada em. Ordenação por header. Mesmos filtros aplicam.
-- Preferência salva por usuário em `localStorage`.
-
-### Coluna "Concluído" colapsável
-- Colunas com `kind = 'done'` ou `kind = 'rejected'` mostram por padrão os **últimos 10 cards** + link "ver mais N".
-- Header da coluna ganha ícone de chevron para colapsar/expandir totalmente.
-
----
-
-## Fase 3 — Ciclo de vida (arquivamento de cards)
-
-**Objetivo:** quadro não acumula histórico infinito; nada é apagado.
-
-### Política
-- Card em coluna `done` ou `rejected` há mais de **30 dias** é considerado arquivado e some do quadro automaticamente.
-- Critério: `data_entrega` (para done) ou `data_aceite` (para rejected) + 30 dias < `now()`.
-- Card arquivado nunca é deletado — só não aparece no kanban/lista padrão.
-
-### UI
-- Aba/tela **"Arquivados"** acessível pelo botão de configurações do quadro ou por uma aba no topo.
-- Lista pesquisável (mesmos filtros da Fase 2) com ações: **Restaurar** (move para coluna `open` padrão e zera o critério de arquivamento) e **Excluir permanentemente** (com AlertDialog).
-- No topo da coluna `done`/`rejected` do quadro: botão "Arquivar concluídas agora" para forçar manualmente.
-
-### Dados
-- Adicionar `arquivada_em timestamptz null` em `pendencies`.
-- Query do kanban filtra `arquivada_em IS NULL`.
-- Função/trigger ou job (pg_cron, se disponível; senão, derivação na query) marca `arquivada_em = now()` quando `data_entrega/data_aceite < now() - interval '30 days'`. Implementação preferida: **derivação na query** (`WHERE arquivada_em IS NOT NULL OR data_entrega < now() - interval '30 days'`) para não depender de cron — o campo `arquivada_em` fica reservado para arquivamentos manuais e restaurações explícitas.
-
----
-
-## Ordem sugerida de execução
-
-1. **Fase 1** primeiro — resolve o problema mais imediato (navegação) e independe das outras.
-2. **Fase 3** em seguida — limpa o ruído visual histórico antes de polir filtros.
-3. **Fase 2** por último — filtros e visão lista são refinamento sobre uma base já saudável.
-
-Cada fase termina com QA visual no preview antes de seguir.
-
----
-
-## Detalhes técnicos (resumo)
-
-- Migrations Supabase: 1 por fase (boards: arquivamento+favoritos+métricas RPC; pendencies: `arquivada_em`).
-- Sem mudanças destrutivas em colunas existentes.
-- Hooks novos: `useBoardsOverview`, `useArchivedPendencies`, `useArchiveBoard`, `useArchivePendency`, `useRestorePendency`.
-- RLS: novas políticas seguem o padrão atual (criador/responsável/coordenação).
-- Rotas: adicionar `/pendencias/:boardId` mantendo `/pendencias` como índice.
-
-Confirma a ordem (1 → 3 → 2) ou prefere outra sequência?
+### Resultado para o usuário
+- Coluna "Concluída" não acumula histórico: cards saem sozinhos após 30 dias.
+- Página "Arquivados" lista tudo (manual + automático) com indicação clara da origem.
+- Nenhum botão extra, nenhuma ação obrigatória do usuário.
