@@ -148,6 +148,9 @@ const PendencyBoardPage = () => {
             <Button variant="outline" onClick={() => navigate("/pendencias")}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Quadros
             </Button>
+            <Button variant="outline" onClick={() => navigate(`/pendencias/${boardId}/arquivados`)} disabled={!boardId}>
+              <Archive className="h-4 w-4 mr-1" /> Arquivados
+            </Button>
             <Button variant="outline" onClick={() => handleOpenNew()} disabled={!boardId}>
               <Plus className="h-4 w-4 mr-1" /> Nova pendência
             </Button>
