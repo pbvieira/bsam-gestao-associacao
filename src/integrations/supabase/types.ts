@@ -980,6 +980,8 @@ export type Database = {
       pendencies: {
         Row: {
           area_id: string | null
+          arquivada_em: string | null
+          arquivada_por: string | null
           board_id: string
           categoria_id: string | null
           column_id: string
@@ -1006,6 +1008,8 @@ export type Database = {
         }
         Insert: {
           area_id?: string | null
+          arquivada_em?: string | null
+          arquivada_por?: string | null
           board_id: string
           categoria_id?: string | null
           column_id: string
@@ -1032,6 +1036,8 @@ export type Database = {
         }
         Update: {
           area_id?: string | null
+          arquivada_em?: string | null
+          arquivada_por?: string | null
           board_id?: string
           categoria_id?: string | null
           column_id?: string
@@ -3349,6 +3355,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_old_pendencies: { Args: { _board_id?: string }; Returns: number }
       audit_current_actor_name: { Args: never; Returns: string }
       can_view_event: {
         Args: { creator_uuid: string; event_uuid: string }
@@ -3391,6 +3398,7 @@ export type Database = {
       is_system_admin: { Args: { _user_id: string }; Returns: boolean }
       module_to_capability: { Args: { _module: string }; Returns: string }
       process_event_reminders: { Args: never; Returns: undefined }
+      restore_pendency: { Args: { _pendency_id: string }; Returns: undefined }
       sync_role_module_access: {
         Args: { _role_id: string }
         Returns: undefined
