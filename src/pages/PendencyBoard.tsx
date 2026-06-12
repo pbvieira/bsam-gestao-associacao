@@ -7,7 +7,7 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { PageLayout } from "@/components/layout/page-layout";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Plus, Settings2, ArrowLeft, KanbanSquare, List } from "lucide-react";
+import { Plus, Settings2, ArrowLeft, KanbanSquare, List, Archive } from "lucide-react";
 import { KanbanBoard } from "@/components/pendencies/kanban-board";
 import { PendencyDialog } from "@/components/pendencies/pendency-dialog";
 import { BoardSettingsDialog } from "@/components/pendencies/board-settings-dialog";
