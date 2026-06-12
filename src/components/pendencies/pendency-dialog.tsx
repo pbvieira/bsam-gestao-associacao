@@ -97,8 +97,8 @@ export function PendencyDialog({ open, onOpenChange, boardId, columns, pendency,
             <TabsTrigger value="historico" disabled={!isEdit}>Histórico</TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 mt-2 pr-2">
-            <TabsContent value="detalhes" className="space-y-4 mt-0">
+          <ScrollArea className="mt-2 px-3 h-[calc(90vh-220px)] min-h-[400px]">
+            <TabsContent value="detalhes" className="space-y-4 mt-0 h-full pb-4">
               <div className="space-y-2">
                 <Label>Demanda *</Label>
                 <Input value={form.titulo || ""} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder="Título resumido" />
@@ -245,13 +245,13 @@ export function PendencyDialog({ open, onOpenChange, boardId, columns, pendency,
               )}
             </TabsContent>
 
-            <TabsContent value="checklist" className="mt-0">
+            <TabsContent value="checklist" className="mt-0 h-full pb-4">
               {pendency && <ChecklistTab pendencyId={pendency.id} />}
             </TabsContent>
-            <TabsContent value="comentarios" className="mt-0">
+            <TabsContent value="comentarios" className="mt-0 h-full pb-4">
               {pendency && <CommentsTab pendencyId={pendency.id} profiles={profiles} />}
             </TabsContent>
-            <TabsContent value="historico" className="mt-0">
+            <TabsContent value="historico" className="mt-0 h-full pb-4">
               {pendency && <HistoryTab pendencyId={pendency.id} profiles={profiles} />}
             </TabsContent>
           </ScrollArea>
