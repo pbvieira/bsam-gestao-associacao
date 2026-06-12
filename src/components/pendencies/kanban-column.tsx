@@ -56,12 +56,25 @@ export function KanbanColumn({ column, pendencies, profileNameMap, onCardClick, 
             {pendencies.length}{column.wip_limit ? `/${column.wip_limit}` : ""}
           </Badge>
         </button>
-        {canAdd && !collapsed && (
-          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onAddCard(column.id)}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+        <div className="flex items-center gap-1">
+          {isCollapsibleKind && !collapsed && pendencies.length > 0 && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6"
+              title="Arquivar concluídas/rejeitadas há mais de 30 dias"
+              onClick={() => archiveOld.mutate(column.board_id)}
+              disabled={archiveOld.isPending}
+            >
+              <Archive className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {canAdd && !collapsed && (
+            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onAddCard(column.id)}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       {!collapsed && (
         <div
           ref={setNodeRef}
