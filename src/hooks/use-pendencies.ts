@@ -273,6 +273,29 @@ export function useUpdatePendency() {
   });
 }
 
+export function useMovePendency() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (p: { id: string; column_id: string; targetKind: PendencyColumnKind; motivo_rejeicao?: string | null }) => {
+      const updates: any = { column_id: p.column_id };
+      if (p.targetKind === "rejected") {
+        if (!p.motivo_rejeicao || !p.motivo_rejeicao.trim()) {
+          throw new Error("Motivo da rejeição é obrigatório.");
+        }
+        updates.motivo_rejeicao = p.motivo_rejeicao.trim();
+      }
+      const { error } = await supabase.from("pendencies").update(updates).eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["pendencies"] });
+      qc.invalidateQueries({ queryKey: ["pendency_activity", v.id] });
+    },
+    onError: (e: any) => toast({ title: "Erro ao mover", description: e.message, variant: "destructive" }),
+  });
+}
+
 export function useDeletePendency() {
   const qc = useQueryClient();
   const { toast } = useToast();
