@@ -54,7 +54,7 @@ const PendencyArchivedPage = () => {
     <MainLayout>
       <PageLayout
         title={`Arquivados — ${board?.nome || "Quadro"}`}
-        subtitle="Pendências concluídas há mais de 30 dias ou arquivadas manualmente"
+        subtitle={`Pendências concluídas há mais de ${archiveDays} dias ou arquivadas manualmente`}
         actionButton={
           <Button variant="outline" onClick={() => navigate(`/pendencias/${boardId}`)}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Voltar ao quadro
