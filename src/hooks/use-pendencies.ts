@@ -179,9 +179,66 @@ export function useDeleteBoard() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pendency_boards"] });
+      qc.invalidateQueries({ queryKey: ["pendency_boards_overview"] });
       toast({ title: "Quadro excluído" });
     },
     onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+  });
+}
+
+// Visão geral dos quadros (com métricas e favoritos)
+export function usePendencyBoardsOverview(includeArchived = false) {
+  return useQuery({
+    queryKey: ["pendency_boards_overview", includeArchived],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_pendency_boards_overview", { _include_archived: includeArchived });
+      if (error) throw error;
+      return (data ?? []) as PendencyBoardOverview[];
+    },
+  });
+}
+
+export function useArchiveBoard() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async ({ id, archive }: { id: string; archive: boolean }) => {
+      const { data: u } = await supabase.auth.getUser();
+      const payload = archive
+        ? { arquivado_em: new Date().toISOString(), arquivado_por: u.user?.id }
+        : { arquivado_em: null, arquivado_por: null };
+      const { error } = await supabase.from("pendency_boards").update(payload).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["pendency_boards"] });
+      qc.invalidateQueries({ queryKey: ["pendency_boards_overview"] });
+      toast({ title: v.archive ? "Quadro arquivado" : "Quadro restaurado" });
+    },
+    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+  });
+}
+
+export function useToggleBoardFavorite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ boardId, favorite }: { boardId: string; favorite: boolean }) => {
+      const { data: u } = await supabase.auth.getUser();
+      const userId = u.user?.id;
+      if (!userId) throw new Error("Não autenticado");
+      if (favorite) {
+        const { error } = await supabase.from("pendency_board_favorites").insert({ board_id: boardId, user_id: userId });
+        if (error && error.code !== "23505") throw error;
+      } else {
+        const { error } = await supabase
+          .from("pendency_board_favorites")
+          .delete()
+          .eq("board_id", boardId)
+          .eq("user_id", userId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["pendency_boards_overview"] }),
   });
 }
 
