@@ -323,13 +323,13 @@ export function PendencyDialog({ open, onOpenChange, boardId, columns, pendency,
                 </section>
               </TabsContent>
 
-              <TabsContent value="checklist" className="mt-0 h-full pb-4">
+              <TabsContent value="checklist" className="mt-0 h-full pb-4 px-2">
                 {pendency && <ChecklistTab pendencyId={pendency.id} />}
               </TabsContent>
-              <TabsContent value="comentarios" className="mt-0 h-full pb-4">
+              <TabsContent value="comentarios" className="mt-0 h-full pb-4 px-2">
                 {pendency && <CommentsTab pendencyId={pendency.id} profiles={profiles} />}
               </TabsContent>
-              <TabsContent value="historico" className="mt-0 h-full pb-4">
+              <TabsContent value="historico" className="mt-0 h-full pb-4 px-2">
                 {pendency && <HistoryTab pendencyId={pendency.id} profiles={profiles} />}
               </TabsContent>
             </ScrollArea>
