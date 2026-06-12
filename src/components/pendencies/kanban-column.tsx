@@ -28,6 +28,7 @@ export function KanbanColumn({ column, pendencies, profileNameMap, onCardClick, 
   const isCollapsibleKind = column.kind === "done" || column.kind === "rejected";
   const [collapsed, setCollapsed] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const archiveOld = useArchiveOldPendencies();
 
   const overLimit = column.wip_limit != null && pendencies.length > column.wip_limit;
 
