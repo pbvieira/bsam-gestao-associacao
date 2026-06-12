@@ -47,6 +47,7 @@ import PendingInvitations from "./pages/PendingInvitations";
 import InvitationsHistory from "./pages/InvitationsHistory";
 import Pendencies from "./pages/Pendencies";
 import PendencyBoard from "./pages/PendencyBoard";
+import PendencyArchived from "./pages/PendencyArchived";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
