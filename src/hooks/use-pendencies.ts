@@ -300,16 +300,16 @@ export function usePendencies(boardId?: string) {
     queryKey: ["pendencies", boardId],
     enabled: !!boardId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pendencies")
-        .select("*")
-        .eq("board_id", boardId!)
-        .is("arquivada_em", null)
-        .order("posicao");
+      const { data, error } = await supabase.rpc("get_board_pendencies", { _board_id: boardId! });
       if (error) throw error;
       return (data ?? []) as Pendency[];
     },
   });
+}
+
+export interface ArchivedPendency extends Pendency {
+  arquivamento_tipo: "manual" | "automatico";
+  arquivado_efetivo_em: string | null;
 }
 
 export function useArchivedPendencies(boardId?: string) {
@@ -317,14 +317,9 @@ export function useArchivedPendencies(boardId?: string) {
     queryKey: ["pendencies_archived", boardId],
     enabled: !!boardId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pendencies")
-        .select("*")
-        .eq("board_id", boardId!)
-        .not("arquivada_em", "is", null)
-        .order("arquivada_em", { ascending: false });
+      const { data, error } = await supabase.rpc("get_archived_pendencies", { _board_id: boardId! });
       if (error) throw error;
-      return (data ?? []) as Pendency[];
+      return (data ?? []) as ArchivedPendency[];
     },
   });
 }
