@@ -28,6 +28,8 @@ const PendencyArchivedPage = () => {
   const { data: columns = [] } = usePendencyColumns(boardId);
   const { data: pendencies = [], isLoading } = useArchivedPendencies(boardId);
   const { data: profiles = [] } = useProfilesLite();
+  const { getPendencyAutoArchiveDays } = useSystemSettings();
+  const archiveDays = getPendencyAutoArchiveDays();
 
   const restore = useRestorePendency();
   const remove = useDeletePendency();
