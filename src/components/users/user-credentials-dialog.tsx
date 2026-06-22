@@ -19,6 +19,17 @@ import { z } from 'zod';
 
 const emailSchema = z.string().email('Email inválido');
 
+async function extractFnError(error: any): Promise<string> {
+  try {
+    const res: Response | undefined = error?.context;
+    if (res && typeof res.json === 'function') {
+      const body = await res.clone().json();
+      if (body?.error) return body.error;
+    }
+  } catch {}
+  return error?.message || 'Erro ao chamar função';
+}
+
 interface UserCredentialsDialogProps {
   user: UserProfile;
   onClose: () => void;
@@ -62,7 +73,10 @@ export function UserCredentialsDialog({ user, onClose }: UserCredentialsDialogPr
       const { data, error } = await supabase.functions.invoke('admin-update-user-credentials', {
         body: { user_id: user.user_id, new_password: newPassword },
       });
-      if (error) throw error;
+      if (error) {
+        const msg = await extractFnError(error);
+        throw new Error(msg);
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
 
       handleSuccess('Senha definida com sucesso!', 'Atualizar Senha');
@@ -88,7 +102,10 @@ export function UserCredentialsDialog({ user, onClose }: UserCredentialsDialogPr
       const { data, error } = await supabase.functions.invoke('admin-update-user-credentials', {
         body: { user_id: user.user_id, new_email: parsed.data },
       });
-      if (error) throw error;
+      if (error) {
+        const msg = await extractFnError(error);
+        throw new Error(msg);
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
 
       handleSuccess('E-mail alterado com sucesso!', 'Alterar E-mail');
