@@ -362,7 +362,14 @@ export function UserList() {
                   {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
-                        {user.full_name}
+                        <div className="flex flex-col">
+                          <span>{user.full_name}</span>
+                          {user.email && (
+                            <span className="text-xs text-muted-foreground font-normal">
+                              {user.email}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getRoleBadgeVariant(user.role)}>
