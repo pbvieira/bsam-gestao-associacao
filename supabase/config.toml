@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.process-invitation-response]
 verify_jwt = false
+
+[functions.admin-update-user-credentials]
+verify_jwt = true
