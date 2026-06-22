@@ -49,16 +49,21 @@ serve(async (req) => {
       updates.password = new_password
     }
 
+    console.log('Updating user', user_id, 'fields:', Object.keys(updates))
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(user_id, updates)
     if (error) {
+      console.error('updateUserById error:', JSON.stringify(error), 'status:', (error as any).status, 'code:', (error as any).code)
       const code = (error as any).code
-      if (code === 'email_exists') {
+      if (code === 'email_exists' || (error as any).status === 422) {
         return new Response(
           JSON.stringify({ error: 'Este e-mail já está em uso.', code: 'email_exists' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
         )
       }
-      throw error
+      return new Response(
+        JSON.stringify({ error: error.message || 'Falha ao atualizar usuário' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
 
     return new Response(
@@ -67,7 +72,7 @@ serve(async (req) => {
     )
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Erro desconhecido'
-    console.error('admin-update-user-credentials error:', message)
+    console.error('admin-update-user-credentials catch:', message, JSON.stringify(error))
     return new Response(
       JSON.stringify({ error: message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
