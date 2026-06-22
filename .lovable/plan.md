@@ -1,37 +1,41 @@
 ## Objetivo
 
-Tornar o prazo de arquivamento automático de pendências (hoje fixo em 30 dias) configurável via Configurações do Sistema.
+Simplificar a gestão de usuários removendo qualquer envio ou validação de e-mail. O administrador define senha e e-mail diretamente pela interface, sem fluxo de confirmação.
 
 ## Mudanças
 
-### 1. Banco (migration)
+### 1. Configuração do Supabase (Auth)
+- Desativar "Confirm email" no projeto Supabase (autoconfirma usuários ao criar).
+- Desativar "Secure email change" (não exige confirmação ao trocar e-mail).
+- Essas opções ficam em **Authentication → Sign In / Providers → Email**. Como não temos API para alterar isso automaticamente, vou deixar um botão de atalho para o painel.
 
-- Inserir nova chave em `system_settings`:
-  - `pendency_auto_archive_days` = `'30'` (padrão), descrição: "Dias para arquivar automaticamente pendências concluídas ou rejeitadas".
-- Atualizar as RPCs `get_board_pendencies` e `get_archived_pendencies` para ler esse valor dinamicamente:
-  ```sql
-  _days := COALESCE((SELECT value::int FROM public.system_settings WHERE key = 'pendency_auto_archive_days'), 30);
-  ```
-  e usar `now() - (_days || ' days')::interval` no lugar do literal `30 days`.
+### 2. Edge function `create-user` (já existe)
+- Garantir `email_confirm: true` no `admin.createUser` (já está, manter).
+- Nenhum e-mail é enviado.
 
-### 2. UI — `src/pages/SystemSettingsPage.tsx`
+### 3. Nova edge function `admin-update-user-credentials`
+- Recebe `{ user_id, new_email?, new_password? }`.
+- Verifica capability `users.manage` do chamador.
+- Usa `supabase.auth.admin.updateUserById(user_id, { email, password, email_confirm: true })`.
+- Atualização imediata, sem envio de e-mail nem link de confirmação.
 
-Adicionar um novo `Card` "Arquivamento de Pendências" com:
-- Input numérico (min 1) para `pendency_auto_archive_days`.
-- Texto explicativo: "Cartões nas colunas 'Concluída' e 'Rejeitada' são ocultados do quadro após este número de dias."
-- Botão Salvar usando `updateSetting('pendency_auto_archive_days', value)`.
+### 4. Refatorar `src/components/users/user-credentials-dialog.tsx`
+- Remover o botão "Enviar email de reset".
+- Substituir por campo **"Nova senha"** + **"Confirmar senha"** com validação (mínimo 6 caracteres) e botão **"Definir senha"** que chama a nova edge function.
+- Manter campo **"Alterar e-mail"**, mas agora chamando a edge function (troca direta, sem confirmação).
+- Remover o aviso amarelo sobre confirmação por e-mail; substituir por aviso de que a mudança é imediata.
+- Remover a chamada a `supabase.auth.resetPasswordForEmail` e ao RPC `get_user_email`.
 
-Refatorar o componente para tratar múltiplas configurações (estado por chave, salvar individualmente).
+## Detalhes técnicos
 
-### 3. Hook — `src/hooks/use-system-settings.ts`
+- A edge function usa `SUPABASE_SERVICE_ROLE_KEY` (já configurado) e valida JWT do chamador + capability `users.manage` via RPC `current_user_has_capability`.
+- Configuração toml: `verify_jwt = true` para a nova função.
+- Nenhuma migração de banco necessária.
 
-Adicionar helper `getPendencyAutoArchiveDays: () => parseInt(settings.pendency_auto_archive_days || '30', 10)`.
+## Ação manual do usuário (após implementação)
 
-### 4. UI — opcional, informativo
+No painel Supabase → Authentication → Providers → Email:
+- Desmarcar **Confirm email**
+- Desmarcar **Secure email change**
 
-Em `PendencyArchived.tsx`, no texto de cabeçalho/descrição, substituir "+30 dias" por o valor atual do setting via `useSystemSettings`.
-
-## Fora do escopo
-
-- Permissões: já controladas por `system_settings.read/write`.
-- Não alteramos schema da tabela `pendencies` nem da `system_settings`.
+Vou incluir o link direto na resposta final.
