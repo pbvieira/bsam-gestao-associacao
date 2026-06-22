@@ -92,7 +92,20 @@ export function UserList() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as UserWithAreaSetor[];
+      const profiles = data as UserWithAreaSetor[];
+
+      // Buscar e-mails em paralelo via RPC get_user_email
+      const withEmails = await Promise.all(
+        profiles.map(async (p) => {
+          try {
+            const { data: email } = await supabase.rpc('get_user_email', { user_uuid: p.user_id });
+            return { ...p, email: (email as string | null) ?? null };
+          } catch {
+            return { ...p, email: null };
+          }
+        })
+      );
+      return withEmails;
     },
     meta: {
       onError: (error: unknown) => handleError(error, 'database'),
