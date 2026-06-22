@@ -54,9 +54,17 @@ serve(async (req) => {
     if (error) {
       console.error('updateUserById error:', JSON.stringify(error), 'status:', (error as any).status, 'code:', (error as any).code)
       const code = (error as any).code
-      if (code === 'email_exists' || (error as any).status === 422) {
+      const msg = (error.message || '').toLowerCase()
+      const isEmailDup =
+        code === 'email_exists' ||
+        (error as any).status === 422 ||
+        msg.includes('users_email_partial_key') ||
+        msg.includes('duplicate key') ||
+        msg.includes('already been registered') ||
+        msg.includes('already registered')
+      if (isEmailDup) {
         return new Response(
-          JSON.stringify({ error: 'Este e-mail já está em uso.', code: 'email_exists' }),
+          JSON.stringify({ error: 'Este e-mail já está em uso por outro usuário.', code: 'email_exists' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409 }
         )
       }
