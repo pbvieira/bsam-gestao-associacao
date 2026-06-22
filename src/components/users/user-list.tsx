@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 interface UserWithAreaSetor extends UserProfile {
   areas?: { nome: string } | null;
   setores?: { nome: string } | null;
+  email?: string | null;
 }
 
 const getRoleBadgeVariant = (role: string) => {
